@@ -2,8 +2,10 @@ package com.example.aiddproject.home.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -11,6 +13,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,8 +39,19 @@ enum class HomeNavTab(
 
 /**
  * `mms_7_nav bar` (`6885:9056`) — Material 3 bottom NavigationBar with 4 tabs.
- * SAA 2025 is active on Home; visual highlight uses the brand cream
- * (`SaaCream`). Each item:
+ *
+ * Container styling matches Figma's outer wrapper (`I6885:9056;75:2007`):
+ *  - Background: 15% [SaaCream] translucent overlay (`rgba(255, 234, 158, 0.15)`).
+ *  - Border-radius: 20dp on the TOP corners only — bottom corners stay flush
+ *    against the screen edge.
+ *  - The Figma layer also specifies `backdrop-filter: blur(20px)` for a
+ *    glassmorphism effect; Compose does not currently render true backdrop
+ *    blur cross-API without `RenderEffect` plumbing on the underlying layer,
+ *    so we approximate with the translucent fill (the dark keyvisual under
+ *    the navbar still shows through tinted cream, which reads as the same
+ *    visual class).
+ *
+ * Each item:
  *  - Exposes `Role.Tab` semantics (TR-009).
  *  - Surfaces a localized active/inactive content description merged with the
  *    tab label so TalkBack reads e.g. "SAA 2025, đang chọn, tab".
@@ -50,7 +65,17 @@ fun HomeBottomBar(
     onTabSelect: (HomeNavTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    NavigationBar(modifier = modifier.testTag(TEST_TAG_HOME_BOTTOM_BAR)) {
+    NavigationBar(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                .background(SaaCream.copy(alpha = 0.15f))
+                .testTag(TEST_TAG_HOME_BOTTOM_BAR),
+        // The container background is provided by `Modifier.background` above so
+        // the 20dp top-rounded clip applies to the cream tint. NavigationBar's
+        // own surface stays transparent.
+        containerColor = Color.Transparent,
+    ) {
         HomeNavTab.entries.forEach { tab ->
             val isActive = tab == selected
             val label = stringResource(tab.label)
@@ -89,13 +114,13 @@ fun HomeBottomBar(
                     NavigationBarItemDefaults.colors(
                         selectedIconColor = SaaCream,
                         selectedTextColor = SaaCream,
-                        unselectedIconColor = androidx.compose.ui.graphics.Color.White,
-                        unselectedTextColor = androidx.compose.ui.graphics.Color.White,
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color.White,
                         // Figma `mms_7_nav bar` (`6885:9056`) renders the active
                         // state as cream-tinted icon + label only — no pill
                         // background behind the icon. Suppress the M3 default
                         // indicator so the active tab matches design.
-                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                        indicatorColor = Color.Transparent,
                     ),
             )
         }

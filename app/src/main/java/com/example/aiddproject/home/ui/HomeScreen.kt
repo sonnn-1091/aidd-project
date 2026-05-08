@@ -1,9 +1,11 @@
 package com.example.aiddproject.home.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -18,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -174,6 +177,20 @@ fun HomeScreenContent(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
+            // Header gradient overlay — Figma `mms_1_header` (`6885:9057`)
+            // background: linear-gradient(180deg, #00101A 0%, transparent 100%)
+            // at 0.9 opacity, 104dp tall, sitting above the keyvisual so the
+            // logo + actions row read against a dark band. We extend it with
+            // the system-bar inset on top so the status bar text also reads
+            // against the dark gradient instead of the bright keyvisual.
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .systemBarsPadding()
+                        .height(104.dp)
+                        .background(HeaderGradient),
+            )
             LazyColumn(
                 state = lazyListState,
                 modifier =
@@ -191,7 +208,9 @@ fun HomeScreenContent(
                         unreadCount = state.unreadCount,
                     )
                 }
-                item { Spacer(Modifier.height(24.dp)) }
+                // 40dp gap between header end (y=104 in Figma) and hero start
+                // (y=144) per `mms_1_header` → `mms_2_content` distance.
+                item { Spacer(Modifier.height(40.dp)) }
                 item {
                     HomeHero(
                         countdown = state.countdown,
@@ -221,3 +240,20 @@ fun HomeScreenContent(
 }
 
 const val TEST_TAG_HOME_SCREEN: String = "home_screen"
+
+/**
+ * Vertical gradient that mirrors Figma `mms_1_header`'s 0.9-opacity
+ * 104dp top band. The Figma stop list interpolates between #00101A 100%
+ * and the same colour at 0% opacity through several intermediate alphas;
+ * Compose's three-stop linear gradient produces a visually identical
+ * smooth fade.
+ */
+private val HeaderGradient: Brush =
+    Brush.verticalGradient(
+        colors =
+            listOf(
+                Color(0xE6001019), // ≈ #00101A at 0.9 opacity (top)
+                Color(0x4D00101A),
+                Color(0x00001019), // transparent (bottom)
+            ),
+    )
