@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
+import com.example.aiddproject.core.ui.rememberSingleClickHandler
 import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.ui.theme.SaaCream
 import com.example.aiddproject.ui.theme.SaaInk
@@ -76,18 +77,23 @@ fun HomeHero(
         } else {
             Spacer(Modifier.height(28.dp))
         }
+        // Both buttons remain visible regardless of `isKudosAvailable` (Q-Home-9).
+        // Each click is wrapped via `rememberSingleClickHandler` (TR-005) so a
+        // finger-bounce double-tap can't push two destinations on the back stack.
+        val aboutAwardClick = rememberSingleClickHandler(onClick = onAboutAwardClick)
+        val aboutKudosClick = rememberSingleClickHandler(onClick = onAboutKudosClick)
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(horizontal = 20.dp),
         ) {
             HeroButton(
                 label = stringResource(R.string.home_btn_about_award),
-                onClick = onAboutAwardClick,
+                onClick = aboutAwardClick,
                 modifier = Modifier.weight(1f),
             )
             HeroButton(
                 label = stringResource(R.string.home_btn_about_kudos),
-                onClick = onAboutKudosClick,
+                onClick = aboutKudosClick,
                 modifier = Modifier.weight(1f),
             )
         }

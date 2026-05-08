@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -36,6 +36,7 @@ import com.example.aiddproject.home.ui.components.HomeHero
 import com.example.aiddproject.home.ui.components.HomeNavTab
 import com.example.aiddproject.home.ui.components.KudosSection
 import com.example.aiddproject.home.ui.components.ThemeParagraph
+import kotlinx.coroutines.launch
 
 /**
  * Stateful entry point for the Home route. Hoists [HomeViewModel]'s aggregate
@@ -44,6 +45,11 @@ import com.example.aiddproject.home.ui.components.ThemeParagraph
  * `STARTED` lifecycle state via [LifecycleStartEffect] so it pauses on background
  * (TR-004); the section refreshes also re-fire on every `STARTED` re-entry per
  * Q-Home-5 (no longer-lived in-memory cache).
+ *
+ * SAA 2025 is always the active tab on Home (the other tabs navigate away). Tapping
+ * a non-SAA tab routes to the corresponding placeholder; re-tap of SAA scrolls the
+ * Home `LazyColumn` to top — handled inside [HomeScreenContent] so the
+ * `LazyListState` doesn't need to leak through this stateful layer.
  */
 @Composable
 fun HomeScreen(
@@ -59,7 +65,6 @@ fun HomeScreen(
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var selectedTab by rememberSaveable { mutableStateOf(HomeNavTab.Saa2025) }
 
     LifecycleStartEffect(viewModel) {
         viewModel.startCountdown()
@@ -71,7 +76,7 @@ fun HomeScreen(
 
     HomeScreenContent(
         state = uiState,
-        selectedTab = selectedTab,
+        selectedTab = HomeNavTab.Saa2025,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
         onBellClick = { /* sheet wiring lands in US6 / Phase 8 */ },
@@ -83,9 +88,9 @@ fun HomeScreen(
         onPencilClick = onNavigateToWriteKudo,
         onSKudosClick = onNavigateToKudosFeed,
         onTabSelect = { tab ->
-            selectedTab = tab
             when (tab) {
-                HomeNavTab.Saa2025 -> Unit // already on Home
+                // SAA re-tap is handled internally by HomeScreenContent (scroll-to-top).
+                HomeNavTab.Saa2025 -> Unit
                 HomeNavTab.Awards -> onNavigateToAwardsOverview()
                 HomeNavTab.Kudos -> onNavigateToKudosFeed()
                 HomeNavTab.Profile -> onNavigateToProfile()
@@ -110,7 +115,19 @@ fun HomeScreenContent(
     onSKudosClick: () -> Unit,
     onTabSelect: (HomeNavTab) -> Unit,
     modifier: Modifier = Modifier,
+    lazyListState: LazyListState = rememberLazyListState(),
+    notificationsSheetVisible: Boolean = false,
 ) {
+    val scope = rememberCoroutineScope()
+    val tabSelectHandler: (HomeNavTab) -> Unit = { tab ->
+        // Re-tap of the active SAA 2025 tab scrolls the Home content to the top
+        // (Q-Home-3). Suppressed when the Notifications sheet is open so the sheet
+        // gesture continues to take precedence (risk register).
+        if (tab == HomeNavTab.Saa2025 && selectedTab == HomeNavTab.Saa2025 && !notificationsSheetVisible) {
+            scope.launch { lazyListState.animateScrollToItem(0) }
+        }
+        onTabSelect(tab)
+    }
     Scaffold(
         modifier =
             modifier
@@ -120,7 +137,7 @@ fun HomeScreenContent(
         bottomBar = {
             HomeBottomBar(
                 selected = selectedTab,
-                onTabSelect = onTabSelect,
+                onTabSelect = tabSelectHandler,
             )
         },
         floatingActionButton = {
@@ -140,6 +157,7 @@ fun HomeScreenContent(
                 modifier = Modifier.fillMaxSize(),
             )
             LazyColumn(
+                state = lazyListState,
                 modifier =
                     Modifier
                         .fillMaxSize()

@@ -201,17 +201,17 @@ placeholder. Re-tap SAA 2025 tab → Home `LazyColumn` scrolls to top.
 
 ### Tests First
 
-- [ ] T066 [P] [US3] Write `HomeBottomBarTest` — NavBar renders 4 tabs (SAA 2025 active by default); tap each tab → corresponding placeholder + that tab marks active; re-tap of active SAA 2025 fires the scroll-to-top callback; scroll-to-top is suppressed when `notificationsSheetVisible == true` (risk register) | app/src/androidTest/java/com/example/aiddproject/home/HomeBottomBarTest.kt
+- [x] T066 [P] [US3] Write `HomeBottomBarTest` — NavBar renders 4 tabs (SAA 2025 active by default); tap each tab → corresponding placeholder + that tab marks active; re-tap of active SAA 2025 fires the scroll-to-top callback; scroll-to-top is suppressed when `notificationsSheetVisible == true` (risk register) | app/src/androidTest/java/com/example/aiddproject/home/HomeBottomBarTest.kt
 
 ### UI
 
-- [ ] T067 [P] [US3] Create `HomeBottomBar` subcomposable — Material 3 `NavigationBar` with 4 `NavigationBarItem`s using the icons from T007; `selected = (currentRoute == this tab's route)`; `Role.Tab` semantics + `a11y_home_navbar_tab_active`/`_inactive` content descriptions (TR-009); minimum touch target 48dp per tab | app/src/main/java/com/example/aiddproject/home/ui/components/HomeBottomBar.kt
+- [x] T067 [P] [US3] Create `HomeBottomBar` subcomposable — Material 3 `NavigationBar` with 4 `NavigationBarItem`s using the icons from T007; `selected = (currentRoute == this tab's route)`; `Role.Tab` semantics + `a11y_home_navbar_tab_active`/`_inactive` content descriptions (TR-009); minimum touch target 48dp per tab | app/src/main/java/com/example/aiddproject/home/ui/components/HomeBottomBar.kt
 
 ### Wiring
 
-- [ ] T068 [US3] Wire `HomeBottomBar` into `HomeScreenContent`'s `Scaffold.bottomBar` slot; expose the Home root `LazyListState` via `rememberLazyListState()`; on re-tap of the active SAA 2025 tab call `lazyListState.animateScrollToItem(0)` (suppress when `notificationsSheetVisible`) (depends on T056, T067) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
-- [ ] T069 [US3] Wire ABOUT AWARD button → `navController.navigate(Routes.AWARDS_OVERVIEW)` and ABOUT KUDOS button → `Routes.KUDOS_OVERVIEW`. Both visible regardless of `isKudosAvailable` (Q-Home-9). Add double-tap suppression (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHero.kt
-- [ ] T070 [US3] Apply double-tap suppression to all NavBar tabs + hero buttons via a shared `Modifier.singleClickGuard(scope)` helper that flips a local boolean for one frame after click (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/{HomeHero, HomeBottomBar}.kt + new app/src/main/java/com/example/aiddproject/core/ui/SingleClickGuard.kt
+- [x] T068 [US3] Wire `HomeBottomBar` into `HomeScreenContent`'s `Scaffold.bottomBar` slot; expose the Home root `LazyListState` via `rememberLazyListState()`; on re-tap of the active SAA 2025 tab call `lazyListState.animateScrollToItem(0)` (suppress when `notificationsSheetVisible`) (depends on T056, T067) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
+- [x] T069 [US3] Wire ABOUT AWARD button → `navController.navigate(Routes.AWARDS_OVERVIEW)` and ABOUT KUDOS button → `Routes.KUDOS_OVERVIEW`. Both visible regardless of `isKudosAvailable` (Q-Home-9). Add double-tap suppression (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHero.kt
+- [x] T070 [US3] Apply double-tap suppression to all NavBar tabs + hero buttons via a shared `Modifier.singleClickGuard(scope)` helper that flips a local boolean for one frame after click (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/{HomeHero, HomeBottomBar}.kt + new app/src/main/java/com/example/aiddproject/core/ui/SingleClickGuard.kt
 
 **Checkpoint**: NavBar tabs + hero buttons all navigate to their
 placeholder destinations; SAA 2025 re-tap scrolls Home to top; back from
