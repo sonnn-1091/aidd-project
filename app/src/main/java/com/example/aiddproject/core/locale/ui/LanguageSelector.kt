@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -179,6 +180,7 @@ fun LanguageSelector(
                         modifier =
                             Modifier
                                 .testTag(menuItemTag(lang))
+                                .width(108.dp)
                                 .heightIn(min = 48.dp)
                                 .then(
                                     if (isSelected) {
@@ -198,8 +200,9 @@ fun LanguageSelector(
                                 ),
                         text = {
                             Row(
+                                modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start,
+                                horizontalArrangement = Arrangement.Center,
                             ) {
                                 // Fixed-width slot so 🇻🇳 and 🇺🇸 (rendered at
                                 // different intrinsic widths by the system
