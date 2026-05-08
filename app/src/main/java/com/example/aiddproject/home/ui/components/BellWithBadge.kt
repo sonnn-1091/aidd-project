@@ -11,7 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.aiddproject.R
@@ -42,7 +44,13 @@ fun BellWithBadge(
         modifier =
             modifier
                 .testTag(TEST_TAG_HOME_BELL)
-                .semantics { contentDescription = description },
+                .semantics {
+                    contentDescription = description
+                    // Re-announce when the badge appears/disappears or the unread
+                    // count changes — TalkBack reads the new contentDescription
+                    // ("Notifications, 3 unread" → "Notifications, 4 unread").
+                    liveRegion = LiveRegionMode.Polite
+                },
         badge = {
             if (unreadCount > 0) {
                 Badge(modifier = Modifier.testTag(TEST_TAG_HOME_BELL_BADGE))

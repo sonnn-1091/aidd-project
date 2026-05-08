@@ -197,7 +197,7 @@ private fun ScopedRedirectGraph(
     onNavigateToLogin: () -> Unit,
     onNavigateToAccessDenied: () -> Unit,
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(controller) {
@@ -213,13 +213,15 @@ private fun ScopedRedirectGraph(
     LaunchedEffect(controller) {
         controller.sessionExpiredHint.collect {
             snackbarHostState.showSnackbar(
-                message = context.getString(R.string.error_oauth_session_expired),
+                message = resources.getString(R.string.error_oauth_session_expired),
             )
             controller.consumeSessionExpiredHint()
         }
     }
 
-    // Scaffold body is empty — the test only asserts the snackbar text.
+    // Scaffold body is empty — the test only asserts the snackbar text. The
+    // unused inner-padding parameter is intentional; we don't render a body.
+    @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { _ -> },

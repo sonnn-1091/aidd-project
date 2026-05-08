@@ -44,13 +44,15 @@ class TouchTargetTest {
         minDp: Dp = 48.dp,
     ) {
         val bounds = composeRule.onNodeWithTag(testTag).getBoundsInRoot()
+        val widthDp = bounds.right - bounds.left
+        val heightDp = bounds.bottom - bounds.top
         assertTrue(
-            "$testTag width ${bounds.width} < $minDp",
-            bounds.width.value >= minDp.value - SLOP,
+            "$testTag width $widthDp < $minDp",
+            widthDp.value >= minDp.value - SLOP,
         )
         assertTrue(
-            "$testTag height ${bounds.height} < $minDp",
-            bounds.height.value >= minDp.value - SLOP,
+            "$testTag height $heightDp < $minDp",
+            heightDp.value >= minDp.value - SLOP,
         )
     }
 
@@ -67,9 +69,10 @@ class TouchTargetTest {
         // can. We assert width >= 48dp — the visual span (flag + code + chevron)
         // comfortably exceeds it.
         val bounds = composeRule.onNodeWithTag(TEST_TAG_ANCHOR).getBoundsInRoot()
+        val widthDp = bounds.right - bounds.left
         assertTrue(
-            "Language anchor width ${bounds.width} < 48dp",
-            bounds.width.value >= 48.dp.value - SLOP,
+            "Language anchor width $widthDp < 48dp",
+            widthDp.value >= 48.dp.value - SLOP,
         )
     }
 

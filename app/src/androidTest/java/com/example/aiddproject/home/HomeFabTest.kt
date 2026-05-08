@@ -1,7 +1,6 @@
 package com.example.aiddproject.home
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag

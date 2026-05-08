@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -102,26 +103,35 @@ fun HomeHero(
 
 @Composable
 private fun CountdownRow(countdown: CountdownState) {
+    val daysLabel = stringResource(R.string.home_countdown_days_label)
+    val hoursLabel = stringResource(R.string.home_countdown_hours_label)
+    val minutesLabel = stringResource(R.string.home_countdown_min_label)
+    // Single contentDescription on the live-region root, keyed on the displayed
+    // (days, hours, minutes) tuple — minute-granularity. The engine ticks every
+    // 1s but the value only changes on minute boundaries, so this string is
+    // identical across same-minute ticks and TalkBack does not re-announce
+    // (spec § Behavioral Accessibility).
+    val a11yLabel =
+        "${countdown.days} $daysLabel, ${countdown.hours} $hoursLabel, ${countdown.minutes} $minutesLabel"
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier =
-            Modifier.semantics {
-                // Live region keyed only on minute granularity — set externally via
-                // derivedStateOf at the screen level when the engine is wired.
+            Modifier.semantics(mergeDescendants = true) {
                 liveRegion = LiveRegionMode.Polite
+                contentDescription = a11yLabel
             },
     ) {
         CountdownCell(
             value = countdown.days,
-            label = stringResource(R.string.home_countdown_days_label),
+            label = daysLabel,
         )
         CountdownCell(
             value = countdown.hours,
-            label = stringResource(R.string.home_countdown_hours_label),
+            label = hoursLabel,
         )
         CountdownCell(
             value = countdown.minutes,
-            label = stringResource(R.string.home_countdown_min_label),
+            label = minutesLabel,
         )
     }
 }

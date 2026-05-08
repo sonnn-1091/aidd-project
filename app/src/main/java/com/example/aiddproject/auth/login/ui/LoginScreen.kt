@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +60,10 @@ fun LoginScreen(
     val state by viewModel.state.collectAsState()
     val language by localeViewModel.language.collectAsState()
     val context = LocalContext.current
+    // Compose-recommended replacement for `context.getString(...)` inside
+    // suspend points: `LocalResources.current` is keyed on
+    // `LocalConfiguration` so it re-renders correctly under our locale overlay.
+    val resources = LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     // T065: probe Google Play Services availability once on enter. The CTA stays
@@ -74,7 +79,7 @@ fun LoginScreen(
         viewModel.setPlayServicesAvailable(available)
         if (!available) {
             snackbarHostState.showSnackbar(
-                message = context.getString(LoginError.PlayServicesUnavailable.messageRes),
+                message = resources.getString(LoginError.PlayServicesUnavailable.messageRes),
                 duration = SnackbarDuration.Indefinite,
             )
         }
@@ -88,7 +93,7 @@ fun LoginScreen(
                 is LoginEvent.ShowError -> {
                     snackbarHostState.currentSnackbarData?.dismiss()
                     snackbarHostState.showSnackbar(
-                        message = context.getString(event.error.messageRes),
+                        message = resources.getString(event.error.messageRes),
                         duration = SnackbarDuration.Short,
                     )
                 }
@@ -104,7 +109,7 @@ fun LoginScreen(
         authRedirectController.sessionExpiredHint.collect {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
-                message = context.getString(R.string.error_oauth_session_expired),
+                message = resources.getString(R.string.error_oauth_session_expired),
                 duration = SnackbarDuration.Short,
             )
             authRedirectController.consumeSessionExpiredHint()
