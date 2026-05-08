@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.NavType
@@ -14,8 +16,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aiddproject.auth.login.ui.LoginScreen
+import com.example.aiddproject.core.auth.AuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 
 /**
  * NavHost. Start destination is [Routes.GATE], which observes the persisted
@@ -29,6 +36,13 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     startDestination: String = Routes.GATE,
 ) {
+    val authRedirectController = rememberAuthRedirectController()
+    LaunchedEffect(authRedirectController) {
+        // Phase 6 (T073) replaces this no-op with the real navigate-to-Login /
+        // navigate-to-AccessDenied behavior. Wired now so the controller's coroutine
+        // scope starts collecting at NavHost composition.
+        authRedirectController.events.collect { /* no-op */ }
+    }
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.GATE) {
             SessionGate(
@@ -112,4 +126,23 @@ private fun PlaceholderScreen(label: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = label)
     }
+}
+
+/**
+ * AuthRedirectController is a `@Singleton` (not a ViewModel), so we resolve it through
+ * a Hilt entry-point off the application context — the standard pattern for reaching
+ * SingletonComponent bindings from a composable that isn't a `@HiltViewModel`.
+ */
+@Composable
+private fun rememberAuthRedirectController(): AuthRedirectController {
+    val context = LocalContext.current.applicationContext
+    return EntryPointAccessors
+        .fromApplication(context, AuthRedirectControllerEntryPoint::class.java)
+        .authRedirectController()
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+internal interface AuthRedirectControllerEntryPoint {
+    fun authRedirectController(): AuthRedirectController
 }

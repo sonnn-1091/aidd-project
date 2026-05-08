@@ -130,8 +130,10 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.play.services.base)
 
-    // Home feature: image loading for Kudos banner
+    // Home feature: image loading for Kudos banner + countdown clock + Compose-aware lifecycle
     implementation(libs.coil.compose)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
