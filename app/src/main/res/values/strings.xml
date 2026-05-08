@@ -1,3 +1,73 @@
 <resources>
-    <string name="app_name">AIDD Project</string>
+    <string name="app_name" translatable="false">AIDD Project</string>
+
+    <!-- ====================================================================== -->
+    <!-- Login feature — Brand-fixed strings (T022)                              -->
+    <!-- These are NOT translated. Same value across every locale.               -->
+    <!-- ====================================================================== -->
+    <string name="brand_root_further" translatable="false">ROOT FURTHER</string>
+    <string name="brand_company" translatable="false">Sun*</string>
+    <string name="login_cta_label" translatable="false">LOGIN With Google</string>
+
+    <!-- ====================================================================== -->
+    <!-- Login feature — Localized display strings (VN default)                  -->
+    <!-- ====================================================================== -->
+    <string name="login_description">Bắt đầu hành trình của bạn cùng SAA 2025. Đăng nhập để khám phá!</string>
+    <string name="login_copyright">Bản quyền thuộc về Sun* © 2025</string>
+
+    <!-- ====================================================================== -->
+    <!-- Login feature — Error messages (mapped 1:1 to LoginError sealed type)   -->
+    <!-- ====================================================================== -->
+    <string name="error_oauth_network">Không thể kết nối. Vui lòng kiểm tra Internet và thử lại.</string>
+    <string name="error_oauth_account_disabled">Tài khoản Google này không thể đăng nhập. Vui lòng liên hệ quản trị viên.</string>
+    <string name="error_oauth_code_expired">Đăng nhập mất quá nhiều thời gian. Vui lòng thử lại.</string>
+    <string name="error_oauth_play_services">Hãy cập nhật Google Play Services để đăng nhập.</string>
+    <string name="error_oauth_session_expired">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</string>
+    <string name="error_oauth_generic">Đã có lỗi xảy ra. Vui lòng thử lại.</string>
+
+    <!-- ====================================================================== -->
+    <!-- Login feature — Accessibility labels (read by TalkBack)                 -->
+    <!-- ====================================================================== -->
+    <string name="a11y_cta_idle">Đăng nhập với Google, nút</string>
+    <string name="a11y_cta_loading">Đang đăng nhập</string>
+    <string name="a11y_language_selector">Ngôn ngữ, %1$s, danh sách thả xuống</string>
+
+    <!-- ====================================================================== -->
+    <!-- Home feature — Brand-fixed (translatable=false)                         -->
+    <!-- ====================================================================== -->
+    <string name="home_btn_about_award" translatable="false">ABOUT AWARD</string>
+    <string name="home_btn_about_kudos" translatable="false">ABOUT KUDOS</string>
+    <string name="home_countdown_days_label" translatable="false">DAYS</string>
+    <string name="home_countdown_hours_label" translatable="false">HOURS</string>
+    <string name="home_countdown_min_label" translatable="false">MINUTES</string>
+    <string name="home_coming_soon" translatable="false">Coming soon</string>
+
+    <!-- ====================================================================== -->
+    <!-- Home feature — Localized display strings (VN authoritative)             -->
+    <!-- ====================================================================== -->
+    <string name="home_section_awards_title">Sun* Annual Awards 2025</string>
+    <string name="home_section_kudos_title">Phong trào ghi nhận</string>
+    <string name="home_kudos_note_heading">ĐIỂM MỚI CỦA SAA 2025</string>
+    <string name="home_kudos_note_body">Hoạt động ghi nhận và cảm ơn đồng nghiệp - lần đầu tiên được diễn ra dành cho tất cả Sunner. Hoạt động sẽ được triển khai vào tháng 11/2025, khuyến khích người Sun* chia sẻ những lời ghi nhận, cảm ơn đồng nghiệp trên hệ thống do BTC công bố. Đây sẽ là chất liệu để Hội đồng Heads tham khảo trong quá trình lựa chọn người đạt giải.</string>
+    <string name="home_link_chi_tiet">Chi tiết</string>
+    <string name="home_theme_paragraph">Không đơn thuần là một cái tên, "Root Further" chính là tinh thần mà mỗi người Sun* đang hướng tới: luôn nhìn nhận sâu sắc trong mọi bối cảnh và không ngừng sáng tạo, mở rộng bản thân để vượt qua những giới hạn mà chính mình đã từng đặt ra. Mượn hình ảnh ẩn dụ của lý thuyết phối màu, chỉ từ ba màu cơ bản: đỏ, vàng và lam, sức sáng tạo vô tận của mỗi cá nhân có thể tạo ra số lượng màu sắc gần như vô hạn, với mỗi gam màu đều đại diện cho sự bứt phá và sáng tạo không giới hạn.</string>
+    <string name="home_awards_loading">Đang tải…</string>
+    <string name="home_awards_empty">Chưa có giải thưởng nào</string>
+    <string name="home_awards_error">Không thể tải danh sách giải thưởng. Vui lòng thử lại.</string>
+    <string name="home_action_retry">Thử lại</string>
+    <string name="home_navbar_saa_2025" translatable="false">SAA 2025</string>
+    <string name="home_navbar_awards">Giải thưởng</string>
+    <string name="home_navbar_kudos" translatable="false">Kudos</string>
+    <string name="home_navbar_profile">Hồ sơ</string>
+
+    <!-- ====================================================================== -->
+    <!-- Home feature — Accessibility labels                                     -->
+    <!-- ====================================================================== -->
+    <string name="a11y_home_bell_badge">Thông báo, %1$d chưa đọc</string>
+    <string name="a11y_home_bell_no_badge">Thông báo</string>
+    <string name="a11y_home_search">Tìm kiếm</string>
+    <string name="a11y_home_fab_compose_kudo">Viết Kudo mới</string>
+    <string name="a11y_home_fab_kudos_feed">Mở bảng tin Kudos</string>
+    <string name="a11y_home_navbar_tab_active">%1$s, đang chọn, tab</string>
+    <string name="a11y_home_navbar_tab_inactive">%1$s, tab</string>
 </resources>

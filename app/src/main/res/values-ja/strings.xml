@@ -1,0 +1,41 @@
+<resources>
+    <!-- Login feature — JA translations (T024). Brand-fixed strings (e.g.
+         brand_root_further, login_cta_label) live in values/strings.xml only and
+         are NOT duplicated here. -->
+
+    <string name="login_description">SAA 2025で旅を始めよう。サインインして探検しましょう。</string>
+    <string name="login_copyright">Copyright belongs to Sun* © 2025</string>
+
+    <string name="error_oauth_network">接続できませんでした。インターネット接続をご確認のうえ、もう一度お試しください。</string>
+    <string name="error_oauth_account_disabled">このGoogleアカウントではサインインできません。管理者にお問い合わせください。</string>
+    <string name="error_oauth_code_expired">サインインに時間がかかりすぎました。もう一度お試しください。</string>
+    <string name="error_oauth_play_services">サインインするにはGoogle Playサービスを更新してください。</string>
+    <string name="error_oauth_session_expired">セッションの有効期限が切れました。もう一度サインインしてください。</string>
+    <string name="error_oauth_generic">問題が発生しました。もう一度お試しください。</string>
+
+    <string name="a11y_cta_idle">Googleでサインイン、ボタン</string>
+    <string name="a11y_cta_loading">サインイン中</string>
+    <string name="a11y_language_selector">言語、%1$s、ドロップダウン</string>
+
+    <!-- Home feature — JA translations (TODO: translator pickup for long paragraphs) -->
+    <string name="home_section_awards_title">Sun* Annual Awards 2025</string>
+    <string name="home_section_kudos_title">表彰活動</string>
+    <string name="home_kudos_note_heading">SAA 2025の新機能</string>
+    <string name="home_kudos_note_body">同僚への感謝と表彰の活動が、すべてのSunner向けに初めて開催されます。2025年11月から始動するこのキャンペーンは、運営委員会が発表するプラットフォーム上で、Sunnerが同僚への感謝と認識を共有するよう促すものです。Heads Councilは、受賞者を選ぶ際にこれらのメッセージを参考にします。</string>
+    <string name="home_link_chi_tiet">詳細</string>
+    <string name="home_theme_paragraph">単なる名称ではなく「Root Further」とは、すべてのSunnerが目指す精神そのもの。あらゆる状況で深く本質を見つめ、自らが設けた限界を超えるべく絶えず創造し、自身の幅を広げ続けることです。色彩理論の比喩を借りれば、赤・黄・青というたった三原色から、一人ひとりの創造力は無限に近い色を生み出せる。それぞれの色合いが、突破と無限の創造を象徴しています。</string>
+    <string name="home_awards_loading">読み込み中…</string>
+    <string name="home_awards_empty">まだアワードはありません</string>
+    <string name="home_awards_error">アワードを読み込めませんでした。再試行してください。</string>
+    <string name="home_action_retry">再試行</string>
+    <string name="home_navbar_awards">アワード</string>
+    <string name="home_navbar_profile">プロフィール</string>
+
+    <string name="a11y_home_bell_badge">通知、未読 %1$d 件</string>
+    <string name="a11y_home_bell_no_badge">通知</string>
+    <string name="a11y_home_search">検索</string>
+    <string name="a11y_home_fab_compose_kudo">Kudoを書く</string>
+    <string name="a11y_home_fab_kudos_feed">Kudosフィードを開く</string>
+    <string name="a11y_home_navbar_tab_active">%1$s、選択中、タブ</string>
+    <string name="a11y_home_navbar_tab_inactive">%1$s、タブ</string>
+</resources>

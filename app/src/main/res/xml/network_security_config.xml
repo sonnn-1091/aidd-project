@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Login feature — Network security configuration (T012).
+
+    - Base config forbids cleartext traffic; only TLS is permitted.
+    - Cert pinning is currently NOT enabled. Q5 in plan.md is open: pick
+      between (a) SPKI-pinning the LetsEncrypt intermediates with backup pins,
+      (b) skipping pinning and relying on system trust + HSTS, or (c) pinning
+      a custom Sun* CA. The commented <domain-config> below is the placeholder
+      for option (a) — fill SPKI hashes and uncomment before release builds.
+-->
+<network-security-config>
+
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- TODO Q5: enable cert pinning for the Supabase project domain in release.
+    <domain-config>
+        <domain includeSubdomains="true">YOUR-PROJECT-REF.supabase.co</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">SPKI_HASH_PRIMARY</pin>
+            <pin digest="SHA-256">SPKI_HASH_BACKUP_1</pin>
+            <pin digest="SHA-256">SPKI_HASH_BACKUP_2</pin>
+        </pin-set>
+    </domain-config>
+    -->
+
+</network-security-config>

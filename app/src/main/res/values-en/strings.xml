@@ -1,0 +1,41 @@
+<resources>
+    <!-- Login feature — EN translations (T023). Brand-fixed strings (e.g.
+         brand_root_further, login_cta_label) live in values/strings.xml only and
+         are NOT duplicated here. -->
+
+    <string name="login_description">Start your journey with SAA 2025. Log in to explore!</string>
+    <string name="login_copyright">Copyright belongs to Sun* © 2025</string>
+
+    <string name="error_oauth_network">Couldn\'t connect. Please check your internet and try again.</string>
+    <string name="error_oauth_account_disabled">This Google account can\'t be used to sign in. Please contact your admin.</string>
+    <string name="error_oauth_code_expired">Sign-in took too long. Please try again.</string>
+    <string name="error_oauth_play_services">Update Google Play Services to sign in.</string>
+    <string name="error_oauth_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_oauth_generic">Something went wrong. Please try again.</string>
+
+    <string name="a11y_cta_idle">Sign in with Google, button</string>
+    <string name="a11y_cta_loading">Signing in</string>
+    <string name="a11y_language_selector">Language, %1$s, dropdown</string>
+
+    <!-- Home feature — EN translations -->
+    <string name="home_section_awards_title">Sun* Annual Awards 2025</string>
+    <string name="home_section_kudos_title">Recognition movement</string>
+    <string name="home_kudos_note_heading">WHAT\'S NEW IN SAA 2025</string>
+    <string name="home_kudos_note_body">Recognition and thank-you activities for colleagues — for the first time available to every Sunner. Launching November 2025, this campaign encourages Sunners to share recognition and thanks with their teammates on the platform announced by the organising committee. The Heads Council will reference these messages when selecting award recipients.</string>
+    <string name="home_link_chi_tiet">Details</string>
+    <string name="home_theme_paragraph">More than just a name, "Root Further" is the spirit every Sunner aspires to: always seeing deeper in every context and continuously creating, expanding beyond the limits we once set for ourselves. Borrowing the metaphor of color theory — from just three primaries (red, yellow, blue), individual creativity can spawn an almost infinite range of hues, each shade representing a breakthrough and limitless invention.</string>
+    <string name="home_awards_loading">Loading…</string>
+    <string name="home_awards_empty">No awards yet</string>
+    <string name="home_awards_error">Couldn\'t load awards. Please try again.</string>
+    <string name="home_action_retry">Retry</string>
+    <string name="home_navbar_awards">Awards</string>
+    <string name="home_navbar_profile">Profile</string>
+
+    <string name="a11y_home_bell_badge">Notifications, %1$d unread</string>
+    <string name="a11y_home_bell_no_badge">Notifications</string>
+    <string name="a11y_home_search">Search</string>
+    <string name="a11y_home_fab_compose_kudo">Write a Kudo</string>
+    <string name="a11y_home_fab_kudos_feed">Open Kudos feed</string>
+    <string name="a11y_home_navbar_tab_active">%1$s, selected, tab</string>
+    <string name="a11y_home_navbar_tab_inactive">%1$s, tab</string>
+</resources>
