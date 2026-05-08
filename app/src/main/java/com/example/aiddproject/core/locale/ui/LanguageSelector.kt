@@ -1,4 +1,4 @@
-package com.example.aiddproject.auth.login.ui.components
+package com.example.aiddproject.core.locale.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

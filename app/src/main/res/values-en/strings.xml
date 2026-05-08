@@ -16,6 +16,9 @@
     <string name="a11y_cta_idle">Sign in with Google, button</string>
     <string name="a11y_cta_loading">Signing in</string>
     <string name="a11y_language_selector">Language, %1$s, dropdown</string>
+    <!-- Language dropdown stateDescription — see spec uUvW6Qm1ve. -->
+    <string name="a11y_dropdown_expanded">expanded</string>
+    <string name="a11y_dropdown_collapsed">collapsed</string>
 
     <!-- Home feature — EN translations -->
     <!-- TODO Phase 11 EN translation: home_section_awards_title is the big

@@ -20,8 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.aiddproject.R
-import com.example.aiddproject.auth.login.ui.components.LanguageSelector
 import com.example.aiddproject.core.locale.Language
+import com.example.aiddproject.core.locale.ui.LanguageSelector
 import com.example.aiddproject.core.ui.rememberSingleClickHandler
 
 /**

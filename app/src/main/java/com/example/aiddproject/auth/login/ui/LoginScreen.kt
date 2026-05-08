@@ -40,10 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.aiddproject.R
 import com.example.aiddproject.auth.login.ui.components.GoogleSignInButton
-import com.example.aiddproject.auth.login.ui.components.LanguageSelector
 import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LocaleViewModel
+import com.example.aiddproject.core.locale.ui.LanguageSelector
 
 /**
  * Stateful entry point for the Login route. Owns the HiltViewModel + Scaffold;

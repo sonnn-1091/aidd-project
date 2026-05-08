@@ -11,10 +11,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.aiddproject.R
-import com.example.aiddproject.auth.login.ui.components.TEST_TAG_ANCHOR
-import com.example.aiddproject.auth.login.ui.components.menuItemTag
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LanguageProvider
+import com.example.aiddproject.core.locale.ui.TEST_TAG_ANCHOR
+import com.example.aiddproject.core.locale.ui.menuItemTag
 import com.example.aiddproject.home.domain.Award
 import com.example.aiddproject.home.domain.KudosSummary
 import com.example.aiddproject.home.domain.states.AwardsState

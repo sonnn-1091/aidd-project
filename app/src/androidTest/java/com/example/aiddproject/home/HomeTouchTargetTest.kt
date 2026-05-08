@@ -6,9 +6,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.aiddproject.auth.login.ui.components.TEST_TAG_ANCHOR
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LanguageProvider
+import com.example.aiddproject.core.locale.ui.TEST_TAG_ANCHOR
 import com.example.aiddproject.home.domain.Award
 import com.example.aiddproject.home.domain.KudosSummary
 import com.example.aiddproject.home.domain.states.AwardsState

@@ -31,6 +31,12 @@
     <string name="a11y_cta_idle">Đăng nhập với Google, nút</string>
     <string name="a11y_cta_loading">Đang đăng nhập</string>
     <string name="a11y_language_selector">Ngôn ngữ, %1$s, danh sách thả xuống</string>
+    <!-- Language dropdown — TalkBack stateDescription on the anchor. Localized
+         (NOT brand-fixed) because TalkBack reads stateDescription literally
+         without translation; a Vietnamese user must hear a Vietnamese
+         announcement. See spec uUvW6Qm1ve § Resolved Q1 + plan TR-003. -->
+    <string name="a11y_dropdown_expanded">đã mở</string>
+    <string name="a11y_dropdown_collapsed">đã đóng</string>
 
     <!-- ====================================================================== -->
     <!-- Home feature — Brand-fixed (translatable=false)                         -->

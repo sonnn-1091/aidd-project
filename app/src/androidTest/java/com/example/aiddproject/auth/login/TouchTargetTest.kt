@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.example.aiddproject.auth.login.ui.LoginScreenContent
 import com.example.aiddproject.auth.login.ui.LoginUiState
 import com.example.aiddproject.auth.login.ui.components.TEST_TAG
-import com.example.aiddproject.auth.login.ui.components.TEST_TAG_ANCHOR
+import com.example.aiddproject.core.locale.ui.TEST_TAG_ANCHOR
 import com.example.aiddproject.ui.theme.AIDDProjectTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule

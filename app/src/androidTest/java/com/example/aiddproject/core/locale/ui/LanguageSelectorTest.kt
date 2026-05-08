@@ -1,4 +1,4 @@
-package com.example.aiddproject.auth.login.ui.components
+package com.example.aiddproject.core.locale.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,11 +18,17 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * UI coverage for [LanguageSelector] (T054, US3).
+ * UI coverage for [LanguageSelector] (Login Phase 3 T054 + Language Dropdown
+ * spec uUvW6Qm1ve Phase 3).
  *
- * Drives the stateless component directly. The test installs a small wrapper that holds
- * the current selection in `remember` so we can verify the visible label updates after
- * a selection — proving the round-trip from menu tap → onSelect → recomposition.
+ * Drives the stateless component directly. The test installs a small wrapper
+ * that holds the current selection in `remember` so we can verify the visible
+ * label updates after a selection — proving the round-trip from menu tap →
+ * onSelect → recomposition.
+ *
+ * Phase 3 contract tests for the new TalkBack focus / expand-collapse / 48dp
+ * touch-target behaviour land in T018–T031 of `tasks.md` and are added to
+ * this file as additional `@Test` methods.
  */
 class LanguageSelectorTest {
     @get:Rule
@@ -52,14 +58,13 @@ class LanguageSelectorTest {
 
         composeRule.onNodeWithTag(TEST_TAG_ANCHOR).performClick()
 
-        // All three supported languages render with their native names (FR-013).
+        // Both supported languages render with their native names. JA was
+        // removed per Language Dropdown spec uUvW6Qm1ve § Resolved Q1.
         composeRule.onNodeWithTag(menuItemTag(Language.VN)).assertIsDisplayed()
         composeRule.onNodeWithTag(menuItemTag(Language.EN)).assertIsDisplayed()
-        composeRule.onNodeWithTag(menuItemTag(Language.JA)).assertIsDisplayed()
 
         composeRule.onNodeWithText(Language.VN.nativeName).assertIsDisplayed()
         composeRule.onNodeWithText(Language.EN.nativeName).assertIsDisplayed()
-        composeRule.onNodeWithText(Language.JA.nativeName).assertIsDisplayed()
     }
 
     @Test

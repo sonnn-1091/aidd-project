@@ -225,9 +225,9 @@ class HomeViewModelTest {
     @Test
     fun `language flow propagates persisted preference into uiState`() =
         runTest {
-            coEvery { languageRepository.language } returns flowOf(Language.JA)
+            coEvery { languageRepository.language } returns flowOf(Language.EN)
             val vm = newViewModel()
-            assertEquals(Language.JA, vm.uiState.value.language)
+            assertEquals(Language.EN, vm.uiState.value.language)
         }
 
     @Test
@@ -309,13 +309,15 @@ class HomeViewModelTest {
     fun `language StateFlow is collected eagerly so first paint matches stored preference`() =
         runTest {
             // Use a hot StateFlow upstream so we can verify that `stateIn(Eagerly)` propagates.
-            val upstream = MutableStateFlow(Language.EN)
+            // VN → EN transition stands in for the previous VN → EN → JA chain
+            // since JA is removed (Language Dropdown spec uUvW6Qm1ve).
+            val upstream = MutableStateFlow(Language.VN)
             coEvery { languageRepository.language } returns upstream
             val vm = newViewModel()
-            assertEquals(Language.EN, vm.uiState.value.language)
+            assertEquals(Language.VN, vm.uiState.value.language)
 
-            upstream.value = Language.JA
+            upstream.value = Language.EN
             // Eagerly collected — propagation is one dispatcher step away.
-            assertEquals(Language.JA, vm.uiState.value.language)
+            assertEquals(Language.EN, vm.uiState.value.language)
         }
 }
