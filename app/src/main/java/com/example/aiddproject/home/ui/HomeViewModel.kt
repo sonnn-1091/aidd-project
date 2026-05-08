@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -102,6 +103,10 @@ class HomeViewModel
          * without re-triggering kudos / notifications calls.
          */
         fun onRetryAwards() {
+            // Telemetry breadcrumb (T099). Real telemetry SDK choice carries over
+            // from Login Phase 7; until that lands, Timber is the conduit and the
+            // SecureTimberTree scrubber covers PII keys (TR-007).
+            Timber.tag(TELEMETRY_TAG).i("home.awards.retry")
             viewModelScope.launch { loadAwards() }
         }
 
@@ -111,6 +116,7 @@ class HomeViewModel
          * notifications without forcing a full Home refresh (Q-Home-6).
          */
         fun onNotificationsSheetDismissed() {
+            Timber.tag(TELEMETRY_TAG).i("home.notifications.sheet_dismissed")
             viewModelScope.launch { loadNotifications() }
         }
 
@@ -133,17 +139,25 @@ class HomeViewModel
         }
 
         private suspend fun loadAwards() {
+            Timber.tag(TELEMETRY_TAG).i("home.awards.loading")
             awardsState.value = AwardsState.Loading
             awardsRepository.list().fold(
                 onSuccess = { items ->
                     awardsState.value =
                         if (items.isEmpty()) AwardsState.Empty else AwardsState.Populated(items)
+                    // SecureTimberTree scrubs `award.name` / `award.description` keys
+                    // before they hit Logcat — we only emit the count for telemetry.
+                    Timber.tag(TELEMETRY_TAG).i("home.awards.success count=%d", items.size)
                 },
-                onFailure = { error -> awardsState.value = AwardsState.Error(error.message) },
+                onFailure = { error ->
+                    awardsState.value = AwardsState.Error(error.message)
+                    Timber.tag(TELEMETRY_TAG).w(error, "home.awards.error")
+                },
             )
         }
 
         private suspend fun loadKudos() {
+            Timber.tag(TELEMETRY_TAG).i("home.kudos.loading")
             kudosRepository.get().fold(
                 onSuccess = { summary ->
                     kudosState.value =
@@ -152,22 +166,45 @@ class HomeViewModel
                         } else {
                             KudosState.Hidden
                         }
+                    Timber.tag(TELEMETRY_TAG).i(
+                        "home.kudos.success isKudosAvailable=%b",
+                        summary.isKudosAvailable,
+                    )
                 },
-                onFailure = { error -> kudosState.value = KudosState.Error(error.message) },
+                onFailure = { error ->
+                    kudosState.value = KudosState.Error(error.message)
+                    Timber.tag(TELEMETRY_TAG).w(error, "home.kudos.error")
+                },
             )
         }
 
         private suspend fun loadNotifications() {
+            Timber.tag(TELEMETRY_TAG).i("home.notifications.loading")
             notificationsRepository.get().fold(
                 onSuccess = { summary ->
                     notificationsState.value = NotificationsState.Loaded(summary.unreadCount)
+                    Timber.tag(TELEMETRY_TAG).i(
+                        "home.notifications.success unreadCount=%d",
+                        summary.unreadCount,
+                    )
                 },
-                onFailure = { notificationsState.value = NotificationsState.Error },
+                onFailure = { error ->
+                    notificationsState.value = NotificationsState.Error
+                    Timber.tag(TELEMETRY_TAG).w(error, "home.notifications.error")
+                },
             )
         }
 
         override fun onCleared() {
             super.onCleared()
             countdownJob = null
+        }
+
+        private companion object {
+            // Tag for the four-state-transitions-per-section breadcrumbs (T099).
+            // The real telemetry SDK choice is still pending Login Phase 7
+            // carry-over; until that lands, Timber is the conduit and the
+            // SecureTimberTree scrubber covers any PII keys we accidentally pass.
+            const val TELEMETRY_TAG = "HomeTelemetry"
         }
     }

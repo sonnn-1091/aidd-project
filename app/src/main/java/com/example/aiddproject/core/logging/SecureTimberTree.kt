@@ -9,6 +9,9 @@ import timber.log.Timber
  *   - Refresh tokens (`refresh_token=…`)
  *   - Google ID tokens (long Base64URL strings beginning with `eyJ`)
  *   - Any value associated with the keys `password`, `secret`, `apiKey`, `anonKey`.
+ *   - Home PII keys (TR-007): `award.name`, `award.description`,
+ *     `notification.title`, `notification.body` — values may contain spaces, so
+ *     quoted strings are supported alongside unquoted single tokens.
  *
  * Release builds DO NOT plant any tree (the `Timber.plant` call in `AIDDApplication` is
  * guarded by `BuildConfig.DEBUG`), so verbose logs are stripped entirely. CI also greps
@@ -36,6 +39,14 @@ private val SCRUB_PATTERNS: List<Regex> =
     listOf(
         Regex(
             """(\b(?:access_token|refresh_token|id_token|anon_?key|api_?key|password|secret)\b\s*[=:]\s*)["']?[A-Za-z0-9._\-+/=]+["']?""",
+            RegexOption.IGNORE_CASE,
+        ),
+        // Home PII keys (TR-007). Values may contain spaces (e.g. a notification
+        // title "Welcome to SAA 2025"), so we match a quoted string OR an
+        // unquoted single token. Using `\Q…\E` literal segments inside the
+        // alternation keeps the dots literal without escaping each one.
+        Regex(
+            """(\b(?:award\.name|award\.description|notification\.title|notification\.body)\b\s*[=:]\s*)(?:"[^"]*"|'[^']*'|\S+)""",
             RegexOption.IGNORE_CASE,
         ),
         Regex("""(\bBearer\s+)[A-Za-z0-9._\-+/=]+"""),

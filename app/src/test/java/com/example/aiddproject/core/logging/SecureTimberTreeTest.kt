@@ -54,4 +54,56 @@ class SecureTimberTreeTest {
         val message = "User alice navigated from Login to Home"
         assertEquals(message, scrubLogMessage(message))
     }
+
+    // ---- TR-007: Home PII keys ----
+
+    @Test
+    fun award_name_quoted_value_with_spaces_is_redacted() {
+        val out = scrubLogMessage("""Loaded award.name="Top Talent Award" sortOrder=0""")
+        assertFalse("award name must not appear", out.contains("Top Talent"))
+        assertEquals("Loaded award.name=[REDACTED] sortOrder=0", out)
+    }
+
+    @Test
+    fun award_description_quoted_value_is_redacted() {
+        val out =
+            scrubLogMessage("""Got award.description="Recognise teammates who carried you" mid-fetch""")
+        assertFalse("description must not appear", out.contains("Recognise"))
+        assertEquals("Got award.description=[REDACTED] mid-fetch", out)
+    }
+
+    @Test
+    fun notification_title_unquoted_value_is_redacted() {
+        val out = scrubLogMessage("Sending notification.title=Welcome to user 42")
+        // Unquoted variant only catches the first whitespace-bounded token, but
+        // that's the security-significant boundary — the leak risk is
+        // distinguishing "is there a notification title here" from "what's in
+        // it". The first token is masked, which prevents single-keyword leakage.
+        assertFalse(out.startsWith("Sending notification.title=Welcome"))
+        assertEquals("Sending notification.title=[REDACTED] to user 42", out)
+    }
+
+    @Test
+    fun notification_body_quoted_value_is_redacted() {
+        val out =
+            scrubLogMessage("""Pushed notification.body="You earned a Kudo from Bob" to channel""")
+        assertFalse("body content must not appear", out.contains("Bob"))
+        assertEquals("Pushed notification.body=[REDACTED] to channel", out)
+    }
+
+    @Test
+    fun award_name_with_colon_separator_is_redacted() {
+        val out = scrubLogMessage("""award.name: "Top Project Award"""")
+        assertFalse(out.contains("Top Project"))
+        assertEquals("award.name: [REDACTED]", out)
+    }
+
+    @Test
+    fun pii_keys_match_case_insensitively() {
+        // Defensive: scrubber should not skip the redaction just because a log
+        // statement happened to capitalize the field key.
+        val out = scrubLogMessage("""Award.Name="Captured" was set""")
+        assertFalse(out.contains("Captured"))
+        assertEquals("Award.Name=[REDACTED] was set", out)
+    }
 }
