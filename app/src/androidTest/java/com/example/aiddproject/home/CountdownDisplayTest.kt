@@ -79,11 +79,12 @@ class CountdownDisplayTest {
     }
 
     @Test
-    fun at_event_clock_clamps_to_zero_keeps_unit_labels_and_hides_coming_soon() {
+    fun at_event_clock_clamps_to_zero_keeps_unit_labels_and_coming_soon() {
         // Post-event behaviour: the countdown digit cells stay visible (clamped
-        // to 00 / 00 / 00) and the unit labels stay rendered — only the
-        // "Coming soon" header collapses. The event-info block is a static
-        // metadata sibling and also stays.
+        // to 00 / 00 / 00), the unit labels stay rendered, and the "Coming
+        // soon" header stays as part of the brand voicing — Figma renders
+        // it unconditionally. The event-info block is a static metadata
+        // sibling and also stays.
         composeRule.setContent {
             AIDDProjectTheme {
                 HomeHero(
@@ -94,7 +95,7 @@ class CountdownDisplayTest {
             }
         }
 
-        composeRule.onNodeWithText(ctx.getString(R.string.home_coming_soon)).assertDoesNotExist()
+        composeRule.onNodeWithText(ctx.getString(R.string.home_coming_soon)).assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_days_label)).assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_hours_label)).assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_min_label)).assertIsDisplayed()

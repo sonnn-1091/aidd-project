@@ -1,24 +1,32 @@
 <!--
-  Kudos brand glyph at FAB scale (Figma `MM_MEDIA_IC_Kudos Logo` `6885:7657`,
-  used inside `mms_6_float button` `6885:9058`).
+  Sun* Kudos brand glyph at FAB scale (Figma `MM_MEDIA_Logo/Kudos`
+  `6885:9045`, used as the right child of `mms_6_float button`
+  `6885:9058`). The source SVG is the full 119×22 KUDOS wordmark; the
+  FAB instance crops to just the leading red swirl glyph, so we keep
+  only the red paths (B72927 + E73928) and drop the cream "KUDOS"
+  letters that appear later in the wordmark.
 
-  The design's source SVG is hosted on Figma; we approximate it here as a bold
-  stylized "S" with a red sweep accent so the FAB visually reads as the Sun*
-  Kudos brand mark. Constitution Principle II forbids guessing visual values,
-  so this is documented as a deliberate substitution until the actual brand
-  glyph asset is downloaded from MoMorph and committed.
+  Paths copied verbatim from the Figma SVG so the curve geometry
+  matches the brand mark pixel-for-pixel. viewportWidth = 16, viewportHeight = 19
+  crops the swirl bounding box to a tight rectangle so the glyph fills
+  the full 24dp Icon slot rather than rendering as a small smudge in
+  the left third.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <!-- Bold "S" body — dark ink so it reads on the cream FAB background. -->
+    android:viewportWidth="16"
+    android:viewportHeight="19">
+    <!-- Top arc — deeper red `#B72927`. -->
     <path
-        android:fillColor="#00101A"
-        android:pathData="M17.5,6.5 C16.4,5.4 14.6,4.8 12.5,4.8 C9.4,4.8 7,6.6 7,9 C7,11.2 8.6,12.4 11.6,13 L13.4,13.4 C15.1,13.7 16,14.2 16,15.2 C16,16.4 14.7,17.2 12.8,17.2 C10.6,17.2 9.1,16.4 8.4,15 L6.4,16.2 C7.6,18.4 9.8,19.4 12.8,19.4 C16.4,19.4 18.5,17.6 18.5,15 C18.5,12.6 16.8,11.4 13.6,10.8 L12,10.4 C10.4,10.1 9.5,9.6 9.5,8.7 C9.5,7.7 10.7,6.9 12.5,6.9 C14.2,6.9 15.4,7.6 16,8.7 L17.5,7.4 Z"/>
-    <!-- Red brand sweep — the curl that crosses the "S" in the brand mark. -->
+        android:fillColor="#B72927"
+        android:pathData="M6.13716,7.14167 L12.9032,9.29915 C13.5873,9.53491 14.1809,10.3 13.6326,11.1319 C13.2704,11.7591 10.569,14.3614 10.569,14.3614 C10.5539,14.4104 1.84111,11.55 1.84111,11.55 C1.13181,11.3098 0.719313,10.6559 0.950716,9.89523 C1.18212,9.13456 5.31719,6.85253 6.13716,7.13722 V7.14167 Z" />
+    <!-- Top brushstroke — bright red `#E73928`. -->
     <path
-        android:fillColor="#D4271D"
-        android:pathData="M5,11 C5,11 8,8 12,9 C16,10 19,8 19,8 C19,8 17.5,11.5 12,11 C8,10.5 5,13 5,13 Z"/>
+        android:fillColor="#E73928"
+        android:pathData="M14.794,6.80832 C15.0405,6.60814 18.6473,3.65885 23.2855,0.109029 C23.3458,0.060097 23.2855,-0.0244226 23.21,0.00671617 C21.072,0.972019 16.776,1.8617 16.776,1.8617 L7.96255,3.31188 C4.95934,3.85458 4.68266,4.29942 3.47031,6.0254 L3.14836,6.47469 C3.13327,6.49693 2.62016,7.31544 0.970154,9.84658 C1.4732,9.077 2.04165,9.01473 5.42215,8.45423 C6.06605,8.33412 7.60035,8.02273 8.56118,7.84925 C9.89426,7.60903 14.4368,6.8706 14.7588,6.81722 C14.7738,6.81722 14.7789,6.81277 14.7889,6.80387 L14.794,6.80832 Z" />
+    <!-- Bottom brushstroke — bright red `#E73928`. -->
+    <path
+        android:fillColor="#E73928"
+        android:pathData="M3.45092,13.352 L0,18.8369 L6.77608,17.4223 C9.77426,16.8663 10.0509,16.4214 11.2583,14.691 L11.5802,14.2373 C11.5802,14.2373 11.9676,13.7123 13.6327,11.1367 C13.1598,11.9018 11.3035,11.8885 9.30139,12.2711 C8.65749,12.3956 3.45595,13.352 3.45595,13.352 H3.45092 Z" />
 </vector>

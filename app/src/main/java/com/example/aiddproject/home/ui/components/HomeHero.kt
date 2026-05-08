@@ -61,9 +61,21 @@ fun HomeHero(
     onAboutKudosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Hero matches Figma `mms_2_content` (`6885:8983`): 20dp horizontal
+    // padding, left-aligned children, 32dp vertical gap between sections.
+    // "Coming soon" header is part of the brand voicing and shows
+    // unconditionally (the design renders it regardless of whether the
+    // event clock has crossed the target — it reads as "upcoming
+    // event" copy, not a runtime gate).
+    val aboutAwardClick = rememberSingleClickHandler(onClick = onAboutAwardClick)
+    val aboutKudosClick = rememberSingleClickHandler(onClick = onAboutKudosClick)
     Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
         Image(
             painter = painterResource(R.drawable.ic_logo_root_further),
@@ -73,36 +85,22 @@ fun HomeHero(
                     .width(247.dp)
                     .height(109.dp),
         )
-        Spacer(Modifier.height(8.dp))
-        // Countdown + event-info always render (Figma `6885:8985` shows them as
-        // permanent siblings of the hero). The "Coming soon" header is the only
-        // pre-event-only element — at/post-event it hides, the digit boxes
-        // clamp to 00 / 00 / 00, and event metadata stays as static facts.
-        if (countdown.isPreEvent) {
-            Text(
-                text = stringResource(R.string.home_coming_soon),
-                color = Color.White,
-                style = MaterialTheme.typography.labelLarge,
-            )
-            Spacer(Modifier.height(8.dp))
+        // Frame 553 (countdown + event info), inner gap=24dp.
+        Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            // countdown time block — inner gap=8dp between "Coming soon" + cells.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.home_coming_soon),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                CountdownRow(countdown = countdown)
+            }
+            EventInfoBlock()
         }
-        CountdownRow(countdown = countdown)
-        Spacer(Modifier.height(24.dp))
-        EventInfoBlock(modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(Modifier.height(20.dp))
-        // Both buttons remain visible regardless of `isKudosAvailable` (Q-Home-9).
-        // Each click is wrapped via `rememberSingleClickHandler` (TR-005) so a
-        // finger-bounce double-tap can't push two destinations on the back stack.
-        // The two have DIFFERENT styles per Figma:
-        //  - ABOUT AWARD (`mms_2.2_Button` `6885:9026`) — filled cream + dark text.
-        //  - ABOUT KUDOS (`mms_2.3_Button` `6885:9027`) — translucent (10% cream)
-        //    bg, 1dp #998C5F border, WHITE text.
-        val aboutAwardClick = rememberSingleClickHandler(onClick = onAboutAwardClick)
-        val aboutKudosClick = rememberSingleClickHandler(onClick = onAboutKudosClick)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(horizontal = 20.dp),
-        ) {
+        // ABOUT AWARD (filled cream) + ABOUT KUDOS (outlined translucent).
+        // Row inner gap=16dp matches Figma `mms_2_content > actions`.
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             HeroButtonPrimary(
                 label = stringResource(R.string.home_btn_about_award),
                 onClick = aboutAwardClick,

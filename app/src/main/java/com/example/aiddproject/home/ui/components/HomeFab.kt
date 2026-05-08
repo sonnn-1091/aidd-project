@@ -1,5 +1,6 @@
 package com.example.aiddproject.home.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -98,14 +99,13 @@ fun HomeFab(
             // Maintain visual centering when the pen + divider collapse.
             Spacer(Modifier.width(0.dp))
         }
-        // The brand Kudos glyph (`MM_MEDIA_IC_Kudos Logo` `6885:7657`) is a
-        // stylized "S" with a red sweep — distinct from the navbar Kudos
-        // icon (speech bubble + heart). Vector lives at `ic_fab_skudos.xml`.
-        // tint=null so the multi-colour glyph (dark + red) renders verbatim.
-        Icon(
+        // The brand Kudos glyph (`MM_MEDIA_Logo/Kudos` `6885:9045`) is a
+        // multi-colour vector — `Image` (rather than `Icon`) preserves the
+        // red brushstrokes verbatim instead of flattening them with a single
+        // tint. Vector lives at `ic_fab_skudos.xml`.
+        Image(
             painter = painterResource(R.drawable.ic_fab_skudos),
-            contentDescription = null,
-            tint = androidx.compose.ui.graphics.Color.Unspecified,
+            contentDescription = sKudosCd,
             modifier =
                 Modifier
                     .size(24.dp)

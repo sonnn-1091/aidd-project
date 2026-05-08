@@ -89,7 +89,13 @@ fun HomeBottomBar(
                     NavigationBarItemDefaults.colors(
                         selectedIconColor = SaaCream,
                         selectedTextColor = SaaCream,
-                        indicatorColor = SaaCream.copy(alpha = 0.16f),
+                        unselectedIconColor = androidx.compose.ui.graphics.Color.White,
+                        unselectedTextColor = androidx.compose.ui.graphics.Color.White,
+                        // Figma `mms_7_nav bar` (`6885:9056`) renders the active
+                        // state as cream-tinted icon + label only — no pill
+                        // background behind the icon. Suppress the M3 default
+                        // indicator so the active tab matches design.
+                        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
                     ),
             )
         }
