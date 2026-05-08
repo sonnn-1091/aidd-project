@@ -97,6 +97,15 @@ class HomeViewModel
         }
 
         /**
+         * US2 Retry intent — re-fires only the awards fetch. Each section's state
+         * machine is independent (Q-Home-7), so a transient awards failure recovers
+         * without re-triggering kudos / notifications calls.
+         */
+        fun onRetryAwards() {
+            viewModelScope.launch { loadAwards() }
+        }
+
+        /**
          * Starts the 1Hz countdown ticker. No-op if already running. The screen calls
          * this from `LifecycleStartEffect` and pairs it with [stopCountdown] so the
          * coroutine doesn't run while Home is off-screen (TR-004).

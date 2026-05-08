@@ -78,7 +78,7 @@ fun HomeScreen(
         onAboutAwardClick = onNavigateToAwardsOverview,
         onAboutKudosClick = onNavigateToKudosOverview,
         onAwardChiTietTap = onNavigateToAwardDetail,
-        onAwardsRetry = { /* re-fetch lands in US2 / Phase 4 */ },
+        onAwardsRetry = viewModel::onRetryAwards,
         onKudosChiTietClick = onNavigateToKudosDetail,
         onPencilClick = onNavigateToWriteKudo,
         onSKudosClick = onNavigateToKudosFeed,

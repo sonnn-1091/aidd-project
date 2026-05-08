@@ -169,18 +169,18 @@ Retry → re-fetch succeeds → populated.
 
 ### Tests First
 
-- [ ] T060 [P] [US2] Extend `HomeViewModelTest` — `AwardsState` transition test: Loading → Populated, Loading → Error, Retry → Loading → Populated; assert `awardsState.value === AwardsState.Loading` synchronously at VM construction BEFORE any coroutine launches (TR-003 first-paint guarantee, no `Initial` predecessor) | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
-- [ ] T061 [P] [US2] Write `AwardsCarouselTest` — populated state: drag scroll left/right; tap "Chi tiết" on first card fires the navigation callback with that awardId; loading state shows spinner; empty state shows empty message; error state shows Retry button | app/src/androidTest/java/com/example/aiddproject/home/AwardsCarouselTest.kt
+- [x] T060 [P] [US2] Extend `HomeViewModelTest` — `AwardsState` transition test: Loading → Populated, Loading → Error, Retry → Loading → Populated; assert `awardsState.value === AwardsState.Loading` synchronously at VM construction BEFORE any coroutine launches (TR-003 first-paint guarantee, no `Initial` predecessor) | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
+- [x] T061 [P] [US2] Write `AwardsCarouselTest` — populated state: drag scroll left/right; tap "Chi tiết" on first card fires the navigation callback with that awardId; loading state shows spinner; empty state shows empty message; error state shows Retry button | app/src/androidTest/java/com/example/aiddproject/home/AwardsCarouselTest.kt
 
 ### UI
 
-- [ ] T062 [P] [US2] Create `AwardCard` subcomposable — uses the design's `Top Talent Award` instance component (`6885:8051`); thumbnail (`AsyncImage` with placeholder from T008) + name + Chi tiết link; double-tap suppression on Chi tiết (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/AwardCard.kt
-- [ ] T063 [US2] Create `AwardsSection` subcomposable — section title + `LazyRow` of `AwardCard`s; renders one of `AwardsState`'s 4 branches (loading spinner / empty message / error+Retry / populated cards) (depends on T030, T062) | app/src/main/java/com/example/aiddproject/home/ui/components/AwardsSection.kt
+- [x] T062 [P] [US2] Create `AwardCard` subcomposable — uses the design's `Top Talent Award` instance component (`6885:8051`); thumbnail (`AsyncImage` with placeholder from T008) + name + Chi tiết link; double-tap suppression on Chi tiết (TR-005) | app/src/main/java/com/example/aiddproject/home/ui/components/AwardCard.kt
+- [x] T063 [US2] Create `AwardsSection` subcomposable — section title + `LazyRow` of `AwardCard`s; renders one of `AwardsState`'s 4 branches (loading spinner / empty message / error+Retry / populated cards) (depends on T030, T062) | app/src/main/java/com/example/aiddproject/home/ui/components/AwardsSection.kt
 
 ### ViewModel intent + screen wiring
 
-- [ ] T064 [US2] Add `HomeViewModel.onRetryAwards()` intent that re-fires the awards fetch | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
-- [ ] T065 [US2] Wire `AwardsSection` into `HomeScreenContent` between `ThemeParagraph` and the Kudos slot; pass `onChiTietTap = { awardId -> navController.navigate("award_detail/$awardId") }` (depends on T056, T063) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
+- [x] T064 [US2] Add `HomeViewModel.onRetryAwards()` intent that re-fires the awards fetch | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
+- [x] T065 [US2] Wire `AwardsSection` into `HomeScreenContent` between `ThemeParagraph` and the Kudos slot; pass `onChiTietTap = { awardId -> navController.navigate("award_detail/$awardId") }` (depends on T056, T063) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
 
 **Checkpoint**: tap "Chi tiết" → Award Detail placeholder opens with the
 right `awardId`; carousel scrolls; loading / empty / error states each

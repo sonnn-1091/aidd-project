@@ -17,6 +17,7 @@ import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.home.domain.states.KudosState
 import com.example.aiddproject.home.domain.states.NotificationsState
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -131,6 +132,35 @@ class HomeViewModelTest {
             coEvery { awardsRepository.list() } returns Result.failure(RuntimeException("boom"))
             val vm = newViewModel()
             assertEquals(AwardsState.Error("boom"), vm.uiState.value.awards)
+        }
+
+    @Test
+    fun `onRetryAwards re-fires awards fetch — Error then success transitions to Populated (US2)`() =
+        runTest {
+            // First call fails, retry call succeeds.
+            coEvery { awardsRepository.list() } returnsMany
+                listOf(
+                    Result.failure(RuntimeException("transient")),
+                    Result.success(listOf(sampleAward)),
+                )
+            val vm = newViewModel()
+            assertEquals(AwardsState.Error("transient"), vm.uiState.value.awards)
+
+            vm.onRetryAwards()
+            assertEquals(AwardsState.Populated(listOf(sampleAward)), vm.uiState.value.awards)
+        }
+
+    @Test
+    fun `onRetryAwards reloads only awards — kudos and notifications are not re-fetched`() =
+        runTest {
+            coEvery { awardsRepository.list() } returns Result.success(listOf(sampleAward))
+            val vm = newViewModel()
+
+            vm.onRetryAwards()
+
+            coVerify(exactly = 2) { awardsRepository.list() } // initial + retry
+            coVerify(exactly = 1) { kudosRepository.get() } // unchanged
+            coVerify(exactly = 1) { notificationsRepository.get() } // unchanged
         }
 
     @Test
