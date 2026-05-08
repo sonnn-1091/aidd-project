@@ -8,17 +8,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.aiddproject.auth.login.ui.LoginScreen
 import com.example.aiddproject.core.session.SessionGate
+import com.example.aiddproject.home.ui.HomeScreen
 
 /**
- * NavHost. Start destination is [Routes.GATE], which observes the persisted Supabase
- * session and forwards to Home (auto-login per US2 of Login) or Login. The Home
- * destination is a placeholder for now — real Home implementation lands with the Home
- * feature.
+ * NavHost. Start destination is [Routes.GATE], which observes the persisted
+ * Supabase session and forwards to Home (auto-login per US2 of Login) or
+ * Login. Home then fans out to every other primary surface; the destination
+ * screens that aren't built yet (Awards overview, Kudos feed, etc.) render
+ * labeled placeholders so the graph is fully navigable end-to-end.
  */
 @Composable
 fun AppNavigation(
@@ -54,8 +58,38 @@ fun AppNavigation(
                 },
             )
         }
-        composable(Routes.HOME) { PlaceholderScreen(label = "Home") }
-        composable(Routes.ACCESS_DENIED) { PlaceholderScreen(label = "Access denied") }
+        composable(Routes.HOME) {
+            HomeScreen(
+                onNavigateToAwardsOverview = { navController.navigate(Routes.AWARDS_OVERVIEW) },
+                onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
+                onNavigateToKudosFeed = { navController.navigate(Routes.KUDOS_FEED) },
+                onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
+                onNavigateToWriteKudo = { navController.navigate(Routes.WRITE_KUDO) },
+                onNavigateToAwardDetail = { award ->
+                    navController.navigate(Routes.awardDetail(award.id))
+                },
+                onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+                onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+            )
+        }
+        composable(Routes.ACCESS_DENIED) { AccessDeniedPlaceholder() }
+
+        // Home-feature outbound placeholders (UI implement-ui pass) — replaced
+        // by real screens in subsequent feature plans.
+        composable(Routes.AWARDS_OVERVIEW) { PlaceholderScreen(label = "Awards overview") }
+        composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(label = "Kudos overview") }
+        composable(Routes.KUDOS_FEED) { PlaceholderScreen(label = "Kudos feed") }
+        composable(Routes.KUDOS_DETAIL) { PlaceholderScreen(label = "Kudos detail") }
+        composable(Routes.WRITE_KUDO) { PlaceholderScreen(label = "Write a Kudo") }
+        composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
+        composable(Routes.PROFILE) { PlaceholderScreen(label = "Profile") }
+        composable(
+            route = Routes.AWARD_DETAIL_PATTERN,
+            arguments = listOf(navArgument("awardId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val awardId = backStackEntry.arguments?.getString("awardId").orEmpty()
+            PlaceholderScreen(label = "Award detail: $awardId")
+        }
     }
 }
 
@@ -66,6 +100,11 @@ fun AppNavigation(
 private fun NavOptionsBuilder.clearGateBackstack() {
     popUpTo(Routes.GATE) { inclusive = true }
     launchSingleTop = true
+}
+
+@Composable
+private fun AccessDeniedPlaceholder() {
+    PlaceholderScreen(label = "Access denied")
 }
 
 @Composable

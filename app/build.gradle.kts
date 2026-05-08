@@ -130,6 +130,9 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.play.services.base)
 
+    // Home feature: image loading for Kudos banner
+    implementation(libs.coil.compose)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
