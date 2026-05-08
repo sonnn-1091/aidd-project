@@ -168,4 +168,20 @@ class HomeScreenTest {
             .performClick()
         assertEquals(1, taps)
     }
+
+    @Test
+    fun search_icon_double_tap_yields_exactly_one_callback() {
+        // TR-005 / SC-002: rapid double-tap must not push two SEARCH destinations
+        // on the back stack. The single-click guard on the search IconButton
+        // drops the second invocation within the guard window.
+        var taps = 0
+        setContent(onSearchClick = { taps++ })
+        composeRule
+            .onNodeWithContentDescription(ctx.getString(R.string.a11y_home_search))
+            .performClick()
+        composeRule
+            .onNodeWithContentDescription(ctx.getString(R.string.a11y_home_search))
+            .performClick()
+        assertEquals(1, taps)
+    }
 }

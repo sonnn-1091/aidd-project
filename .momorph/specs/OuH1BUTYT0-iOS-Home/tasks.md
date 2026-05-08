@@ -322,13 +322,13 @@ EN within one recomposition.
 
 ### Tests First
 
-- [ ] T089 [P] [US7] Extend `HomeScreenTest` — search icon tap fires nav callback to `Routes.SEARCH` | app/src/androidTest/java/com/example/aiddproject/home/HomeScreenTest.kt
-- [ ] T090 [P] [US7] Write `HomeLocaleSwitchTest` — drives the locale state from VN → EN inside `LanguageProvider`; asserts `home_theme_paragraph`, `home_section_awards_title`, and `home_navbar_awards` text all re-render to their EN variants in the same composition tree (no Activity recreation) | app/src/androidTest/java/com/example/aiddproject/home/HomeLocaleSwitchTest.kt
+- [x] T089 [P] [US7] Extend `HomeScreenTest` — search icon tap fires nav callback to `Routes.SEARCH` | app/src/androidTest/java/com/example/aiddproject/home/HomeScreenTest.kt
+- [x] T090 [P] [US7] Write `HomeLocaleSwitchTest` — drives the locale state from VN → EN inside `LanguageProvider`; asserts `home_theme_paragraph`, `home_section_awards_title`, and `home_navbar_awards` text all re-render to their EN variants in the same composition tree (no Activity recreation) | app/src/androidTest/java/com/example/aiddproject/home/HomeLocaleSwitchTest.kt
 
 ### Implementation
 
-- [ ] T091 [US7] Add Search `IconButton` (icon `ic_search`) to `HomeHeader`; `onClick = { navController.navigate(Routes.SEARCH) }`; `contentDescription = stringResource(R.string.a11y_home_search)`; double-tap suppression (depends on T053, T003) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
-- [ ] T092 [US7] Drop in Login's `LanguageSelector` composable into `HomeHeader` between the logo and search icon; binds to `LocaleViewModel` (already shipped from Login) so language state is shared globally (depends on T053) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
+- [x] T091 [US7] Add Search `IconButton` (icon `ic_search`) to `HomeHeader`; `onClick = { navController.navigate(Routes.SEARCH) }`; `contentDescription = stringResource(R.string.a11y_home_search)`; double-tap suppression (depends on T053, T003) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
+- [x] T092 [US7] Drop in Login's `LanguageSelector` composable into `HomeHeader` between the logo and search icon; binds to `LocaleViewModel` (already shipped from Login) so language state is shared globally (depends on T053) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
 
 **Checkpoint**: search icon navigates; language dropdown opens and
 selection re-renders all Home text within one frame.

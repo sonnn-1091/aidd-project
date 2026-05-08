@@ -15,12 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.aiddproject.R
 import com.example.aiddproject.auth.login.ui.components.LanguageSelector
 import com.example.aiddproject.core.locale.Language
+import com.example.aiddproject.core.ui.rememberSingleClickHandler
 
 /**
  * Home header (`mms_1_header` — `6885:9057`): SAA logo on the leading edge, then a
@@ -29,6 +31,10 @@ import com.example.aiddproject.core.locale.Language
  *
  * Layout from the MoMorph instance: 375×104dp wrapping a 44dp iOS status-bar slot
  * we collapse into Android `systemBarsPadding` + a 60dp action row.
+ *
+ * The search icon is wrapped in [rememberSingleClickHandler] so a finger-bounce
+ * double-tap can never push two `Search` destinations on the back stack
+ * (TR-005, SC-002). The bell uses the same guard internally.
  */
 @Composable
 fun HomeHeader(
@@ -39,6 +45,7 @@ fun HomeHeader(
     unreadCount: Int,
     modifier: Modifier = Modifier,
 ) {
+    val searchClick = rememberSingleClickHandler(onClick = onSearchClick)
     Row(
         modifier =
             modifier
@@ -64,7 +71,10 @@ fun HomeHeader(
                 selected = selectedLanguage,
                 onSelect = onLanguageSelected,
             )
-            IconButton(onClick = onSearchClick) {
+            IconButton(
+                onClick = searchClick,
+                modifier = Modifier.testTag(TEST_TAG_HOME_SEARCH),
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = stringResource(R.string.a11y_home_search),
@@ -79,3 +89,5 @@ fun HomeHeader(
         }
     }
 }
+
+const val TEST_TAG_HOME_SEARCH: String = "home_search"
