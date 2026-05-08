@@ -293,15 +293,15 @@ unchanged; badge re-fetches (in demo, value stays 2). Demo
 
 ### Tests First
 
-- [ ] T083 [P] [US6] Extend `HomeViewModelTest` — `NotificationsState` transitions: Loaded(>0) → badge visible; Loaded(0) → no badge; Error → no badge AND bell still tappable; on `onNotificationsSheetDismissed()` triggers a new fetch | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
-- [ ] T084 [P] [US6] Write `NotificationsSheetTest` — bell tap opens `ModalBottomSheet`; back-press dismisses without leaving Home; on dismiss `notifications_summary` re-fetch fires; bell tap is enabled in every notifications state | app/src/androidTest/java/com/example/aiddproject/home/NotificationsSheetTest.kt
+- [x] T083 [P] [US6] Extend `HomeViewModelTest` — `NotificationsState` transitions: Loaded(>0) → badge visible; Loaded(0) → no badge; Error → no badge AND bell still tappable; on `onNotificationsSheetDismissed()` triggers a new fetch | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
+- [x] T084 [P] [US6] Write `NotificationsSheetTest` — bell tap opens `ModalBottomSheet`; back-press dismisses without leaving Home; on dismiss `notifications_summary` re-fetch fires; bell tap is enabled in every notifications state | app/src/androidTest/java/com/example/aiddproject/home/NotificationsSheetTest.kt
 
 ### Implementation
 
-- [ ] T085 [P] [US6] Create `BellWithBadge` subcomposable — `BadgedBox` wrapping the `ic_bell` IconButton; renders red badge `Badge()` only when `state is Loaded && state.unreadCount > 0`; content description = `a11y_home_bell_badge` (formatted with count) when badged, `a11y_home_bell_no_badge` otherwise (depends on T004) | app/src/main/java/com/example/aiddproject/home/ui/components/BellWithBadge.kt
-- [ ] T086 [P] [US6] Create `NotificationsSheet` subcomposable — Material 3 `ModalBottomSheet` with a stub list ("No notifications" placeholder + a TODO note that the real panel is owned by the Notifications spec). Sheet content padded with `Modifier.systemBarsPadding()` (risk register: status-bar gap) | app/src/main/java/com/example/aiddproject/home/ui/components/NotificationsSheet.kt
-- [ ] T087 [US6] Wire bell tap in `HomeHeader` → flips `notificationsSheetVisible` state in `HomeScreen`; render `NotificationsSheet` conditionally on that state with `onDismissRequest = { notificationsSheetVisible = false; viewModel.onNotificationsSheetDismissed() }` (depends on T053, T085, T086) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt + HomeHeader.kt
-- [ ] T088 [US6] Add `HomeViewModel.onNotificationsSheetDismissed()` that re-invokes the notifications-summary fetch; this is also added to the API-trigger note in spec § API Dependencies | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
+- [x] T085 [P] [US6] Create `BellWithBadge` subcomposable — `BadgedBox` wrapping the `ic_bell` IconButton; renders red badge `Badge()` only when `state is Loaded && state.unreadCount > 0`; content description = `a11y_home_bell_badge` (formatted with count) when badged, `a11y_home_bell_no_badge` otherwise (depends on T004) | app/src/main/java/com/example/aiddproject/home/ui/components/BellWithBadge.kt
+- [x] T086 [P] [US6] Create `NotificationsSheet` subcomposable — Material 3 `ModalBottomSheet` with a stub list ("No notifications" placeholder + a TODO note that the real panel is owned by the Notifications spec). Sheet content padded with `Modifier.systemBarsPadding()` (risk register: status-bar gap) | app/src/main/java/com/example/aiddproject/home/ui/components/NotificationsSheet.kt
+- [x] T087 [US6] Wire bell tap in `HomeHeader` → flips `notificationsSheetVisible` state in `HomeScreen`; render `NotificationsSheet` conditionally on that state with `onDismissRequest = { notificationsSheetVisible = false; viewModel.onNotificationsSheetDismissed() }` (depends on T053, T085, T086) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt + HomeHeader.kt
+- [x] T088 [US6] Add `HomeViewModel.onNotificationsSheetDismissed()` that re-invokes the notifications-summary fetch; this is also added to the API-trigger note in spec § API Dependencies | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
 
 **Checkpoint**: bell tap → sheet over Home; back-press dismisses without
 leaving Home; badge updates after dismissal.

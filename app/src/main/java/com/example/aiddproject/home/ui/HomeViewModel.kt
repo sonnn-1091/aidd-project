@@ -106,6 +106,15 @@ class HomeViewModel
         }
 
         /**
+         * US6 — re-fires only the notifications-summary fetch when the
+         * Notifications sheet is dismissed, so the badge reflects newly-read
+         * notifications without forcing a full Home refresh (Q-Home-6).
+         */
+        fun onNotificationsSheetDismissed() {
+            viewModelScope.launch { loadNotifications() }
+        }
+
+        /**
          * Starts the 1Hz countdown ticker. No-op if already running. The screen calls
          * this from `LifecycleStartEffect` and pairs it with [stopCountdown] so the
          * coroutine doesn't run while Home is off-screen (TR-004).

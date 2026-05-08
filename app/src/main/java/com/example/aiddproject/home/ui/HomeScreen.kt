@@ -13,7 +13,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -35,6 +38,7 @@ import com.example.aiddproject.home.ui.components.HomeHeader
 import com.example.aiddproject.home.ui.components.HomeHero
 import com.example.aiddproject.home.ui.components.HomeNavTab
 import com.example.aiddproject.home.ui.components.KudosSection
+import com.example.aiddproject.home.ui.components.NotificationsSheet
 import com.example.aiddproject.home.ui.components.ThemeParagraph
 import kotlinx.coroutines.launch
 
@@ -65,6 +69,7 @@ fun HomeScreen(
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var notificationsSheetVisible by rememberSaveable { mutableStateOf(false) }
 
     LifecycleStartEffect(viewModel) {
         viewModel.startCountdown()
@@ -79,7 +84,7 @@ fun HomeScreen(
         selectedTab = HomeNavTab.Saa2025,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
-        onBellClick = { /* sheet wiring lands in US6 / Phase 8 */ },
+        onBellClick = { notificationsSheetVisible = true },
         onAboutAwardClick = onNavigateToAwardsOverview,
         onAboutKudosClick = onNavigateToKudosOverview,
         onAwardChiTietTap = onNavigateToAwardDetail,
@@ -96,7 +101,20 @@ fun HomeScreen(
                 HomeNavTab.Profile -> onNavigateToProfile()
             }
         },
+        notificationsSheetVisible = notificationsSheetVisible,
     )
+
+    // Sheet is mounted at the screen root, NOT inside HomeScreenContent — so a
+    // 401-driven popUpTo(GATE) navigation tear-down (Q-Plan-3) implicitly
+    // removes the sheet without an explicit dismiss sequencing.
+    if (notificationsSheetVisible) {
+        NotificationsSheet(
+            onDismissRequest = {
+                notificationsSheetVisible = false
+                viewModel.onNotificationsSheetDismissed()
+            },
+        )
+    }
 }
 
 @Composable

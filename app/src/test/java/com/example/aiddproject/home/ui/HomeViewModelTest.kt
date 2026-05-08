@@ -190,6 +190,39 @@ class HomeViewModelTest {
         }
 
     @Test
+    fun `notifications zero unread maps to Loaded(0) - badge hidden`() =
+        runTest {
+            coEvery { notificationsRepository.get() } returns
+                Result.success(NotificationsSummary(unreadCount = 0))
+            val vm = newViewModel()
+            assertEquals(NotificationsState.Loaded(0), vm.uiState.value.notifications)
+            assertEquals(0, vm.uiState.value.unreadCount)
+        }
+
+    @Test
+    fun `onNotificationsSheetDismissed re-fires only the notifications fetch (US6)`() =
+        runTest {
+            // Initial fetch returns 2 unread; sheet-dismiss fetch returns 1 (e.g.
+            // user read one notification while the sheet was open).
+            coEvery { notificationsRepository.get() } returnsMany
+                listOf(
+                    Result.success(NotificationsSummary(unreadCount = 2)),
+                    Result.success(NotificationsSummary(unreadCount = 1)),
+                )
+            val vm = newViewModel()
+            assertEquals(NotificationsState.Loaded(2), vm.uiState.value.notifications)
+
+            vm.onNotificationsSheetDismissed()
+
+            assertEquals(NotificationsState.Loaded(1), vm.uiState.value.notifications)
+            // Awards / kudos must NOT be re-fetched on sheet dismissal — only the
+            // notifications endpoint (Q-Home-6).
+            coVerify(exactly = 2) { notificationsRepository.get() }
+            coVerify(exactly = 1) { awardsRepository.list() }
+            coVerify(exactly = 1) { kudosRepository.get() }
+        }
+
+    @Test
     fun `language flow propagates persisted preference into uiState`() =
         runTest {
             coEvery { languageRepository.language } returns flowOf(Language.JA)
