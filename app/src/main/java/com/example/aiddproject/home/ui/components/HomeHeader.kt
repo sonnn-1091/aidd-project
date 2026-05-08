@@ -65,7 +65,9 @@ fun HomeHeader(
         Spacer(Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            // Figma `actions` frame `I6885:9057;88:1828` uses 10dp between
+            // language pill / search / bell.
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             LanguageSelector(
                 selected = selectedLanguage,

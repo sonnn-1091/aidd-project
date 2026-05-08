@@ -53,7 +53,14 @@ fun BellWithBadge(
                 },
         badge = {
             if (unreadCount > 0) {
-                Badge(modifier = Modifier.testTag(TEST_TAG_HOME_BELL_BADGE))
+                // Figma node `I6885:9057;88:1830;72:1628` — 8dp red dot.
+                Badge(
+                    containerColor = BellBadgeColor,
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .testTag(TEST_TAG_HOME_BELL_BADGE),
+                )
             }
         },
     ) {
@@ -70,3 +77,5 @@ fun BellWithBadge(
 
 const val TEST_TAG_HOME_BELL: String = "home_bell"
 const val TEST_TAG_HOME_BELL_BADGE: String = "home_bell_badge"
+
+private val BellBadgeColor: Color = Color(0xFFD4271D)

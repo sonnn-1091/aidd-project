@@ -41,12 +41,25 @@
     <string name="home_countdown_hours_label" translatable="false">HOURS</string>
     <string name="home_countdown_min_label" translatable="false">MINUTES</string>
     <string name="home_coming_soon" translatable="false">Coming soon</string>
+    <!-- Phase 11 — section captions/titles + event-info brand-fixed values -->
+    <string name="home_section_awards_caption" translatable="false">Sun* Annual Awards 2025</string>
+    <string name="home_section_kudos_brand_title" translatable="false">Sun* Kudos</string>
+    <string name="home_event_date_value" translatable="false">26/12/2025</string>
+    <string name="home_event_location_value" translatable="false">Âu Cơ Art Center</string>
+    <string name="home_fab_divider" translatable="false">/</string>
 
     <!-- ====================================================================== -->
     <!-- Home feature — Localized display strings (VN authoritative)             -->
     <!-- ====================================================================== -->
-    <string name="home_section_awards_title">Sun* Annual Awards 2025</string>
-    <string name="home_section_kudos_title">Phong trào ghi nhận</string>
+    <string name="home_section_awards_title">Hệ thống giải thưởng</string>
+    <string name="home_section_kudos_caption">Phong trào ghi nhận</string>
+    <string name="home_event_time_label">Thời gian:</string>
+    <string name="home_event_location_label">Địa điểm:</string>
+    <string name="home_event_livestream">Tường thuật trực tiếp tại Group Facebook Sun* Family</string>
+    <!-- Placeholder description for award cards while the backend payload
+         doesn't yet supply per-award descriptions (Q-Home-8). Lifted from the
+         Figma `Top Talent Award` instance copy. -->
+    <string name="home_award_description_placeholder">Giải thưởng Top Talent vinh danh những cá nhân xuất sắc trên mọi phương diện.</string>
     <string name="home_kudos_note_heading">ĐIỂM MỚI CỦA SAA 2025</string>
     <string name="home_kudos_note_body">Hoạt động ghi nhận và cảm ơn đồng nghiệp - lần đầu tiên được diễn ra dành cho tất cả Sunner. Hoạt động sẽ được triển khai vào tháng 11/2025, khuyến khích người Sun* chia sẻ những lời ghi nhận, cảm ơn đồng nghiệp trên hệ thống do BTC công bố. Đây sẽ là chất liệu để Hội đồng Heads tham khảo trong quá trình lựa chọn người đạt giải.</string>
     <string name="home_link_chi_tiet">Chi tiết</string>

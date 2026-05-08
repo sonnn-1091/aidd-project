@@ -61,8 +61,11 @@ class AwardsCarouselTest {
         // No card name visible because no Populated items.
         composeRule.onNodeWithText(firstAward.name).assertDoesNotExist()
         // Section title still rendered above the spinner.
+        // Phase 11: section header now renders the brand caption "Sun* Annual
+        // Awards 2025" above the cream title — assert the caption since it's
+        // the same value across locales.
         composeRule
-            .onNodeWithText(ctx.getString(R.string.home_section_awards_title))
+            .onNodeWithText(ctx.getString(R.string.home_section_awards_caption))
             .assertIsDisplayed()
     }
 

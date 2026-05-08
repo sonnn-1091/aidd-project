@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -40,11 +39,9 @@ fun AwardsSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.home_section_awards_title),
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+        SectionHeader(
+            caption = stringResource(R.string.home_section_awards_caption),
+            title = stringResource(R.string.home_section_awards_title),
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(Modifier.height(12.dp))
