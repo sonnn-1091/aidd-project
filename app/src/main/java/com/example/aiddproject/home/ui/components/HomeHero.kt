@@ -1,5 +1,6 @@
 package com.example.aiddproject.home.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -73,6 +74,10 @@ fun HomeHero(
                     .height(109.dp),
         )
         Spacer(Modifier.height(8.dp))
+        // Countdown + event-info always render (Figma `6885:8985` shows them as
+        // permanent siblings of the hero). The "Coming soon" header is the only
+        // pre-event-only element — at/post-event it hides, the digit boxes
+        // clamp to 00 / 00 / 00, and event metadata stays as static facts.
         if (countdown.isPreEvent) {
             Text(
                 text = stringResource(R.string.home_coming_soon),
@@ -80,28 +85,30 @@ fun HomeHero(
                 style = MaterialTheme.typography.labelLarge,
             )
             Spacer(Modifier.height(8.dp))
-            CountdownRow(countdown = countdown)
-            Spacer(Modifier.height(24.dp))
-            EventInfoBlock(modifier = Modifier.padding(horizontal = 20.dp))
-            Spacer(Modifier.height(20.dp))
-        } else {
-            Spacer(Modifier.height(28.dp))
         }
+        CountdownRow(countdown = countdown)
+        Spacer(Modifier.height(24.dp))
+        EventInfoBlock(modifier = Modifier.padding(horizontal = 20.dp))
+        Spacer(Modifier.height(20.dp))
         // Both buttons remain visible regardless of `isKudosAvailable` (Q-Home-9).
         // Each click is wrapped via `rememberSingleClickHandler` (TR-005) so a
         // finger-bounce double-tap can't push two destinations on the back stack.
+        // The two have DIFFERENT styles per Figma:
+        //  - ABOUT AWARD (`mms_2.2_Button` `6885:9026`) — filled cream + dark text.
+        //  - ABOUT KUDOS (`mms_2.3_Button` `6885:9027`) — translucent (10% cream)
+        //    bg, 1dp #998C5F border, WHITE text.
         val aboutAwardClick = rememberSingleClickHandler(onClick = onAboutAwardClick)
         val aboutKudosClick = rememberSingleClickHandler(onClick = onAboutKudosClick)
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(horizontal = 20.dp),
         ) {
-            HeroButton(
+            HeroButtonPrimary(
                 label = stringResource(R.string.home_btn_about_award),
                 onClick = aboutAwardClick,
                 modifier = Modifier.weight(1f),
             )
-            HeroButton(
+            HeroButtonOutlined(
                 label = stringResource(R.string.home_btn_about_kudos),
                 onClick = aboutKudosClick,
                 modifier = Modifier.weight(1f),
@@ -261,7 +268,7 @@ private fun EventInfoRow(
 }
 
 @Composable
-private fun HeroButton(
+private fun HeroButtonPrimary(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -278,15 +285,50 @@ private fun HeroButton(
     ) {
         Text(
             text = label,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
         )
         Spacer(Modifier.width(4.dp))
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
             tint = SaaInk,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(24.dp),
         )
     }
 }
+
+@Composable
+private fun HeroButtonOutlined(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(4.dp),
+        colors =
+            ButtonDefaults.buttonColors(
+                // 10% SaaCream over the keyvisual — Figma `6885:9027` background.
+                containerColor = SaaCream.copy(alpha = 0.10f),
+                contentColor = Color.White,
+            ),
+        border = BorderStroke(1.dp, HeroOutlinedBorder),
+        modifier = modifier.height(40.dp),
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+        )
+        Spacer(Modifier.width(4.dp))
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp),
+        )
+    }
+}
+
+private val HeroOutlinedBorder: Color = Color(0xFF998C5F)

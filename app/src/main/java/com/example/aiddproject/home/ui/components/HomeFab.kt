@@ -98,10 +98,14 @@ fun HomeFab(
             // Maintain visual centering when the pen + divider collapse.
             Spacer(Modifier.width(0.dp))
         }
+        // The brand Kudos glyph (`MM_MEDIA_IC_Kudos Logo` `6885:7657`) is a
+        // stylized "S" with a red sweep — distinct from the navbar Kudos
+        // icon (speech bubble + heart). Vector lives at `ic_fab_skudos.xml`.
+        // tint=null so the multi-colour glyph (dark + red) renders verbatim.
         Icon(
-            painter = painterResource(R.drawable.ic_navbar_kudos),
+            painter = painterResource(R.drawable.ic_fab_skudos),
             contentDescription = null,
-            tint = SaaInk,
+            tint = androidx.compose.ui.graphics.Color.Unspecified,
             modifier =
                 Modifier
                     .size(24.dp)

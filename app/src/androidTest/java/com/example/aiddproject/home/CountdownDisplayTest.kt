@@ -79,7 +79,11 @@ class CountdownDisplayTest {
     }
 
     @Test
-    fun at_event_clock_clamps_to_zero_and_hides_coming_soon_label() {
+    fun at_event_clock_clamps_to_zero_keeps_unit_labels_and_hides_coming_soon() {
+        // Post-event behaviour: the countdown digit cells stay visible (clamped
+        // to 00 / 00 / 00) and the unit labels stay rendered — only the
+        // "Coming soon" header collapses. The event-info block is a static
+        // metadata sibling and also stays.
         composeRule.setContent {
             AIDDProjectTheme {
                 HomeHero(
@@ -91,8 +95,11 @@ class CountdownDisplayTest {
         }
 
         composeRule.onNodeWithText(ctx.getString(R.string.home_coming_soon)).assertDoesNotExist()
-        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_days_label)).assertDoesNotExist()
-        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_hours_label)).assertDoesNotExist()
-        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_min_label)).assertDoesNotExist()
+        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_days_label)).assertIsDisplayed()
+        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_hours_label)).assertIsDisplayed()
+        composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_min_label)).assertIsDisplayed()
+        // Event-info stays as a static metadata block.
+        composeRule.onNodeWithText(ctx.getString(R.string.home_event_date_value)).assertIsDisplayed()
+        composeRule.onNodeWithText(ctx.getString(R.string.home_event_location_value)).assertIsDisplayed()
     }
 }
