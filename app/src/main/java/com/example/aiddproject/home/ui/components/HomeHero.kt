@@ -178,13 +178,23 @@ private fun CountdownCell(
 
 @Composable
 private fun DigitBox(digit: Char) {
+    // Figma `6885:8992` styling on each cell:
+    //  - background: linear-gradient(white 0%, white 10% at bottom)
+    //  - border: 0.5px solid SaaCream
+    //  - element opacity: 0.5
+    //  - corner-radius: 8px
+    //  - backdrop-filter: blur(16.64px)
+    // The element-level `opacity: 0.5` is folded directly into both the fill
+    // gradient AND the border colour so the rendered alphas match the
+    // composited Figma output (cream stroke at 50%, white fill 50% → 5%).
+    // Backdrop blur is approximated by the translucent fill class.
     Box(
         modifier =
             Modifier
                 .size(width = 32.dp, height = 56.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(DigitBoxGradient)
-                .border(0.5.dp, SaaCream, RoundedCornerShape(8.dp)),
+                .border(0.5.dp, SaaCream.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -201,7 +211,9 @@ private val DigitBoxGradient: Brush =
     Brush.verticalGradient(
         colors =
             listOf(
+                // White at 50% (top) — Figma white 100% × element opacity 0.5.
                 Color.White.copy(alpha = 0.5f),
+                // White at 5% (bottom) — Figma white 10% × element opacity 0.5.
                 Color.White.copy(alpha = 0.05f),
             ),
     )

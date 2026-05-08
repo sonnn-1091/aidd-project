@@ -179,16 +179,18 @@ fun HomeScreenContent(
             )
             // Header gradient overlay — Figma `mms_1_header` (`6885:9057`)
             // background: linear-gradient(180deg, #00101A 0%, transparent 100%)
-            // at 0.9 opacity, 104dp tall, sitting above the keyvisual so the
-            // logo + actions row read against a dark band. We extend it with
-            // the system-bar inset on top so the status bar text also reads
-            // against the dark gradient instead of the bright keyvisual.
+            // at 0.9 opacity. The Figma frame anchors the gradient at y=0,
+            // covering the iOS 44dp status bar AND the 60dp action area
+            // (104dp total). On Android we draw the gradient from the screen
+            // top (no systemBarsPadding) so the status bar text reads against
+            // the dark band — height bumped to 140dp so the gradient still
+            // covers the action row on devices with a taller system status
+            // bar inset.
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .systemBarsPadding()
-                        .height(104.dp)
+                        .height(140.dp)
                         .background(HeaderGradient),
             )
             LazyColumn(
