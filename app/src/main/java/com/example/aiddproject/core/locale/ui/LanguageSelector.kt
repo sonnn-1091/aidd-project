@@ -1,5 +1,7 @@
 package com.example.aiddproject.core.locale.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -150,6 +153,9 @@ fun LanguageSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier.testTag(TEST_TAG_MENU),
+            shape = RoundedCornerShape(8.dp),
+            containerColor = LanguageMenuSurfaceColor,
+            border = BorderStroke(1.dp, LanguageMenuBorderColor),
         ) {
             Language.entries.forEachIndexed { index, lang ->
                 val rowClick =
@@ -157,13 +163,24 @@ fun LanguageSelector(
                         expanded = false
                         if (lang != selected) onSelect(lang)
                     }
+                val isSelected = lang == selected
                 DropdownMenuItem(
                     onClick = rowClick,
+                    colors = MenuDefaults.itemColors(textColor = Color.White),
                     modifier =
                         Modifier
                             .testTag(menuItemTag(lang))
                             .heightIn(min = 48.dp)
                             .then(
+                                if (isSelected) {
+                                    Modifier.background(
+                                        color = LanguageMenuSelectedRowColor,
+                                        shape = RoundedCornerShape(2.dp),
+                                    )
+                                } else {
+                                    Modifier
+                                },
+                            ).then(
                                 if (index == 0) {
                                     Modifier.focusRequester(firstRowFocusRequester)
                                 } else {
@@ -173,10 +190,17 @@ fun LanguageSelector(
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = lang.flagEmoji, fontSize = 18.sp)
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(4.dp))
                             Text(
-                                text = lang.nativeName,
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = lang.code,
+                                color = Color.White,
+                                style =
+                                    MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 14.sp,
+                                        lineHeight = 20.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        letterSpacing = 0.1.sp,
+                                    ),
                             )
                         }
                     },
@@ -190,6 +214,13 @@ const val TEST_TAG_ANCHOR: String = "language_selector_anchor"
 const val TEST_TAG_MENU: String = "language_selector_menu"
 
 fun menuItemTag(language: Language): String = "language_selector_item_${language.code}"
+
+// Dropdown surface chrome — sourced from Figma `[iOS] Language dropdown`
+// node `6891:15595` (Details-Container-2 #00070C, Details-Border #998C5F),
+// and the active-row tint from node `6891:15596` (SaaCream @ 20% alpha).
+private val LanguageMenuSurfaceColor: Color = Color(0xFF00070C)
+private val LanguageMenuBorderColor: Color = Color(0xFF998C5F)
+private val LanguageMenuSelectedRowColor: Color = Color(0x33FFEA9E)
 
 /** Minimal click modifier without ripple — visual matches the Figma anchor. */
 @Composable

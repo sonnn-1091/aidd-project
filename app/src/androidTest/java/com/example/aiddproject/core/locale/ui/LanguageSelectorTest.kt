@@ -25,6 +25,7 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -83,8 +84,28 @@ class LanguageSelectorTest {
         composeRule.onNodeWithTag(menuItemTag(Language.VN)).assertIsDisplayed()
         composeRule.onNodeWithTag(menuItemTag(Language.EN)).assertIsDisplayed()
 
-        composeRule.onNodeWithText(Language.VN.nativeName).assertIsDisplayed()
-        composeRule.onNodeWithText(Language.EN.nativeName).assertIsDisplayed()
+        // Rows render the 2-letter code per spec § Screen Components
+        // ("'VN' label trailing", "'EN' label trailing"). With selected=VN
+        // and the menu open, "VN" appears twice (anchor + row) and "EN"
+        // appears once (just the row).
+        composeRule.onAllNodesWithText("VN").assertCountEquals(2)
+        composeRule.onAllNodesWithText("EN").assertCountEquals(1)
+    }
+
+    /**
+     * Regression lock for the bug fix: Phase 3 originally rendered
+     * `lang.nativeName` ("Tiếng Việt", "English") in each row; FR-004 +
+     * spec § Screen Components specify the 2-letter code instead. This
+     * test asserts the row text is the code and never the nativeName.
+     */
+    @Test
+    fun rows_render_two_letter_code_not_native_name() {
+        setSelector(initial = Language.VN)
+        composeRule.onNodeWithTag(TEST_TAG_ANCHOR).performClick()
+
+        // Native names must not render anywhere on screen.
+        composeRule.onAllNodesWithText(Language.VN.nativeName).assertCountEquals(0)
+        composeRule.onAllNodesWithText(Language.EN.nativeName).assertCountEquals(0)
     }
 
     @Test
