@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -158,67 +159,74 @@ fun LanguageSelector(
             containerColor = LanguageMenuSurfaceColor,
             border = BorderStroke(1.dp, LanguageMenuBorderColor),
         ) {
-            Language.entries.forEachIndexed { index, lang ->
-                val rowClick =
-                    rememberSingleClickHandler {
-                        expanded = false
-                        if (lang != selected) onSelect(lang)
-                    }
-                val isSelected = lang == selected
-                DropdownMenuItem(
-                    onClick = rowClick,
-                    colors = MenuDefaults.itemColors(textColor = Color.White),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                    modifier =
-                        Modifier
-                            .testTag(menuItemTag(lang))
-                            .heightIn(min = 48.dp)
-                            .then(
-                                if (isSelected) {
-                                    Modifier.background(
-                                        color = LanguageMenuSelectedRowColor,
-                                        shape = RoundedCornerShape(2.dp),
-                                    )
-                                } else {
-                                    Modifier
-                                },
-                            ).then(
-                                if (index == 0) {
-                                    Modifier.focusRequester(firstRowFocusRequester)
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                    text = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start,
-                        ) {
-                            // Fixed-width slot so 🇻🇳 and 🇺🇸 (rendered at
-                            // different intrinsic widths by the system emoji
-                            // font) leave the same x-offset for the code
-                            // label — Figma `Frame 485` width 24dp.
-                            Box(
-                                modifier = Modifier.width(24.dp),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                Text(text = lang.flagEmoji, fontSize = 18.sp)
-                            }
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = lang.code,
-                                color = Color.White,
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 14.sp,
-                                        lineHeight = 20.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        letterSpacing = 0.1.sp,
-                                    ),
-                            )
+            // Inner Column applies the 6dp horizontal inset Figma node
+            // `6891:15595` specs (`padding: 6px`). M3 [DropdownMenu] only
+            // adds vertical padding internally (`MenuListContentPadding`),
+            // so without this wrapper rows would touch the gold border on
+            // the left and right.
+            Column(modifier = Modifier.padding(horizontal = 6.dp)) {
+                Language.entries.forEachIndexed { index, lang ->
+                    val rowClick =
+                        rememberSingleClickHandler {
+                            expanded = false
+                            if (lang != selected) onSelect(lang)
                         }
-                    },
-                )
+                    val isSelected = lang == selected
+                    DropdownMenuItem(
+                        onClick = rowClick,
+                        colors = MenuDefaults.itemColors(textColor = Color.White),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        modifier =
+                            Modifier
+                                .testTag(menuItemTag(lang))
+                                .heightIn(min = 48.dp)
+                                .then(
+                                    if (isSelected) {
+                                        Modifier.background(
+                                            color = LanguageMenuSelectedRowColor,
+                                            shape = RoundedCornerShape(2.dp),
+                                        )
+                                    } else {
+                                        Modifier
+                                    },
+                                ).then(
+                                    if (index == 0) {
+                                        Modifier.focusRequester(firstRowFocusRequester)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start,
+                            ) {
+                                // Fixed-width slot so 🇻🇳 and 🇺🇸 (rendered at
+                                // different intrinsic widths by the system
+                                // emoji font) leave the same x-offset for the
+                                // code label — Figma `Frame 485` width 24dp.
+                                Box(
+                                    modifier = Modifier.width(24.dp),
+                                    contentAlignment = Alignment.CenterStart,
+                                ) {
+                                    Text(text = lang.flagEmoji, fontSize = 18.sp)
+                                }
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = lang.code,
+                                    color = Color.White,
+                                    style =
+                                        MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 14.sp,
+                                            lineHeight = 20.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            letterSpacing = 0.1.sp,
+                                        ),
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
     }

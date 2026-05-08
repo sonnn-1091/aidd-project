@@ -159,6 +159,18 @@ shared `LanguageSelector` contract.
 
 ---
 
+## Phase 6: Post-ship bug fixes (visual fidelity vs Figma)
+
+**Purpose**: cluster of design-vs-implementation gaps surfaced during
+post-ship visual review against Figma node `6891:15595`. Each task is a
+self-contained fix; commit per task or per coherent group.
+
+- [x] T045 Bug — dropdown surface chrome + row labels — apply Figma node `6891:15595` design tokens (Details-Container-2 #00070C, Details-Border #998C5F, 8dp radius); switch row label from `lang.nativeName` to `lang.code` per FR-004 + spec § Screen Components. Add `rows_render_two_letter_code_not_native_name` regression test. (Shipped in commit `ad86cd2`.) | app/src/main/java/com/example/aiddproject/core/locale/ui/LanguageSelector.kt + app/src/androidTest/.../LanguageSelectorTest.kt
+- [x] T046 Bug — row contentPadding + flag-slot width — set DropdownMenuItem `contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)` to match Figma `6891:15596` Button `padding: 16px`; wrap each flag emoji in a 24dp fixed-width `Box` (Figma `Frame 485` icon slot) so 🇻🇳 (~21dp intrinsic) and 🇺🇸 (~26dp intrinsic) leave the same x-offset for the code label. (Shipped in commit `e11457f`.) | app/src/main/java/com/example/aiddproject/core/locale/ui/LanguageSelector.kt
+- [x] T047 Bug — menu surface horizontal inset — Figma node `6891:15595` has `padding: 6px` on all sides; the M3 `DropdownMenu` adds only `MenuListContentPadding = PaddingValues(vertical = 8.dp)` and zero horizontal padding, so rows currently touch the gold border on left/right. Wrap the menu content in an inner `Column(modifier = Modifier.padding(horizontal = 6.dp))` so each row sits 6dp inside the surface chrome and the active-row cream tint inherits the same inset (matches the Figma render). | app/src/main/java/com/example/aiddproject/core/locale/ui/LanguageSelector.kt
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
