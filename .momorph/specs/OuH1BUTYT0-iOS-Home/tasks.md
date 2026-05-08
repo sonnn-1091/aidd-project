@@ -366,28 +366,28 @@ pixel-level fidelity.
 
 ### Tests First
 
-- [ ] T101 [P] [UI] Extend `HomeScreenTest` — assert event-info block
+- [x] T101 [P] [UI] Extend `HomeScreenTest` — assert event-info block
   renders the three lines (date, location, livestream tagline) when
   `state.countdown.isPreEvent == true`; assert the section-header pattern
   renders both the caption ("Sun* Annual Awards 2025") AND the big title
   ("Hệ thống giải thưởng") for the awards section, and ("Phong trào ghi
   nhận", "Sun* Kudos") for the kudos section | app/src/androidTest/java/com/example/aiddproject/home/HomeScreenTest.kt
-- [ ] T102 [P] [UI] Extend `CountdownDisplayTest` — assert a 2-digit
+- [x] T102 [P] [UI] Extend `CountdownDisplayTest` — assert a 2-digit
   zero-padded value renders as TWO separate digit nodes (one per cell);
   assert the "DAYS"/"HOURS"/"MINUTES" label is 18sp Montserrat 400 white
   (mirrors Figma node `6885:8997`) | app/src/androidTest/java/com/example/aiddproject/home/CountdownDisplayTest.kt
-- [ ] T103 [P] [UI] Extend `HomeFabTest` — assert the FAB renders as a
+- [x] T103 [P] [UI] Extend `HomeFabTest` — assert the FAB renders as a
   SINGLE pill (cream bg, 100dp corner radius) containing pen + "/" divider
   + Kudos icon when `isKudosAvailable=true`; when false the pen + "/"
   collapse and only the Kudos icon remains within the same pill | app/src/androidTest/java/com/example/aiddproject/home/HomeFabTest.kt
-- [ ] T104 [P] [UI] Extend `KudosSectionTest` — assert Chi tiết is a
+- [x] T104 [P] [UI] Extend `KudosSectionTest` — assert Chi tiết is a
   proper Button (cream bg, 4dp radius, 160dp wide) not a clickable text
   row; assert the section header renders BOTH the caption and the big
   cream title | app/src/androidTest/java/com/example/aiddproject/home/KudosSectionTest.kt
 
 ### String resources
 
-- [ ] T105 [P] [UI] Add new string resources for the audit gap (`values/strings.xml`
+- [x] T105 [P] [UI] Add new string resources for the audit gap (`values/strings.xml`
   + `values-en/strings.xml` + `values-ja/strings.xml`):
    - **Brand-fixed (`translatable="false"`)**: `home_event_date_value`
      ("26/12/2025"), `home_event_location_value` ("Âu Cơ Art Center"),
@@ -405,7 +405,7 @@ pixel-level fidelity.
 
 ### Hero / countdown
 
-- [ ] T106 [UI] Refactor `HomeHero.CountdownRow` (`6885:8988`) so each
+- [x] T106 [UI] Refactor `HomeHero.CountdownRow` (`6885:8988`) so each
   unit (DAYS / HOURS / MINUTES) renders as TWO 32×56dp digit cells
   side-by-side with 8dp gap. Cell styling: 0.5dp `SaaCream` border, 8dp
   corner radius, gradient bg `linear-gradient(180deg, white 0%, white
@@ -418,7 +418,7 @@ pixel-level fidelity.
   digits row and label. Value is 2-digit zero-padded; split via
   `value.toString().padStart(2, '0').forEachIndexed { ... }` (depends
   on T102) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHero.kt
-- [ ] T107 [UI] Add the `EventInfoBlock` composable below the countdown
+- [x] T107 [UI] Add the `EventInfoBlock` composable below the countdown
   inside `HomeHero` (`6885:9016`): three rows, gap 8dp:
    1. "Thời gian: 26/12/2025" — label 14sp R300 white + date 18sp R400
       cream (`SaaCream`).
@@ -431,14 +431,14 @@ pixel-level fidelity.
 
 ### Section headers
 
-- [ ] T108 [P] [UI] Create `SectionHeader` subcomposable matching Figma
+- [x] T108 [P] [UI] Create `SectionHeader` subcomposable matching Figma
   component `6885:8015` — column with: caption Text (12sp Montserrat
   400 white, 16dp tall), a 1dp horizontal divider (color `#2E3940`,
   full width, gap 4dp above and below), and a big title Text (22sp
   Montserrat 500 `SaaCream`, 28dp tall) inside a Row that may host a
   trailing slot (Frame 488 in design — currently empty for Awards and
   Kudos but the slot is reserved for future filter chips) | app/src/main/java/com/example/aiddproject/home/ui/components/SectionHeader.kt
-- [ ] T109 [UI] Replace the bold `Text` headers in `AwardsSection` and
+- [x] T109 [UI] Replace the bold `Text` headers in `AwardsSection` and
   `KudosSection` with the new `SectionHeader`. Awards passes `caption =
   home_section_awards_caption` + `title = home_section_awards_title`;
   Kudos passes `caption = home_section_kudos_caption` + `title =
@@ -446,7 +446,7 @@ pixel-level fidelity.
 
 ### Kudos Chi tiết
 
-- [ ] T110 [UI] Replace the clickable `Row` Chi tiết link in
+- [x] T110 [UI] Replace the clickable `Row` Chi tiết link in
   `KudosSection` with a proper `Button` matching the design's
   `mms_5.3_Button` (`6885:9055`): 160×40dp, padding 12dp, 4dp radius,
   bg `SaaCream`, label "Chi tiết" 14sp Montserrat 500 `SaaInk`, plus
@@ -454,7 +454,7 @@ pixel-level fidelity.
 
 ### FAB
 
-- [ ] T111 [UI] Refactor `HomeFab` to a SINGLE pill button (`6885:9058`):
+- [x] T111 [UI] Refactor `HomeFab` to a SINGLE pill button (`6885:9058`):
   width = wrap (89dp when both icons present), height = 48dp, padding
   8dp, 100dp corner radius, bg `SaaCream`, glow shadow `0 4dp 4dp 0
   rgba(0,0,0,0.25)` + `0 0 6dp 0 #FAE287`. Children:
@@ -471,18 +471,18 @@ pixel-level fidelity.
 
 ### Header polish
 
-- [ ] T112 [P] [UI] Tweak `HomeHeader` actions row spacing to match the
+- [x] T112 [P] [UI] Tweak `HomeHeader` actions row spacing to match the
   Figma `actions` frame (`I6885:9057;88:1828`): `Arrangement.spacedBy(10.dp)`
   between language pill / search / bell (currently 4dp). Ensure trailing
   edge padding ends 20dp from the screen edge | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
-- [ ] T113 [P] [UI] Override M3 `Badge` color in `BellWithBadge` to the
+- [x] T113 [P] [UI] Override M3 `Badge` color in `BellWithBadge` to the
   Figma red `#D4271D` (`I6885:9057;88:1830;72:1628`); fix size to 8dp
   (M3 default is 6dp dot). Use `Badge(containerColor = Color(0xFFD4271D),
   modifier = Modifier.size(8.dp).testTag(TEST_TAG_HOME_BELL_BADGE))` | app/src/main/java/com/example/aiddproject/home/ui/components/BellWithBadge.kt
 
 ### Awards card
 
-- [ ] T114 [P] [UI] Update `AwardCard` to match `Top Talent Award`
+- [x] T114 [P] [UI] Update `AwardCard` to match `Top Talent Award`
   (`6885:8051`): 160×298dp column with three blocks:
    1. **Thumbnail** — 160×160dp `mm_media_Picture-Award` style: cream
       border 0.5dp, 11.4dp corner radius, ornate gradient placeholder.
@@ -498,7 +498,7 @@ pixel-level fidelity.
 
 ### Validation
 
-- [ ] T115 Run full Quality Gates after Phase 11 lands: `./gradlew lint
+- [x] T115 Run full Quality Gates after Phase 11 lands: `./gradlew lint
   ktlintCheck assembleDebug testDebugUnitTest compileDebugAndroidTestKotlin`
   — all green. Capture an emulator screenshot and compare side-by-side
   against `assets/frame.png` to confirm the gaps are closed | (no file)

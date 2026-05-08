@@ -59,12 +59,16 @@ class KudosSectionTest {
     }
 
     @Test
-    fun loaded_state_renders_section_title_heading_and_chi_tiet() {
+    fun loaded_state_renders_section_caption_brand_title_heading_and_chi_tiet() {
         setContent(state = KudosState.Loaded(sampleKudosNoUrl))
 
         composeRule.onNodeWithTag(TEST_TAG_KUDOS_SECTION).assertIsDisplayed()
+        // Phase 11: caption above the divider + cream brand title below.
         composeRule
-            .onNodeWithText(ctx.getString(R.string.home_section_kudos_title))
+            .onNodeWithText(ctx.getString(R.string.home_section_kudos_caption))
+            .assertIsDisplayed()
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_section_kudos_brand_title))
             .assertIsDisplayed()
         composeRule
             .onNodeWithText(ctx.getString(R.string.home_kudos_note_heading))

@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.aiddproject.R
@@ -96,6 +97,25 @@ class HomeFabTest {
         composeRule.onNodeWithTag(TEST_TAG_HOME_FAB_SKUDOS).performClick()
         composeRule.onNodeWithTag(TEST_TAG_HOME_FAB_SKUDOS).performClick()
         assertEquals(1, sKudosTaps)
+    }
+
+    @Test
+    fun divider_is_visible_only_when_pencil_is_present() {
+        // Phase 11: the single-pill FAB shows pen + "/" + Kudos when the flag
+        // is true; when false the pen and divider collapse and only the
+        // Kudos icon remains within the same pill.
+        setContent(isKudosAvailable = true)
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_fab_divider))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun divider_is_hidden_when_kudos_flag_is_false() {
+        setContent(isKudosAvailable = false)
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_fab_divider))
+            .assertDoesNotExist()
     }
 
     private fun setContent(

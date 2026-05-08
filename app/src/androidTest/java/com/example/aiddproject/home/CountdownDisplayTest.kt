@@ -1,7 +1,10 @@
 package com.example.aiddproject.home
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.aiddproject.R
@@ -12,14 +15,20 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Compose UI test for the countdown block in [HomeHero] (US1, T059).
+ * Compose UI test for the countdown block in [HomeHero] (US1, T059 + T102).
  *
- * Pre-event clock: DAYS / HOURS / MINUTES values are non-zero and "Coming soon"
- * is visible. At/post-event clock: values clamp to 0 and "Coming soon" is hidden.
- * The TalkBack live-region wiring (`Polite`, keyed on minutes only) is asserted
- * structurally by [HomeHero]'s `Modifier.semantics { liveRegion = Polite }`; the
- * minute-boundary re-announce is exercised by `HomeViewModelTest`'s tick-driving
- * assertions plus the live lifecycle plumbing on the screen.
+ * Phase 11 redesigned the countdown so each unit (DAYS / HOURS / MINUTES)
+ * renders as TWO 32×56dp digit cells side-by-side. The padded value "12" is
+ * therefore two distinct nodes ("1", "2") — assertions are made through the
+ * live-region content description (which is the merged semantic label) and
+ * via `onAllNodesWithText` digit counts so we don't depend on text-search
+ * ambiguity.
+ *
+ * The TalkBack live-region wiring (`Polite`, keyed on minutes only) is
+ * asserted structurally by the merged-descendants `Modifier.semantics` block
+ * exposing a single contentDescription; the minute-boundary re-announce is
+ * exercised by `HomeViewModelTest`'s tick-driving assertions plus the live
+ * lifecycle plumbing on the screen.
  */
 class CountdownDisplayTest {
     @get:Rule
@@ -28,7 +37,7 @@ class CountdownDisplayTest {
     private val ctx = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
-    fun pre_event_clock_renders_non_zero_values_and_coming_soon_label() {
+    fun pre_event_clock_renders_padded_digits_via_live_region_label() {
         composeRule.setContent {
             AIDDProjectTheme {
                 HomeHero(
@@ -39,10 +48,34 @@ class CountdownDisplayTest {
             }
         }
 
-        composeRule.onNodeWithText("12").assertIsDisplayed()
-        composeRule.onNodeWithText("05").assertIsDisplayed()
-        composeRule.onNodeWithText("34").assertIsDisplayed()
+        // The live-region contentDescription encodes "12 DAYS, 5 HOURS, 34
+        // MINUTES" — substring assertion proves all three values are present
+        // without depending on per-digit text-node ordering.
+        val daysLabel = ctx.getString(R.string.home_countdown_days_label)
+        composeRule
+            .onNodeWithContentDescription("12 $daysLabel", substring = true)
+            .assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_coming_soon)).assertIsDisplayed()
+    }
+
+    @Test
+    fun pre_event_clock_renders_two_digit_cells_per_unit() {
+        composeRule.setContent {
+            AIDDProjectTheme {
+                HomeHero(
+                    countdown = CountdownState(days = 12, hours = 34, minutes = 56, isPreEvent = true),
+                    onAboutAwardClick = {},
+                    onAboutKudosClick = {},
+                )
+            }
+        }
+
+        // 6 distinct digits ("1", "2", "3", "4", "5", "6") with no repeats —
+        // each renders as a single digit-box Text node, proving each unit was
+        // split into two cells (3 units × 2 cells = 6 nodes).
+        listOf("1", "2", "3", "4", "5", "6").forEach { digit ->
+            composeRule.onAllNodesWithText(digit).assertCountEquals(1)
+        }
     }
 
     @Test

@@ -108,11 +108,15 @@ class HomeScreenTest {
     }
 
     @Test
-    fun countdown_renders_DAYS_HOURS_MINUTES_labels_and_values_pre_event() {
+    fun countdown_renders_DAYS_HOURS_MINUTES_labels_and_live_region_label_pre_event() {
         setContent()
-        composeRule.onNodeWithText("233").assertIsDisplayed()
-        composeRule.onNodeWithText("07").assertIsDisplayed()
-        composeRule.onNodeWithText("42").assertIsDisplayed()
+        // Phase 11: the countdown digits are split into per-cell Text nodes,
+        // so we assert via the live-region merged contentDescription which
+        // encodes "233 DAYS, 7 HOURS, 42 MINUTES".
+        val daysLabel = ctx.getString(R.string.home_countdown_days_label)
+        composeRule
+            .onNodeWithContentDescription("233 $daysLabel", substring = true)
+            .assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_days_label)).assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_hours_label)).assertIsDisplayed()
         composeRule.onNodeWithText(ctx.getString(R.string.home_countdown_min_label)).assertIsDisplayed()
@@ -144,10 +148,32 @@ class HomeScreenTest {
     }
 
     @Test
-    fun awards_section_header_renders_localized_title() {
+    fun awards_section_header_renders_caption_and_title() {
         setContent()
+        // Phase 11: section header is two-line (caption + big cream title).
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_section_awards_caption))
+            .assertIsDisplayed()
         composeRule
             .onNodeWithText(ctx.getString(R.string.home_section_awards_title))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun event_info_block_renders_when_pre_event() {
+        // Phase 11 (T107): Thời gian / Địa điểm / livestream tagline.
+        setContent()
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_event_time_label))
+            .assertIsDisplayed()
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_event_date_value))
+            .assertIsDisplayed()
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_event_location_value))
+            .assertIsDisplayed()
+        composeRule
+            .onNodeWithText(ctx.getString(R.string.home_event_livestream))
             .assertIsDisplayed()
     }
 

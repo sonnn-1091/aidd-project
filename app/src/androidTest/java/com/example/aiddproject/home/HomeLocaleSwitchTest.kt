@@ -39,9 +39,13 @@ import org.junit.Test
  *  - `home_navbar_awards` (NavBar tab label)
  *  - `home_link_chi_tiet` (Chi tiết / Details — used in Awards + Kudos)
  *
- * `home_section_awards_title` is intentionally NOT asserted: the value is
- * identical in VN and EN ("Sun* Annual Awards 2025"), so a string-equality
- * check can't tell the locales apart.
+ * `home_section_awards_caption` ("Sun* Annual Awards 2025") is brand-fixed
+ * and identical in every locale, so a string-equality check can't tell the
+ * locales apart — we don't sample it here. Phase 11's new
+ * `home_section_awards_title` ("Hệ thống giải thưởng" → "Awards system")
+ * does differ across locales but the EN/JA values are still
+ * translator-pickup placeholders, so the strict string assertion is left
+ * to the next translation pass.
  */
 class HomeLocaleSwitchTest {
     @get:Rule
