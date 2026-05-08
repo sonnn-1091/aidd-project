@@ -107,4 +107,51 @@ class AuthRedirectControllerTest {
                 cancelAndConsumeRemainingEvents()
             }
         }
+
+    // ---- Session-expired hint (T074) ----
+
+    @Test
+    fun `Unauthenticated emit also enqueues a sessionExpiredHint`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val interceptor = AuthErrorInterceptor()
+            val controller = AuthRedirectController(interceptor, backgroundScope)
+
+            interceptor.emit(AuthError.Unauthenticated("/rest/v1/awards"))
+
+            controller.sessionExpiredHint.test {
+                // replay = 1 so a late subscriber still sees the hint.
+                assertEquals(Unit, awaitItem())
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `Forbidden emit does NOT enqueue a sessionExpiredHint`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val interceptor = AuthErrorInterceptor()
+            val controller = AuthRedirectController(interceptor, backgroundScope)
+
+            interceptor.emit(AuthError.Forbidden("/rest/v1/notifications"))
+
+            controller.sessionExpiredHint.test {
+                // No item, no completion — just nothing replayed.
+                expectNoEvents()
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `consumeSessionExpiredHint clears the replay cache`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val interceptor = AuthErrorInterceptor()
+            val controller = AuthRedirectController(interceptor, backgroundScope)
+
+            interceptor.emit(AuthError.Unauthenticated("/rest/v1/awards"))
+            controller.consumeSessionExpiredHint()
+
+            controller.sessionExpiredHint.test {
+                expectNoEvents()
+                cancelAndConsumeRemainingEvents()
+            }
+        }
 }

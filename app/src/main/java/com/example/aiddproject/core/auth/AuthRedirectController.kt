@@ -2,6 +2,7 @@ package com.example.aiddproject.core.auth
 
 import com.example.aiddproject.core.di.ApplicationScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -18,6 +19,12 @@ import javax.inject.Singleton
  *
  * Subscribers `collect` from a `SharedFlow` (replay = 0) — a configuration
  * change should NOT replay the redirect.
+ *
+ * In addition, every [AuthRedirectEvent.SessionExpired] also enqueues a one-shot
+ * marker on [sessionExpiredHint] (replay = 1). LoginScreen subscribes to that
+ * stream when it composes after the bounce, surfaces the
+ * `error_oauth_session_expired` snackbar (FR-014), and clears the cached marker
+ * via [consumeSessionExpiredHint] so a configuration change doesn't re-show it.
  */
 @Singleton
 class AuthRedirectController
@@ -33,12 +40,32 @@ class AuthRedirectController
             )
         val events: SharedFlow<AuthRedirectEvent> = _events.asSharedFlow()
 
+        private val _sessionExpiredHint: MutableSharedFlow<Unit> =
+            MutableSharedFlow(
+                replay = 1,
+                extraBufferCapacity = 0,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
+        val sessionExpiredHint: SharedFlow<Unit> = _sessionExpiredHint.asSharedFlow()
+
         init {
             scope.launch {
                 interceptor.errors.collect { error ->
-                    _events.tryEmit(error.toRedirectEvent())
+                    val event = error.toRedirectEvent()
+                    if (event is AuthRedirectEvent.SessionExpired) {
+                        _sessionExpiredHint.tryEmit(Unit)
+                    }
+                    _events.tryEmit(event)
                 }
             }
+        }
+
+        /**
+         * Drops the latest replayed [sessionExpiredHint] so a configuration change
+         * after Login has already surfaced the snackbar doesn't re-show it.
+         */
+        fun consumeSessionExpiredHint() {
+            _sessionExpiredHint.resetReplayCache()
         }
 
         private fun AuthError.toRedirectEvent(): AuthRedirectEvent =

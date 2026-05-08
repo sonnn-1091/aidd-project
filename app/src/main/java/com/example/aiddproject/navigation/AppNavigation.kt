@@ -15,8 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.aiddproject.auth.login.data.AuthRepository
 import com.example.aiddproject.auth.login.ui.LoginScreen
-import com.example.aiddproject.core.auth.AuthRedirectController
+import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
 import dagger.hilt.EntryPoint
@@ -30,6 +31,13 @@ import dagger.hilt.components.SingletonComponent
  * Login. Home then fans out to every other primary surface; the destination
  * screens that aren't built yet (Awards overview, Kudos feed, etc.) render
  * labeled placeholders so the graph is fully navigable end-to-end.
+ *
+ * The [AuthRedirectController] is collected at the NavHost root so 401/403
+ * responses on any authenticated screen bounce through [handleAuthRedirect]:
+ *  - 401 → `signOut()` + replace stack with Login (Login then surfaces an
+ *    `error_oauth_session_expired` snackbar via the controller's
+ *    `sessionExpiredHint` flow).
+ *  - 403 → replace stack with Access Denied.
  */
 @Composable
 fun AppNavigation(
@@ -37,11 +45,24 @@ fun AppNavigation(
     startDestination: String = Routes.GATE,
 ) {
     val authRedirectController = rememberAuthRedirectController()
+    val authRepository = rememberAuthRepository()
     LaunchedEffect(authRedirectController) {
-        // Phase 6 (T073) replaces this no-op with the real navigate-to-Login /
-        // navigate-to-AccessDenied behavior. Wired now so the controller's coroutine
-        // scope starts collecting at NavHost composition.
-        authRedirectController.events.collect { /* no-op */ }
+        authRedirectController.events.collect { event ->
+            handleAuthRedirect(
+                event = event,
+                signOut = { authRepository.signOut() },
+                navigateToLogin = {
+                    navController.navigate(Routes.LOGIN) {
+                        clearGateBackstack()
+                    }
+                },
+                navigateToAccessDenied = {
+                    navController.navigate(Routes.ACCESS_DENIED) {
+                        clearGateBackstack()
+                    }
+                },
+            )
+        }
     }
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.GATE) {
@@ -129,20 +150,22 @@ private fun PlaceholderScreen(label: String) {
 }
 
 /**
- * AuthRedirectController is a `@Singleton` (not a ViewModel), so we resolve it through
- * a Hilt entry-point off the application context — the standard pattern for reaching
- * SingletonComponent bindings from a composable that isn't a `@HiltViewModel`.
+ * Hilt entry-point for the singleton [AuthRepository], used here for the
+ * `signOut()` side effect on `SessionExpired` (T073). LoginViewModel already
+ * owns its own injected copy for the user-initiated sign-in path; we don't
+ * route through it because the redirect is decoupled from any in-flight
+ * Login/Home VM lifecycle.
  */
 @Composable
-private fun rememberAuthRedirectController(): AuthRedirectController {
+internal fun rememberAuthRepository(): AuthRepository {
     val context = LocalContext.current.applicationContext
     return EntryPointAccessors
-        .fromApplication(context, AuthRedirectControllerEntryPoint::class.java)
-        .authRedirectController()
+        .fromApplication(context, AuthRepositoryEntryPoint::class.java)
+        .authRepository()
 }
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-internal interface AuthRedirectControllerEntryPoint {
-    fun authRedirectController(): AuthRedirectController
+internal interface AuthRepositoryEntryPoint {
+    fun authRepository(): AuthRepository
 }

@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.aiddproject.R
 import com.example.aiddproject.auth.login.ui.components.GoogleSignInButton
 import com.example.aiddproject.auth.login.ui.components.LanguageSelector
+import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LocaleViewModel
 
@@ -92,6 +93,21 @@ fun LoginScreen(
                     )
                 }
             }
+        }
+    }
+
+    // Surface the session-expired snackbar after a 401 bounce (T074, FR-014).
+    // The hint is replayed to this collector by AuthRedirectController, then
+    // consumed so a configuration change doesn't re-show it.
+    val authRedirectController = rememberAuthRedirectController()
+    LaunchedEffect(authRedirectController) {
+        authRedirectController.sessionExpiredHint.collect {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.error_oauth_session_expired),
+                duration = SnackbarDuration.Short,
+            )
+            authRedirectController.consumeSessionExpiredHint()
         }
     }
 
