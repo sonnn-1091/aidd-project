@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -167,6 +168,7 @@ fun LanguageSelector(
                 DropdownMenuItem(
                     onClick = rowClick,
                     colors = MenuDefaults.itemColors(textColor = Color.White),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                     modifier =
                         Modifier
                             .testTag(menuItemTag(lang))
@@ -188,8 +190,20 @@ fun LanguageSelector(
                                 },
                             ),
                     text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = lang.flagEmoji, fontSize = 18.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                        ) {
+                            // Fixed-width slot so 🇻🇳 and 🇺🇸 (rendered at
+                            // different intrinsic widths by the system emoji
+                            // font) leave the same x-offset for the code
+                            // label — Figma `Frame 485` width 24dp.
+                            Box(
+                                modifier = Modifier.width(24.dp),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                Text(text = lang.flagEmoji, fontSize = 18.sp)
+                            }
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = lang.code,
