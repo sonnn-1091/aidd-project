@@ -17,6 +17,12 @@
     <string name="a11y_cta_loading">サインイン中</string>
     <string name="a11y_language_selector">言語、%1$s、ドロップダウン</string>
 
+    <!-- Language Dropdown spec uUvW6Qm1ve. JA itself is no longer offered as a
+         choice (Resolved Q1) but the resource stays for the deprecation window
+         per plan.md § Out of Scope. -->
+    <string name="a11y_dropdown_expanded">展開された</string>
+    <string name="a11y_dropdown_collapsed">折りたたまれた</string>
+
     <!-- Home feature — JA translations (TODO: translator pickup for long paragraphs) -->
     <!-- TODO Phase 11 JA translation: home_section_awards_title is the big
          cream "Hệ thống giải thưởng" section title. JA placeholder until

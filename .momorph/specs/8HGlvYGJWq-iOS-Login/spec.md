@@ -15,8 +15,12 @@ The Login screen is the unauthenticated entry point to the SAA 2025 (Sun* Annual
 application. Authentication is **Google OAuth-only** — there is no email/password,
 biometric, or anonymous-access path. Sun* employees ("Sunners") tap a single CTA to start the
 Google consent flow; on success they land on the Home screen. The screen also exposes a
-language switcher (VN default; VN/EN/JA supported) so users can change UI language before
-authenticating, and shows static branding (logo, tagline, description, copyright).
+language switcher (VN default; VN/EN supported — JA was removed by Language Dropdown spec
+`uUvW6Qm1ve` § Resolved Q1) so users can change UI language before authenticating, and shows
+static branding (logo, tagline, description, copyright). The language switcher composable
+now lives in the screen-neutral package `com.example.aiddproject.core.locale.ui.LanguageSelector`
+(moved during Language Dropdown spec `uUvW6Qm1ve` Phase 2; previously
+`auth.login.ui.components.LanguageSelector`).
 
 **Target users**: Sun* employees with a registered Google work account.
 **Implementation platform**: **Android only** (Kotlin + Jetpack Compose + Material 3) per
@@ -89,8 +93,9 @@ opens on Home (not Login).
 
 ### User Story 3 - Switch display language before signing in (Priority: P2)
 
-A user who prefers EN or JA over the default VN can change language from the Login screen,
-and all localizable text on the screen updates immediately.
+A user who prefers EN over the default VN can change language from the Login screen,
+and all localizable text on the screen updates immediately. (JA was removed by Language
+Dropdown spec `uUvW6Qm1ve` § Resolved Q1; see that spec for the current contract.)
 
 **Why this priority**: Important for international employees but not blocking — the app still
 works in VN. Should-have, not must-have.
@@ -109,12 +114,13 @@ the description text and copyright text re-render in English without a screen re
    localizable text on the screen (description and copyright) re-renders in English. The
    "LOGIN With Google" CTA label is English-only on all locales (FR-015) and does not
    change.
-3. **Given** a language has been changed from VN to EN/JA,
+3. **Given** a language has been changed from VN to EN,
    **When** the app is closed and reopened (still unauthenticated),
    **Then** the previously selected language is restored.
 4. **Given** the dropdown is open,
    **When** the user views the options,
-   **Then** only the supported languages (VN, EN, JA) are listed.
+   **Then** only the supported languages (VN, EN) are listed. JA was removed by Language
+   Dropdown spec `uUvW6Qm1ve` § Resolved Q1.
 
 ### User Story 4 - Understand product context before signing in (Priority: P3)
 

@@ -821,7 +821,10 @@ spec.
   table will be produced by `/momorph.createtestcases`.
 - The language switcher reuses the same component and persisted preference
   as Login (`LanguageSelector` + `LanguagePreferenceRepository`); implementation
-  should NOT re-implement.
+  should NOT re-implement. The shared component now lives in the screen-neutral
+  package `com.example.aiddproject.core.locale.ui.LanguageSelector` (moved from
+  the previous `auth.login.ui.components` location during Language Dropdown
+  spec `uUvW6Qm1ve` Phase 2 — see that spec's Phase 2 § File move).
 - The Home keyvisual is similar to Login's but the frame adds two extra
   rectangles in `mm_media_bg` (`Shadow Left` 6885:8981, `Shadow Bottom`
   6885:8982) layered around the same `MM_MEDIA_Keyvisual BG`. Implementation
