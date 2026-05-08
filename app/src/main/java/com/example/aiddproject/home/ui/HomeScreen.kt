@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -23,13 +21,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.aiddproject.R
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LocaleViewModel
 import com.example.aiddproject.home.domain.Award
-import com.example.aiddproject.home.domain.KudosSummary
-import com.example.aiddproject.home.domain.states.AwardsState
-import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.home.domain.states.KudosState
 import com.example.aiddproject.home.ui.components.AwardsSection
 import com.example.aiddproject.home.ui.components.HomeBottomBar
@@ -41,11 +38,12 @@ import com.example.aiddproject.home.ui.components.KudosSection
 import com.example.aiddproject.home.ui.components.ThemeParagraph
 
 /**
- * Stateful entry point for the Home route. This UI-implementation pass renders
- * the screen with hardcoded stub state (Phase 2 of the broader plan wires real
- * data via `HomeViewModel` + `AuthErrorInterceptor`). Behavior of the FAB +
- * NavBar + bell sheet is plumbed through callbacks so the structural fidelity
- * matches `OuH1BUTYT0`.
+ * Stateful entry point for the Home route. Hoists [HomeViewModel]'s aggregate
+ * [HomeUiState] and the shared [LocaleViewModel]'s language preference, then forwards
+ * them to the stateless [HomeScreenContent]. The countdown ticker is bound to the
+ * `STARTED` lifecycle state via [LifecycleStartEffect] so it pauses on background
+ * (TR-004); the section refreshes also re-fire on every `STARTED` re-entry per
+ * Q-Home-5 (no longer-lived in-memory cache).
  */
 @Composable
 fun HomeScreen(
@@ -57,45 +55,22 @@ fun HomeScreen(
     onNavigateToAwardDetail: (Award) -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
-    val language by localeViewModel.language.collectAsState()
-
-    // Stub state for visual scaffolding — Phase 2 will replace with real flows.
-    val countdown =
-        remember {
-            CountdownState(days = 233, hours = 7, minutes = 42, isPreEvent = true)
-        }
-    val awards =
-        remember {
-            AwardsState.Populated(
-                items =
-                    listOf(
-                        Award(id = "1", name = "Top Talent Award", sortOrder = 0),
-                        Award(id = "2", name = "Top Project", sortOrder = 1),
-                        Award(id = "3", name = "Top Heart Award", sortOrder = 2),
-                    ),
-            )
-        }
-    val kudos =
-        remember {
-            KudosState.Loaded(
-                summary =
-                    KudosSummary(
-                        isKudosAvailable = true,
-                        descriptionText = "",
-                    ),
-            )
-        }
-    val unreadCount = 2
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(HomeNavTab.Saa2025) }
 
+    LifecycleStartEffect(viewModel) {
+        viewModel.startCountdown()
+        viewModel.refreshAll()
+        onStopOrDispose {
+            viewModel.stopCountdown()
+        }
+    }
+
     HomeScreenContent(
-        language = language,
-        countdown = countdown,
-        awards = awards,
-        kudos = kudos,
-        unreadCount = unreadCount,
+        state = uiState,
         selectedTab = selectedTab,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
@@ -121,11 +96,7 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    language: Language,
-    countdown: CountdownState,
-    awards: AwardsState,
-    kudos: KudosState,
-    unreadCount: Int,
+    state: HomeUiState,
     selectedTab: HomeNavTab,
     onLanguageSelected: (Language) -> Unit,
     onSearchClick: () -> Unit,
@@ -153,7 +124,7 @@ fun HomeScreenContent(
             )
         },
         floatingActionButton = {
-            val isKudosAvailable = (kudos as? KudosState.Loaded)?.summary?.isKudosAvailable == true
+            val isKudosAvailable = (state.kudos as? KudosState.Loaded)?.summary?.isKudosAvailable == true
             HomeFab(
                 isKudosAvailable = isKudosAvailable,
                 onPencilClick = onPencilClick,
@@ -177,17 +148,17 @@ fun HomeScreenContent(
             ) {
                 item {
                     HomeHeader(
-                        selectedLanguage = language,
+                        selectedLanguage = state.language,
                         onLanguageSelected = onLanguageSelected,
                         onSearchClick = onSearchClick,
                         onBellClick = onBellClick,
-                        unreadCount = unreadCount,
+                        unreadCount = state.unreadCount,
                     )
                 }
                 item { Spacer(Modifier.height(24.dp)) }
                 item {
                     HomeHero(
-                        countdown = countdown,
+                        countdown = state.countdown,
                         onAboutAwardClick = onAboutAwardClick,
                         onAboutKudosClick = onAboutKudosClick,
                     )
@@ -195,7 +166,7 @@ fun HomeScreenContent(
                 item { ThemeParagraph() }
                 item {
                     AwardsSection(
-                        state = awards,
+                        state = state.awards,
                         onChiTietTap = onAwardChiTietTap,
                         onRetry = onAwardsRetry,
                     )
@@ -203,7 +174,7 @@ fun HomeScreenContent(
                 item { Spacer(Modifier.height(32.dp)) }
                 item {
                     KudosSection(
-                        state = kudos,
+                        state = state.kudos,
                         onChiTietClick = onKudosChiTietClick,
                     )
                 }

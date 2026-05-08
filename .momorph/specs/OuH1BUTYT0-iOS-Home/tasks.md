@@ -123,31 +123,31 @@ FAB, and bottom NavBar with the SAA 2025 tab active.
 
 ### Tests First
 
-- [ ] T050 [P] [US1] Write `HomeViewModelTest` — countdown state ticks; section state combines correctly; lifecycle pause stops the ticker; verify the `awardsState.value` is `AwardsState.Loading` synchronously at construction (TR-003 first-paint guarantee) | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
+- [x] T050 [P] [US1] Write `HomeViewModelTest` — countdown state ticks; section state combines correctly; lifecycle pause stops the ticker; verify the `awardsState.value` is `AwardsState.Loading` synchronously at construction (TR-003 first-paint guarantee) | app/src/test/java/com/example/aiddproject/home/ui/HomeViewModelTest.kt
 
 ### Models / state aggregate
 
-- [ ] T051 [P] [US1] Create `HomeUiState` aggregate — `(countdown: CountdownState, awards: AwardsState, kudos: KudosState, notifications: NotificationsState, language: Language)` | app/src/main/java/com/example/aiddproject/home/ui/HomeUiState.kt
+- [x] T051 [P] [US1] Create `HomeUiState` aggregate — `(countdown: CountdownState, awards: AwardsState, kudos: KudosState, notifications: NotificationsState, language: Language)` | app/src/main/java/com/example/aiddproject/home/ui/HomeUiState.kt
 
 ### ViewModel
 
-- [ ] T052 [US1] Create `HomeViewModel` — Hilt `@HiltViewModel`; combines per-section flows from injected repositories + `CountdownEngine` + `LanguagePreferenceRepository`; uses `viewModelScope.launch { repeatOnLifecycle(STARTED) { … } }` for each section's fetch (parallel per Q-Home-7); exposes `events: SharedFlow<HomeEvent>` for one-shot navigations (depends on T029, T046, T051) | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
+- [x] T052 [US1] Create `HomeViewModel` — Hilt `@HiltViewModel`; combines per-section flows from injected repositories + `CountdownEngine` + `LanguagePreferenceRepository`; uses `viewModelScope.launch { repeatOnLifecycle(STARTED) { … } }` for each section's fetch (parallel per Q-Home-7); exposes `events: SharedFlow<HomeEvent>` for one-shot navigations (depends on T029, T046, T051) | app/src/main/java/com/example/aiddproject/home/ui/HomeViewModel.kt
 
 ### UI subcomposables
 
-- [ ] T053 [P] [US1] Create `HomeHeader` subcomposable — Row layout containing SAA logo (`ic_logo_saa`, decorative), `LanguageSelector` (reused from Login), search icon button stub, bell icon stub. Reuses gradient overlay pattern from Login's `LoginScreen` (depends on T003, T004) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
-- [ ] T054 [P] [US1] Create `HomeHero` subcomposable — Column with `ic_logo_root_further` (reused from Login), countdown display, ABOUT AWARD + ABOUT KUDOS Material `Button`s. Countdown uses `derivedStateOf` keyed on `(days, hours, minutes)` so TalkBack live region only re-announces on minute changes (spec § Behavioral Accessibility) (depends on T033) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHero.kt
-- [ ] T055 [P] [US1] Create `ThemeParagraph` subcomposable — single localized `Text(stringResource(R.string.home_theme_paragraph))` (Q-Home-4 — localized) | app/src/main/java/com/example/aiddproject/home/ui/components/ThemeParagraph.kt
-- [ ] T056 [US1] Create `HomeScreen` (stateful) + `HomeScreenContent` (stateless) — `Scaffold` + `SnackbarHost`; full-bleed `bg_keyvisual` + Home shadow overlays (from T010); composes Header, Hero, Theme, Awards header (placeholder until US2), FAB stub (placeholder until US5), BottomBar stub (placeholder until US3); uses `LazyColumn` so `AwardsSection`'s `LazyRow` nests cleanly (depends on T052, T053, T054, T055) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
+- [x] T053 [P] [US1] Create `HomeHeader` subcomposable — Row layout containing SAA logo (`ic_logo_saa`, decorative), `LanguageSelector` (reused from Login), search icon button stub, bell icon stub. Reuses gradient overlay pattern from Login's `LoginScreen` (depends on T003, T004) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHeader.kt
+- [x] T054 [P] [US1] Create `HomeHero` subcomposable — Column with `ic_logo_root_further` (reused from Login), countdown display, ABOUT AWARD + ABOUT KUDOS Material `Button`s. Countdown uses `derivedStateOf` keyed on `(days, hours, minutes)` so TalkBack live region only re-announces on minute changes (spec § Behavioral Accessibility) (depends on T033) | app/src/main/java/com/example/aiddproject/home/ui/components/HomeHero.kt
+- [x] T055 [P] [US1] Create `ThemeParagraph` subcomposable — single localized `Text(stringResource(R.string.home_theme_paragraph))` (Q-Home-4 — localized) | app/src/main/java/com/example/aiddproject/home/ui/components/ThemeParagraph.kt
+- [x] T056 [US1] Create `HomeScreen` (stateful) + `HomeScreenContent` (stateless) — `Scaffold` + `SnackbarHost`; full-bleed `bg_keyvisual` + Home shadow overlays (from T010); composes Header, Hero, Theme, Awards header (placeholder until US2), FAB stub (placeholder until US5), BottomBar stub (placeholder until US3); uses `LazyColumn` so `AwardsSection`'s `LazyRow` nests cleanly (depends on T052, T053, T054, T055) | app/src/main/java/com/example/aiddproject/home/ui/HomeScreen.kt
 
 ### Navigation wire-up
 
-- [ ] T057 [US1] Wire `HomeScreen` behind `Routes.HOME` in `AppNavigation`, replacing the Home placeholder shipped during Login Phase 3. Login's success path (`onNavigateToHome`) now lands on this screen (depends on T056) | app/src/main/java/com/example/aiddproject/navigation/AppNavigation.kt
+- [x] T057 [US1] Wire `HomeScreen` behind `Routes.HOME` in `AppNavigation`, replacing the Home placeholder shipped during Login Phase 3. Login's success path (`onNavigateToHome`) now lands on this screen (depends on T056) | app/src/main/java/com/example/aiddproject/navigation/AppNavigation.kt
 
 ### Instrumented tests
 
-- [ ] T058 [P] [US1] Write `HomeScreenTest` — Compose UI test asserts all four hub elements visible (logo, ROOT FURTHER tagline via contentDescription, countdown values, theme paragraph, ABOUT AWARD button, ABOUT KUDOS button). Drives `HomeScreenContent` directly with a known `HomeUiState` so no DI/VM | app/src/androidTest/java/com/example/aiddproject/home/HomeScreenTest.kt
-- [ ] T059 [P] [US1] Write `CountdownDisplayTest` — pre-event clock: DAYS/HOURS/MINUTES non-zero, "Coming soon" visible; at/post-event clock: values clamp to 0, "Coming soon" hidden; TalkBack live region announces only on minute boundaries | app/src/androidTest/java/com/example/aiddproject/home/CountdownDisplayTest.kt
+- [x] T058 [P] [US1] Write `HomeScreenTest` — Compose UI test asserts all four hub elements visible (logo, ROOT FURTHER tagline via contentDescription, countdown values, theme paragraph, ABOUT AWARD button, ABOUT KUDOS button). Drives `HomeScreenContent` directly with a known `HomeUiState` so no DI/VM | app/src/androidTest/java/com/example/aiddproject/home/HomeScreenTest.kt
+- [x] T059 [P] [US1] Write `CountdownDisplayTest` — pre-event clock: DAYS/HOURS/MINUTES non-zero, "Coming soon" visible; at/post-event clock: values clamp to 0, "Coming soon" hidden; TalkBack live region announces only on minute boundaries | app/src/androidTest/java/com/example/aiddproject/home/CountdownDisplayTest.kt
 
 **Checkpoint**: launching the app authenticated lands on the hub view; the
 countdown ticks against UTC+7; theme paragraph + ABOUT buttons render in
