@@ -42,12 +42,6 @@ class DemoAwardsRepository : AwardsRepository {
                     sortOrder = 2,
                 ),
                 Award(
-                    id = "00000000-0000-0000-0000-000000000a03",
-                    name = "Top Heart Award",
-                    thumbnailUrl = null,
-                    sortOrder = 3,
-                ),
-                Award(
                     id = "00000000-0000-0000-0000-000000000a04",
                     name = "Top Project Leader Award",
                     thumbnailUrl = null,
@@ -122,18 +116,6 @@ class DemoAwardsRepository : AwardsRepository {
                     // a live `awards.image_url` once Supabase Storage ships.
                     imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_project",
                     sortOrder = 2,
-                ),
-                AwardDetail(
-                    id = "00000000-0000-0000-0000-000000000a03",
-                    name = "Top Heart",
-                    description =
-                        "Top Heart tôn vinh những Sunner luôn đặt trái tim vào mỗi hành động — " +
-                            "với khách hàng, với đồng nghiệp, và với cộng đồng.",
-                    quantity = 8,
-                    quantityUnit = "Cá nhân",
-                    prizeValue = "5.000.000 VNĐ",
-                    imageUrl = null,
-                    sortOrder = 3,
                 ),
                 AwardDetail(
                     id = "00000000-0000-0000-0000-000000000a04",

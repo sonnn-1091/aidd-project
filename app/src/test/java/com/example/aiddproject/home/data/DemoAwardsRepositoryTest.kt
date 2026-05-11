@@ -69,19 +69,6 @@ class DemoAwardsRepositoryTest {
         }
 
     @Test
-    fun `detail returns top heart payload unchanged`() =
-        runTest {
-            val result = repository.detail("00000000-0000-0000-0000-000000000a03", Language.VN)
-
-            val detail = result.getOrNull()!!
-            assertEquals("Top Heart", detail.name)
-            assertEquals(8, detail.quantity)
-            assertEquals("Cá nhân", detail.quantityUnit)
-            assertEquals("5.000.000 VNĐ", detail.prizeValue)
-            assertEquals(3, detail.sortOrder)
-        }
-
-    @Test
     fun `detail returns failure when id unknown`() =
         runTest {
             val result = repository.detail("nonexistent-id", Language.VN)
@@ -197,12 +184,15 @@ class DemoAwardsRepositoryTest {
         }
 
     @Test
-    fun `list returns seven demo awards sorted by sort order`() =
+    fun `list returns six demo awards sorted by sort order without top heart`() =
         runTest {
             val result = repository.list()
 
             val awards = result.getOrNull()!!
-            assertEquals(7, awards.size)
+            assertEquals(6, awards.size)
+            // Top Heart (UUID …000a03) intentionally absent — it lacks a
+            // dedicated Figma frame and was a placeholder that surfaced
+            // in the dropdown as a non-spec'd entry. Removed 2026-05-11.
             assertEquals(
                 listOf(
                     Award(
@@ -216,12 +206,6 @@ class DemoAwardsRepositoryTest {
                         name = "Top Project Award",
                         thumbnailUrl = null,
                         sortOrder = 2,
-                    ),
-                    Award(
-                        id = "00000000-0000-0000-0000-000000000a03",
-                        name = "Top Heart Award",
-                        thumbnailUrl = null,
-                        sortOrder = 3,
                     ),
                     Award(
                         id = "00000000-0000-0000-0000-000000000a04",
@@ -250,5 +234,17 @@ class DemoAwardsRepositoryTest {
                 ),
                 awards,
             )
+        }
+
+    @Test
+    fun `detail returns failure for top heart since it was removed`() =
+        runTest {
+            // Top Heart (UUID …000a03) was a placeholder in DEMO_DETAILS
+            // until 2026-05-11. After removal, the detail lookup behaves
+            // like any other unknown id — NoSuchElementException.
+            val result = repository.detail("00000000-0000-0000-0000-000000000a03", Language.VN)
+
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull() is NoSuchElementException)
         }
 }
