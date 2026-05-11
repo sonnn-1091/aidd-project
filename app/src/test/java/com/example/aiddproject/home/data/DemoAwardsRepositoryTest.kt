@@ -45,7 +45,7 @@ class DemoAwardsRepositoryTest {
                     quantity = 2,
                     quantityUnit = "Tập thể",
                     prizeValue = "15.000.000 VNĐ",
-                    imageUrl = null,
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_project",
                     sortOrder = 2,
                 )
             assertEquals(Result.success(expected), result)
