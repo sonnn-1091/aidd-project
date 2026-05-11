@@ -25,7 +25,11 @@ object Routes {
     const val SEARCH: String = "route_search"
     const val PROFILE: String = "route_profile"
 
-    /** Award Detail destination is parameterized by `awardId`. */
+    /**
+     * Award Detail destination is parameterized by `awardId`. Wired
+     * to the real `AwardDetailScreen` since the Award_Top talent spec
+     * (`c-QM3_zjkG`) shipped — see `awarddetail/ui/AwardDetailScreen.kt`.
+     */
     const val AWARD_DETAIL_PATTERN: String = "route_award_detail/{awardId}"
 
     fun awardDetail(awardId: String): String = "route_award_detail/$awardId"
