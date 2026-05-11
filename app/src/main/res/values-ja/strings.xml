@@ -52,4 +52,18 @@
     <string name="a11y_home_fab_kudos_feed">Kudosフィードを開く</string>
     <string name="a11y_home_navbar_tab_active">%1$s、選択中、タブ</string>
     <string name="a11y_home_navbar_tab_inactive">%1$s、タブ</string>
+
+    <!-- Award Detail feature — spec c-QM3_zjkG (deprecation-window parity). -->
+    <string name="award_detail_title">SAA 2025 アワードシステム</string>
+    <string name="award_detail_kv_subtitle">表彰と感謝のシステム</string>
+    <string name="award_detail_quantity_label">表彰枠数</string>
+    <string name="award_detail_prize_label">賞の価値</string>
+    <string name="award_detail_prize_caption">1賞あたり</string>
+    <string name="award_detail_kudos_label">表彰活動</string>
+    <string name="award_detail_error">アワードを読み込めませんでした。再試行してください。</string>
+    <string name="award_detail_placeholder_value">—</string>
+
+    <string name="a11y_award_detail_screen">アワード詳細画面</string>
+    <string name="a11y_award_category_dropdown">アワードカテゴリを選択、%1$s、ドロップダウン</string>
+    <string name="a11y_award_badge_image">%1$s のバッジ</string>
 </resources>

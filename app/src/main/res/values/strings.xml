@@ -89,4 +89,24 @@
     <string name="a11y_home_fab_kudos_feed">Mở bảng tin Kudos</string>
     <string name="a11y_home_navbar_tab_active">%1$s, đang chọn, tab</string>
     <string name="a11y_home_navbar_tab_inactive">%1$s, tab</string>
+
+    <!-- ====================================================================== -->
+    <!-- Award Detail feature — Spec c-QM3_zjkG (parametric award viewer)        -->
+    <!-- Localized display strings (VN authoritative)                            -->
+    <!-- ====================================================================== -->
+    <string name="award_detail_title">Hệ thống giải thưởng SAA 2025</string>
+    <string name="award_detail_sub_label" translatable="false">Sun* Annual Awards 2025</string>
+    <string name="award_detail_kv_subtitle">Hệ thống ghi nhận và cảm ơn</string>
+    <string name="award_detail_quantity_label">Số lượng giải thưởng</string>
+    <string name="award_detail_prize_label">Giá trị giải thưởng</string>
+    <string name="award_detail_prize_caption">cho mỗi giải thưởng</string>
+    <string name="award_detail_kudos_label">Phong trào ghi nhận</string>
+    <string name="award_detail_kudos_section_title" translatable="false">Sun* Kudos</string>
+    <string name="award_detail_error">Không tải được giải thưởng, vui lòng thử lại</string>
+    <string name="award_detail_placeholder_value">—</string>
+
+    <!-- Award Detail — Accessibility labels (TR-003) -->
+    <string name="a11y_award_detail_screen">Màn hình chi tiết giải thưởng</string>
+    <string name="a11y_award_category_dropdown">Chọn hạng mục giải thưởng, %1$s, danh sách thả xuống</string>
+    <string name="a11y_award_badge_image">Huy hiệu giải thưởng %1$s</string>
 </resources>

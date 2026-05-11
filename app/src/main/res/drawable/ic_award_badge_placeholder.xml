@@ -1,0 +1,29 @@
+<!--
+  Placeholder badge graphic rendered by Coil when an award's `image_url`
+  is null (FR-008) or the network fetch fails (TR-007). The drawable
+  uses the same gold-tinted stroke palette as the rest of the SAA 2025
+  chrome (Details-Border #998C5F at 30% alpha, neutral cream fill) so
+  it blends in without drawing attention to itself.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    <!-- Outer ring -->
+    <path
+        android:strokeColor="#4D998C5F"
+        android:strokeWidth="2"
+        android:fillColor="#1AFFEA9E"
+        android:pathData="M 120 16 a 104 104 0 1 0 0.01 0 z" />
+    <!-- Inner ring -->
+    <path
+        android:strokeColor="#33998C5F"
+        android:strokeWidth="1"
+        android:fillColor="#00000000"
+        android:pathData="M 120 36 a 84 84 0 1 0 0.01 0 z" />
+    <!-- Star glyph -->
+    <path
+        android:fillColor="#80FFEA9E"
+        android:pathData="M 120 76 L 132 108 L 166 108 L 138 128 L 148 160 L 120 142 L 92 160 L 102 128 L 74 108 L 108 108 Z" />
+</vector>
