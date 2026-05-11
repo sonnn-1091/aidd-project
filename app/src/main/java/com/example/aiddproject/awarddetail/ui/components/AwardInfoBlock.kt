@@ -95,14 +95,21 @@ fun AwardInfoBlock(
             QuantityValueRow(quantity = quantity, unit = quantityUnit)
         }
         InfoDivider()
-        // Section 3 — prize. For dual-prize awards (Q-SIG-1) the
-        // section renders TWO value rows under the same label, with
-        // 8dp spacing between them. The shared `spacedBy(12.dp)`
-        // already accounts for label↔first-row spacing.
+        // Section 3 — prize (first, always present).
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             InfoTitleRow(title = stringResource(R.string.award_detail_prize_label))
             PrizeValueRow(prizeValue = prizeValue, prizeCaption = prizeCaption)
-            if (prizeValueTeam != null && prizeCaptionTeam != null) {
+        }
+        // Section 4 — second prize section (Q-SIG-1, optional). Per
+        // Figma frame `O98TwiHaJe` Picture-Award INSTANCE — the team
+        // prize lives in its OWN section with its OWN title row +
+        // divider above, mirroring the cá nhân section's chrome.
+        // Renders only when both `prizeValueTeam` and `prizeCaptionTeam`
+        // are non-null.
+        if (prizeValueTeam != null && prizeCaptionTeam != null) {
+            InfoDivider()
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                InfoTitleRow(title = stringResource(R.string.award_detail_prize_label))
                 PrizeValueRow(prizeValue = prizeValueTeam, prizeCaption = prizeCaptionTeam)
             }
         }

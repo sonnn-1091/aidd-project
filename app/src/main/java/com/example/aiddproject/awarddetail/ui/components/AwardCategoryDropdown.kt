@@ -42,7 +42,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -143,13 +142,11 @@ fun AwardCategoryDropdown(
                             fontWeight = FontWeight.Normal,
                             letterSpacing = 0.25.sp,
                         ),
-                    // Long award names (MVP "(Most Valuable Person)",
-                    // "Signature 2025 - Creator") would wrap the
-                    // 32dp-tall anchor pill onto a second line — clamp
-                    // to one line + ellipsis per Figma's single-line
-                    // dropdown contract.
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    // Show the full award name; long names like MVP /
+                    // Signature 2025 — Creator wrap to a second line.
+                    // The earlier single-line+ellipsis fix dropped the
+                    // last few characters which made the active award
+                    // unreadable — reverted per user feedback.
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(4.dp))
@@ -219,8 +216,6 @@ fun AwardCategoryDropdown(
                                                     fontWeight = FontWeight.Normal,
                                                     letterSpacing = 0.25.sp,
                                                 ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
                                         )
                                     }
                                 },

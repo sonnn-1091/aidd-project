@@ -145,11 +145,18 @@ class AwardInfoBlockTest {
         composeRule.onNodeWithText("7.000.000 VNĐ").assertIsDisplayed()
         // No "tập thể" caption should render in single-prize mode.
         composeRule.onAllNodesWithText("cho giải tập thể").assertCountEquals(0)
+        // Single prize title — the second section MUST NOT render
+        // when team fields are null.
+        val prizeTitle = ctx.getString(R.string.award_detail_prize_label)
+        composeRule.onAllNodesWithText(prizeTitle).assertCountEquals(1)
     }
 
     @Test
     fun renders_both_prize_rows_when_team_fields_provided() {
         // Signature 2025 — Creator path: 5M cá nhân + 8M tập thể.
+        // Each prize value lives in its own labeled section per Figma
+        // frame O98TwiHaJe (the two sections share the same
+        // "Giá trị giải thưởng" title, separated by an InfoDivider).
         setContent(
             quantity = 1,
             quantityUnit = "Cá nhân hoặc tập thể",
@@ -163,6 +170,9 @@ class AwardInfoBlockTest {
         composeRule.onNodeWithText("cho giải cá nhân").assertIsDisplayed()
         composeRule.onNodeWithText("8.000.000 VNĐ").assertIsDisplayed()
         composeRule.onNodeWithText("cho giải tập thể").assertIsDisplayed()
+        // Two prize titles — one above each value row (Bug D fix).
+        val prizeTitle = ctx.getString(R.string.award_detail_prize_label)
+        composeRule.onAllNodesWithText(prizeTitle).assertCountEquals(2)
     }
 
     @Test
