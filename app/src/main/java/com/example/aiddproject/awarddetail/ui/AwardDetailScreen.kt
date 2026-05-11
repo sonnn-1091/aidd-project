@@ -45,9 +45,7 @@ fun AwardDetailScreen(
                 HomeNavTab.Profile -> onNavigateToProfile()
             }
         },
-        // Dropdown trigger is a stub in Phase 3; Phase 4 wires the
-        // `AwardCategoryDropdown` popup.
-        onDropdownTriggerClick = { },
+        onCategorySelected = { award -> viewModel.onCategorySelected(award.id) },
         // Per Resolved Q3 the Sun*Kudos block's Chi tiết destination is
         // the same as the bottom-nav Kudos tab — both fire
         // [onNavigateToKudosOverview].

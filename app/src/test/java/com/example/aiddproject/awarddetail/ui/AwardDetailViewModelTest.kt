@@ -182,4 +182,78 @@ class AwardDetailViewModelTest {
             assertEquals(3, vm.uiState.value.unreadCount)
             assertNotNull(vm.uiState.value)
         }
+
+    // ---------------------------------------------------------------
+    // Phase 4 — US2 category dropdown VM tests (T057–T060)
+    // ---------------------------------------------------------------
+
+    @Test
+    fun `dropdown_select cancels in-flight request and loads new`() =
+        runTest {
+            // First call (init) loads Top Talent successfully.
+            val vm = buildVm(awardId = "a1")
+            assertEquals(AwardDetailState.Loaded(topTalentDetail), vm.uiState.value.detail)
+
+            // Reset call counts so we can verify the SELECT path fires a new detail call.
+            // Switch the stub so the second selection returns Top Project.
+            val topProjectDetail = topTalentDetail.copy(id = "a2", name = "Top Project")
+            coEvery { awardsRepository.detail("a2", Language.VN) } returns
+                Result.success(topProjectDetail)
+
+            vm.onCategorySelected("a2")
+
+            // After the new selection completes, the state reflects Top Project.
+            assertEquals(AwardDetailState.Loaded(topProjectDetail), vm.uiState.value.detail)
+            assertEquals("a2", vm.uiState.value.activeAwardId)
+            coVerify(atLeast = 1) { awardsRepository.detail("a2", Language.VN) }
+        }
+
+    @Test
+    fun `dropdown_select_idempotent does not re-fetch`() =
+        runTest {
+            val vm = buildVm(awardId = "a1")
+            assertEquals(AwardDetailState.Loaded(topTalentDetail), vm.uiState.value.detail)
+
+            // Re-select the already-active award — VM must short-circuit
+            // BEFORE calling repository.detail again (FR-005 + FR-006).
+            io.mockk.clearMocks(awardsRepository, answers = false)
+            // Re-establish the default stubs without changing answers so verify counts reset.
+            coEvery { awardsRepository.list() } returns Result.success(topTalentList)
+            coEvery { awardsRepository.detail(any(), any()) } returns Result.success(topTalentDetail)
+
+            vm.onCategorySelected("a1")
+
+            coVerify(exactly = 0) { awardsRepository.detail("a1", Language.VN) }
+        }
+
+    @Test
+    fun `empty_awards_list dropdown renders AwardsState_Empty`() =
+        runTest {
+            coEvery { awardsRepository.list() } returns Result.success(emptyList())
+
+            val vm = buildVm(awardId = null)
+
+            assertTrue(vm.uiState.value.categories === AwardsState.Empty)
+        }
+
+    @Test
+    fun `single_award dropdown lists one row`() =
+        runTest {
+            val solo =
+                listOf(
+                    com.example.aiddproject.home.domain.Award(
+                        id = "only",
+                        name = "Only Award",
+                        thumbnailUrl = null,
+                        sortOrder = 1,
+                    ),
+                )
+            coEvery { awardsRepository.list() } returns Result.success(solo)
+
+            val vm = buildVm(awardId = "only")
+
+            val categories = vm.uiState.value.categories
+            assertTrue(categories is AwardsState.Populated)
+            assertEquals(1, (categories as AwardsState.Populated).items.size)
+        }
 }

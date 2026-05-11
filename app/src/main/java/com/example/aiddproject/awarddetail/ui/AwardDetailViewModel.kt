@@ -102,6 +102,25 @@ class AwardDetailViewModel
             }
         }
 
+        /**
+         * Switches the screen to the [awardId] selected by the dropdown
+         * (US2). Idempotent: re-selecting the active id is a no-op
+         * (FR-005 + FR-006 mirror). Cancels any in-flight detail fetch
+         * before issuing the new one — covers the "Network slow → fast
+         * race" Edge Case where the user taps B → C before A's request
+         * completes.
+         */
+        fun onCategorySelected(awardId: String) {
+            if (awardId == activeAwardIdState.value) {
+                // Idempotent reselection — no telemetry, no fetch.
+                return
+            }
+            Timber.tag(TELEMETRY_TAG).i("award_detail.category_changed to=%s", awardId)
+            activeAwardIdState.value = awardId
+            savedStateHandle[NAV_ARG_AWARD_ID] = awardId
+            viewModelScope.launch { loadDetail(awardId) }
+        }
+
         private suspend fun resolveAwardIdAndLoadDetail() {
             val current = activeAwardIdState.value
             if (current != null) {

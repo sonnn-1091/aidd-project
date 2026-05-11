@@ -38,6 +38,7 @@ import com.example.aiddproject.awarddetail.ui.components.HighlightBlock
 import com.example.aiddproject.awarddetail.ui.components.KvKudosBanner
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.ui.rememberSingleClickHandler
+import com.example.aiddproject.home.domain.Award
 import com.example.aiddproject.home.domain.KudosSummary
 import com.example.aiddproject.home.domain.states.KudosState
 import com.example.aiddproject.home.ui.components.HomeBottomBar
@@ -71,7 +72,7 @@ fun AwardDetailScreenContent(
     onSearchClick: () -> Unit,
     onBellClick: () -> Unit,
     onTabSelect: (HomeNavTab) -> Unit,
-    onDropdownTriggerClick: () -> Unit,
+    onCategorySelected: (Award) -> Unit,
     onKudosChiTietClick: () -> Unit,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
@@ -136,8 +137,9 @@ fun AwardDetailScreenContent(
                         item { KvKudosBanner() }
                         item {
                             HighlightBlock(
-                                activeAwardName = activeName,
-                                onDropdownTriggerClick = onDropdownTriggerClick,
+                                categories = state.categories,
+                                activeAwardId = state.activeAwardId,
+                                onCategorySelected = onCategorySelected,
                             )
                         }
                         item {
