@@ -27,6 +27,20 @@ data class AwardDetail(
     val quantity: Int? = null,
     val quantityUnit: String? = null,
     val prizeValue: String? = null,
+    // Optional override for the prize-row caption. When `null`, the UI
+    // falls back to the localized default ("cho mỗi giải thưởng").
+    // Set explicitly when an award uses a different per-row caption —
+    // e.g., MVP shows "cho giải cá nhân" (delta-spec b2BuS8HYIt
+    // Q-MVP-1, 2026-05-11).
+    val prizeCaption: String? = null,
+    // Optional second prize row for awards with both individual and
+    // team payouts — e.g., Signature 2025 — Creator ships 5.000.000 VNĐ
+    // for "cá nhân" + 8.000.000 VNĐ for "tập thể" (delta-spec
+    // O98TwiHaJe Q-SIG-1, 2026-05-11). When both `prizeValueTeam`
+    // and `prizeCaptionTeam` are non-null, the UI renders a second
+    // prize-value row below the first.
+    val prizeValueTeam: String? = null,
+    val prizeCaptionTeam: String? = null,
     val imageUrl: String? = null,
     val sortOrder: Int = 0,
 )

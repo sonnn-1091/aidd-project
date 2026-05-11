@@ -56,6 +56,15 @@ fun AwardInfoBlock(
     quantityUnit: String?,
     prizeValue: String?,
     modifier: Modifier = Modifier,
+    // Optional caption override. Null → fall back to the localized
+    // default `R.string.award_detail_prize_caption` ("cho mỗi giải thưởng").
+    // Per delta-spec b2BuS8HYIt Q-MVP-1 (MVP renders "cho giải cá nhân").
+    prizeCaption: String? = null,
+    // Optional second prize-value row for dual-prize awards. Both
+    // fields must be non-null for the second row to render.
+    // Per delta-spec O98TwiHaJe Q-SIG-1 (Signature 2025 — Creator).
+    prizeValueTeam: String? = null,
+    prizeCaptionTeam: String? = null,
 ) {
     Column(
         modifier =
@@ -86,10 +95,16 @@ fun AwardInfoBlock(
             QuantityValueRow(quantity = quantity, unit = quantityUnit)
         }
         InfoDivider()
-        // Section 3 — prize
+        // Section 3 — prize. For dual-prize awards (Q-SIG-1) the
+        // section renders TWO value rows under the same label, with
+        // 8dp spacing between them. The shared `spacedBy(12.dp)`
+        // already accounts for label↔first-row spacing.
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             InfoTitleRow(title = stringResource(R.string.award_detail_prize_label))
-            PrizeValueRow(prizeValue = prizeValue)
+            PrizeValueRow(prizeValue = prizeValue, prizeCaption = prizeCaption)
+            if (prizeValueTeam != null && prizeCaptionTeam != null) {
+                PrizeValueRow(prizeValue = prizeValueTeam, prizeCaption = prizeCaptionTeam)
+            }
         }
     }
 }
@@ -174,9 +189,13 @@ private fun QuantityValueRow(
 }
 
 @Composable
-private fun PrizeValueRow(prizeValue: String?) {
+private fun PrizeValueRow(
+    prizeValue: String?,
+    prizeCaption: String? = null,
+) {
     val placeholder = stringResource(R.string.award_detail_placeholder_value)
     val valueText = prizeValue ?: placeholder
+    val captionText = prizeCaption ?: stringResource(R.string.award_detail_prize_caption)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),
@@ -194,7 +213,7 @@ private fun PrizeValueRow(prizeValue: String?) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.award_detail_prize_caption),
+            text = captionText,
             color = Color.White,
             style =
                 MaterialTheme.typography.bodyMedium.copy(

@@ -175,6 +175,9 @@ fun AwardDetailScreenContent(
                                     quantity = detail.detail.quantity,
                                     quantityUnit = detail.detail.quantityUnit,
                                     prizeValue = detail.detail.prizeValue,
+                                    prizeCaption = detail.detail.prizeCaption,
+                                    prizeValueTeam = detail.detail.prizeValueTeam,
+                                    prizeCaptionTeam = detail.detail.prizeCaptionTeam,
                                 )
                             }
                             item { Spacer(Modifier.height(16.dp)) }

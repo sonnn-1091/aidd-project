@@ -59,6 +59,18 @@ class DemoAwardsRepository : AwardsRepository {
                     thumbnailUrl = null,
                     sortOrder = 5,
                 ),
+                Award(
+                    id = "00000000-0000-0000-0000-000000000a06",
+                    name = "MVP (Most Valuable Person) Award",
+                    thumbnailUrl = null,
+                    sortOrder = 6,
+                ),
+                Award(
+                    id = "00000000-0000-0000-0000-000000000a07",
+                    name = "Signature 2025 - Creator Award",
+                    thumbnailUrl = null,
+                    sortOrder = 7,
+                ),
             )
 
         val DEMO_DETAILS: List<AwardDetail> =
@@ -174,6 +186,70 @@ class DemoAwardsRepository : AwardsRepository {
                     // per Picture-Award INSTANCE `6885:10611` layout.
                     imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_best_manager",
                     sortOrder = 5,
+                ),
+                AwardDetail(
+                    id = "00000000-0000-0000-0000-000000000a06",
+                    name = "MVP (Most Valuable Person)",
+                    // Description pulled verbatim from Figma node `6885:10771`
+                    // of frame `b2BuS8HYIt` ([iOS] Award_MVP). Q-MVP-1
+                    // (delta-spec) introduces a custom prize caption —
+                    // "cho giải cá nhân" instead of the default
+                    // "cho mỗi giải thưởng".
+                    description =
+                        "Giải thưởng MVP vinh danh cá nhân xuất sắc nhất năm – gương mặt tiêu " +
+                            "biểu đại diện cho toàn bộ tập thể Sun*. Họ là người đã thể hiện " +
+                            "năng lực vượt trội, tinh thần cống hiến bền bỉ, và tầm ảnh hưởng " +
+                            "sâu rộng, để lại dấu ấn mạnh mẽ trong hành trình của Sun* suốt " +
+                            "năm qua.  Không chỉ nổi bật bởi hiệu suất và kết quả công việc, " +
+                            "họ còn là nguồn cảm hứng lan tỏa – thông qua suy nghĩ, hành " +
+                            "động và ảnh hưởng tích cực của mình đối với tập thể. MVP là " +
+                            "người hội tụ đầy đủ phẩm chất của người Sun* ưu tú, đồng thời " +
+                            "mang trên mình trọng trách lớn lao: trở thành hình mẫu đại diện " +
+                            "cho con người và tinh thần Sun*, góp phần dẫn dắt tập thể vươn " +
+                            "tới những đỉnh cao mới.",
+                    quantity = 1,
+                    quantityUnit = "Cá nhân",
+                    prizeValue = "15.000.000 VNĐ",
+                    prizeCaption = "cho giải cá nhân",
+                    // Bundled Figma badge — BG (160×160, shared hash) +
+                    // "MVP" wordmark (56×25, large central glyph) centered,
+                    // per Picture-Award INSTANCE `6885:10766` layout.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_mvp",
+                    sortOrder = 6,
+                ),
+                AwardDetail(
+                    id = "00000000-0000-0000-0000-000000000a07",
+                    name = "Signature 2025 - Creator",
+                    // Description pulled verbatim from Figma node `6885:10690`
+                    // of frame `O98TwiHaJe` ([iOS] Award_Signature 2025 - Creator).
+                    // Q-SIG-1 (delta-spec) introduces dual prize-value rows
+                    // — 5.000.000 VNĐ cá nhân + 8.000.000 VNĐ tập thể —
+                    // rendered by AwardInfoBlock's optional second
+                    // PrizeValueRow when both `prizeValueTeam` and
+                    // `prizeCaptionTeam` are non-null.
+                    description =
+                        "Giải thưởng Signature vinh danh cá nhân hoặc tập thể thể hiện tinh " +
+                            "thần đặc trưng mà Sun* hướng tới trong từng thời kỳ.  Trong năm " +
+                            "2025, giải thưởng Signature vinh danh Creator - cá nhân/tập thể " +
+                            "mang tư duy chủ động và nhạy bén, luôn nhìn thấy cơ hội trong " +
+                            "thách thức và tiên phong trong hành động. Họ là những người nhạy " +
+                            "bén với vấn đề, nhanh chóng nhận diện và đưa ra những giải pháp " +
+                            "thực tiễn, mang lại giá trị rõ rệt cho dự án, khách hàng hoặc " +
+                            "tổ chức. Với tư duy kiến tạo và tinh thần “Creator” đặc trưng " +
+                            "của Sun*, họ không chỉ phản ứng tích cực trước sự thay đổi mà " +
+                            "còn chủ động tạo ra cải tiến, góp phần định hình chuẩn mực mới " +
+                            "cho cách mà người Sun* tạo giá trị.",
+                    quantity = 1,
+                    quantityUnit = "Cá nhân hoặc tập thể",
+                    prizeValue = "5.000.000 VNĐ",
+                    prizeCaption = "cho giải cá nhân",
+                    prizeValueTeam = "8.000.000 VNĐ",
+                    prizeCaptionTeam = "cho giải tập thể",
+                    // Bundled Figma badge — BG (160×160, shared hash) +
+                    // "Signature 2025 Creator" wordmark (111×26) centered,
+                    // per Picture-Award INSTANCE `6885:10685` layout.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_signature_2025_creator",
+                    sortOrder = 7,
                 ),
             )
     }

@@ -14,9 +14,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Screens | 7 |
-| Discovered | 7 |
-| Spec Shipped | 7 |
+| Total Screens | 9 |
+| Discovered | 9 |
+| Spec Shipped | 9 |
 | Spec In Progress | 0 |
 | Completion | 100% |
 
@@ -33,6 +33,8 @@
 | 5 | [iOS] Award_Top project | FQoJZLkG_d | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=FQoJZLkG_d | spec_shipped (delta-spec) | specs/FQoJZLkG_d-iOS-Award-Top-project/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Top Project card) | Same as canonical Award Detail — renders through the same parametric AwardDetailScreen composable |
 | 6 | [iOS] Award_Top project leader | QQvsfK3yaK | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=QQvsfK3yaK | spec_shipped (delta-spec) | specs/QQvsfK3yaK-iOS-Award-Top-project-leader/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Top Project Leader card — requires DEMO append) | Same as canonical Award Detail — pure data swap, no new Q-numbers (quantity = 3 renders as "03" via shipped Q-TP-2 formatter) |
 | 7 | [iOS] Award_Best Manager | 7y195PPTxQ | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=7y195PPTxQ | spec_shipped (delta-spec) | specs/7y195PPTxQ-iOS-Award-Best-Manager/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Best Manager card — requires DEMO append) | Same as canonical Award Detail — pure data swap, no new Q-numbers (quantity = 1 renders as "01", prizeValue 10.000.000 VNĐ is new value but still pre-formatted per Q5) |
+| 8 | [iOS] Award_MVP | b2BuS8HYIt | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=b2BuS8HYIt | spec_shipped (delta-spec) | specs/b2BuS8HYIt-iOS-Award-MVP/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on MVP card — requires DEMO append) | Same parametric Award Detail with **Q-MVP-1** (custom prize caption "cho giải cá nhân" — extends AwardDetail model + AwardInfoBlock composable, backward-compatible) |
+| 9 | [iOS] Award_Signature 2025 - Creator | O98TwiHaJe | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=O98TwiHaJe | spec_shipped (delta-spec) | specs/O98TwiHaJe-iOS-Award-Signature-2025-Creator/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Signature 2025 card — requires DEMO append) | Same parametric Award Detail with **Q-SIG-1** (dual prize-value rows — cá nhân + tập thể — and **Q-MVP-1** custom caption. Extends AwardDetail with `prizeValueTeam` + `prizeCaptionTeam`; AwardInfoBlock conditionally renders second PrizeValueRow) |
 
 ---
 
@@ -125,6 +127,7 @@ flowchart TD
 | 2026-05-11 | Slice A badge bundle shipped | [iOS] Award_Top project (FQoJZLkG_d) | Top Project Figma badge composite bundled (commit `1417e25`). MoMorph composite endpoint returned null → fell back to downloading BG (160×160) + wordmark (106×16) layers separately and compositing offline with Python + Pillow. DemoAwardsRepository.DEMO_DETAILS[1].imageUrl flipped null → resource URI. |
 | 2026-05-11 | Delta-spec authored | [iOS] Award_Top project leader (QQvsfK3yaK) | Lightweight delta-spec referencing canonical c-QM3_zjkG (no commit yet — spec only). Data shape identical to Top Talent (quantity=3 "Cá nhân", prize 7.000.000 VNĐ); no new Q-numbers introduced since shipped Q-TP-2 `"%02d"` formatter renders "03" automatically. Description text deliberately not inlined — pulled from Figma node `6885:10542` at impl time. Pending DEMO_AWARDS + DEMO_DETAILS append + badge composite bundle (Slice A equivalent). |
 | 2026-05-11 | Delta-spec authored | [iOS] Award_Best Manager (7y195PPTxQ) | Third delta-spec following the now-validated pattern. Pure data append — `quantity=1` (renders "01"), `unit="Cá nhân"`, `prizeValue="10.000.000 VNĐ"` (new value, still pre-formatted). No new Q-numbers. Description full Figma copy at node `6885:10616`. Pending DEMO append + badge bundle. |
+| 2026-05-11 | Delta-specs + impl shipped | [iOS] Award_MVP (b2BuS8HYIt) + [iOS] Award_Signature 2025 - Creator (O98TwiHaJe) | Two delta-specs break the pure-data-append pattern by introducing **Q-MVP-1** (custom prize caption per award) and **Q-SIG-1** (dual prize-value rows — cá nhân + tập thể). AwardDetail model extended with 3 new optional fields: `prizeCaption`, `prizeValueTeam`, `prizeCaptionTeam` (all backward-compatible defaults). AwardInfoBlock composable extended to accept the caption override and conditionally render a second PrizeValueRow. After this lands, all five future Award fields are absorbable by data-only deltas. |
 
 ---
 

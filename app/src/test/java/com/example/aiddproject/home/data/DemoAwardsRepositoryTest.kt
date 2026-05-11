@@ -144,12 +144,65 @@ class DemoAwardsRepositoryTest {
         }
 
     @Test
-    fun `list returns five demo awards sorted by sort order`() =
+    fun `detail returns mvp payload with custom prize caption Q-MVP-1`() =
+        runTest {
+            val result = repository.detail("00000000-0000-0000-0000-000000000a06", Language.VN)
+
+            val detail = result.getOrNull()!!
+            assertEquals("MVP (Most Valuable Person)", detail.name)
+            assertEquals(1, detail.quantity)
+            assertEquals("Cá nhân", detail.quantityUnit)
+            assertEquals("15.000.000 VNĐ", detail.prizeValue)
+            // Q-MVP-1: custom caption — verifies the model carries the
+            // override + the UI will use it instead of the default.
+            assertEquals("cho giải cá nhân", detail.prizeCaption)
+            // No dual prize row for MVP.
+            assertEquals(null, detail.prizeValueTeam)
+            assertEquals(null, detail.prizeCaptionTeam)
+            assertEquals(
+                "android.resource://com.example.aiddproject/drawable/ic_award_mvp",
+                detail.imageUrl,
+            )
+            assertEquals(6, detail.sortOrder)
+            assertTrue(
+                "description starts with 'Giải thưởng MVP vinh danh'",
+                detail.description.startsWith("Giải thưởng MVP vinh danh"),
+            )
+        }
+
+    @Test
+    fun `detail returns signature 2025 creator payload with dual prize rows Q-SIG-1`() =
+        runTest {
+            val result = repository.detail("00000000-0000-0000-0000-000000000a07", Language.VN)
+
+            val detail = result.getOrNull()!!
+            assertEquals("Signature 2025 - Creator", detail.name)
+            assertEquals(1, detail.quantity)
+            assertEquals("Cá nhân hoặc tập thể", detail.quantityUnit)
+            // Q-SIG-1: dual prize values — both individual and team rows
+            // are carried in the model.
+            assertEquals("5.000.000 VNĐ", detail.prizeValue)
+            assertEquals("cho giải cá nhân", detail.prizeCaption)
+            assertEquals("8.000.000 VNĐ", detail.prizeValueTeam)
+            assertEquals("cho giải tập thể", detail.prizeCaptionTeam)
+            assertEquals(
+                "android.resource://com.example.aiddproject/drawable/ic_award_signature_2025_creator",
+                detail.imageUrl,
+            )
+            assertEquals(7, detail.sortOrder)
+            assertTrue(
+                "description starts with 'Giải thưởng Signature vinh danh'",
+                detail.description.startsWith("Giải thưởng Signature vinh danh"),
+            )
+        }
+
+    @Test
+    fun `list returns seven demo awards sorted by sort order`() =
         runTest {
             val result = repository.list()
 
             val awards = result.getOrNull()!!
-            assertEquals(5, awards.size)
+            assertEquals(7, awards.size)
             assertEquals(
                 listOf(
                     Award(
@@ -181,6 +234,18 @@ class DemoAwardsRepositoryTest {
                         name = "Best Manager Award",
                         thumbnailUrl = null,
                         sortOrder = 5,
+                    ),
+                    Award(
+                        id = "00000000-0000-0000-0000-000000000a06",
+                        name = "MVP (Most Valuable Person) Award",
+                        thumbnailUrl = null,
+                        sortOrder = 6,
+                    ),
+                    Award(
+                        id = "00000000-0000-0000-0000-000000000a07",
+                        name = "Signature 2025 - Creator Award",
+                        thumbnailUrl = null,
+                        sortOrder = 7,
                     ),
                 ),
                 awards,

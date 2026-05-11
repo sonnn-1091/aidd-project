@@ -1,7 +1,9 @@
 package com.example.aiddproject.awarddetail
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.aiddproject.R
@@ -36,6 +38,9 @@ class AwardInfoBlockTest {
         quantity: Int?,
         quantityUnit: String? = "Cá nhân",
         prizeValue: String? = "7.000.000 VNĐ",
+        prizeCaption: String? = null,
+        prizeValueTeam: String? = null,
+        prizeCaptionTeam: String? = null,
     ) {
         composeRule.setContent {
             AIDDProjectTheme {
@@ -45,6 +50,9 @@ class AwardInfoBlockTest {
                     quantity = quantity,
                     quantityUnit = quantityUnit,
                     prizeValue = prizeValue,
+                    prizeCaption = prizeCaption,
+                    prizeValueTeam = prizeValueTeam,
+                    prizeCaptionTeam = prizeCaptionTeam,
                 )
             }
         }
@@ -92,5 +100,81 @@ class AwardInfoBlockTest {
 
         val placeholder = ctx.getString(R.string.award_detail_placeholder_value)
         composeRule.onNodeWithText(placeholder).assertIsDisplayed()
+    }
+
+    // -----------------------------------------------------------------------
+    // Q-MVP-1 — custom prize caption override (delta-spec b2BuS8HYIt)
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun renders_default_prize_caption_when_prize_caption_is_null() {
+        setContent(quantity = 10, prizeValue = "7.000.000 VNĐ", prizeCaption = null)
+
+        val defaultCaption = ctx.getString(R.string.award_detail_prize_caption)
+        composeRule.onNodeWithText(defaultCaption).assertIsDisplayed()
+    }
+
+    @Test
+    fun renders_custom_prize_caption_when_provided() {
+        // MVP path: caption override "cho giải cá nhân"
+        setContent(
+            quantity = 1,
+            prizeValue = "15.000.000 VNĐ",
+            prizeCaption = "cho giải cá nhân",
+        )
+
+        composeRule.onNodeWithText("cho giải cá nhân").assertIsDisplayed()
+        // The default caption must NOT render when an override is provided.
+        val defaultCaption = ctx.getString(R.string.award_detail_prize_caption)
+        composeRule.onAllNodesWithText(defaultCaption).assertCountEquals(0)
+    }
+
+    // -----------------------------------------------------------------------
+    // Q-SIG-1 — dual prize-value rows (delta-spec O98TwiHaJe)
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun renders_only_first_prize_row_when_team_fields_are_null() {
+        setContent(
+            quantity = 10,
+            prizeValue = "7.000.000 VNĐ",
+            prizeValueTeam = null,
+            prizeCaptionTeam = null,
+        )
+
+        composeRule.onNodeWithText("7.000.000 VNĐ").assertIsDisplayed()
+        // No "tập thể" caption should render in single-prize mode.
+        composeRule.onAllNodesWithText("cho giải tập thể").assertCountEquals(0)
+    }
+
+    @Test
+    fun renders_both_prize_rows_when_team_fields_provided() {
+        // Signature 2025 — Creator path: 5M cá nhân + 8M tập thể.
+        setContent(
+            quantity = 1,
+            quantityUnit = "Cá nhân hoặc tập thể",
+            prizeValue = "5.000.000 VNĐ",
+            prizeCaption = "cho giải cá nhân",
+            prizeValueTeam = "8.000.000 VNĐ",
+            prizeCaptionTeam = "cho giải tập thể",
+        )
+
+        composeRule.onNodeWithText("5.000.000 VNĐ").assertIsDisplayed()
+        composeRule.onNodeWithText("cho giải cá nhân").assertIsDisplayed()
+        composeRule.onNodeWithText("8.000.000 VNĐ").assertIsDisplayed()
+        composeRule.onNodeWithText("cho giải tập thể").assertIsDisplayed()
+    }
+
+    @Test
+    fun second_row_does_not_render_when_only_team_value_provided() {
+        // Defensive: both team fields must be set; missing caption → skip.
+        setContent(
+            quantity = 1,
+            prizeValue = "5.000.000 VNĐ",
+            prizeValueTeam = "8.000.000 VNĐ",
+            prizeCaptionTeam = null,
+        )
+
+        composeRule.onAllNodesWithText("8.000.000 VNĐ").assertCountEquals(0)
     }
 }
