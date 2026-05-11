@@ -90,7 +90,13 @@ class DemoAwardsRepository : AwardsRepository {
                     quantity = 2,
                     quantityUnit = "Tập thể",
                     prizeValue = "15.000.000 VNĐ",
-                    imageUrl = null,
+                    // Bundled Figma badge — BG (160×160) composited offline
+                    // with the Top Project wordmark (106×16) centered, per
+                    // Picture-Award INSTANCE `6885:10463` layout (flex
+                    // column, padding 71.364px top + 25.455px sides). Mirrors
+                    // Top Talent's resource URI approach; will be replaced by
+                    // a live `awards.image_url` once Supabase Storage ships.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_project",
                     sortOrder = 2,
                 ),
                 AwardDetail(
