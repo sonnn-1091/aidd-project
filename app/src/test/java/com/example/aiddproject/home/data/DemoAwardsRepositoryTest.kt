@@ -91,12 +91,40 @@ class DemoAwardsRepositoryTest {
         }
 
     @Test
-    fun `list returns three demo awards sorted by sort order`() =
+    fun `detail returns top project leader payload matching figma node 6885 10542`() =
+        runTest {
+            val result = repository.detail("00000000-0000-0000-0000-000000000a04", Language.VN)
+
+            val detail = result.getOrNull()!!
+            assertEquals("Top Project Leader", detail.name)
+            assertEquals(3, detail.quantity)
+            assertEquals("Cá nhân", detail.quantityUnit)
+            assertEquals("7.000.000 VNĐ", detail.prizeValue)
+            assertEquals(
+                "android.resource://com.example.aiddproject/drawable/ic_award_top_project_leader",
+                detail.imageUrl,
+            )
+            assertEquals(4, detail.sortOrder)
+            // Description pinned to Figma node 6885:10542; spot-check the
+            // first and last clauses so a future copy edit must update
+            // the fixture.
+            assertTrue(
+                "description starts with 'Giải thưởng Top Project Leader vinh danh'",
+                detail.description.startsWith("Giải thưởng Top Project Leader vinh danh"),
+            )
+            assertTrue(
+                "description ends with the Wasshoi clause",
+                detail.description.endsWith("hạnh phúc hơn của chính mình."),
+            )
+        }
+
+    @Test
+    fun `list returns four demo awards sorted by sort order`() =
         runTest {
             val result = repository.list()
 
             val awards = result.getOrNull()!!
-            assertEquals(3, awards.size)
+            assertEquals(4, awards.size)
             assertEquals(
                 listOf(
                     Award(
@@ -116,6 +144,12 @@ class DemoAwardsRepositoryTest {
                         name = "Top Heart Award",
                         thumbnailUrl = null,
                         sortOrder = 3,
+                    ),
+                    Award(
+                        id = "00000000-0000-0000-0000-000000000a04",
+                        name = "Top Project Leader Award",
+                        thumbnailUrl = null,
+                        sortOrder = 4,
                     ),
                 ),
                 awards,

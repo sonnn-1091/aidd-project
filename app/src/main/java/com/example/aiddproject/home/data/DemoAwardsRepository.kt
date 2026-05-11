@@ -47,6 +47,12 @@ class DemoAwardsRepository : AwardsRepository {
                     thumbnailUrl = null,
                     sortOrder = 3,
                 ),
+                Award(
+                    id = "00000000-0000-0000-0000-000000000a04",
+                    name = "Top Project Leader Award",
+                    thumbnailUrl = null,
+                    sortOrder = 4,
+                ),
             )
 
         val DEMO_DETAILS: List<AwardDetail> =
@@ -110,6 +116,32 @@ class DemoAwardsRepository : AwardsRepository {
                     prizeValue = "5.000.000 VNĐ",
                     imageUrl = null,
                     sortOrder = 3,
+                ),
+                AwardDetail(
+                    id = "00000000-0000-0000-0000-000000000a04",
+                    name = "Top Project Leader",
+                    // Description pulled verbatim from Figma node `6885:10542`
+                    // of frame `QQvsfK3yaK` ([iOS] Award_Top project leader),
+                    // per delta-spec § Data Requirements. No new Q-numbers —
+                    // the shipped Q-TP-2 `%02d` formatter renders the
+                    // single-digit quantity as `03 Cá nhân` automatically.
+                    description =
+                        "Giải thưởng Top Project Leader vinh danh những nhà quản lý dự án xuất " +
+                            "sắc – những người hội tụ năng lực quản lý vững vàng, khả năng truyền " +
+                            "cảm hứng mạnh mẽ, và tư duy “Aim High – Be Agile” trong mọi bài toán " +
+                            "và bối cảnh. Dưới sự dẫn dắt của họ, các thành viên không chỉ cùng " +
+                            "nhau vượt qua thử thách và đạt được mục tiêu đề ra, mà còn giữ vững " +
+                            "ngọn lửa nhiệt huyết, tinh thần Wasshoi, và trưởng thành để trở " +
+                            "thành phiên bản tinh hoa – hạnh phúc hơn của chính mình.",
+                    quantity = 3,
+                    quantityUnit = "Cá nhân",
+                    prizeValue = "7.000.000 VNĐ",
+                    // Bundled Figma badge — BG (160×160, same hash as Top
+                    // Project) composited offline with the Top Project Leader
+                    // wordmark (111×31, two lines) centered, per Picture-Award
+                    // INSTANCE `6885:10537` layout.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_project_leader",
+                    sortOrder = 4,
                 ),
             )
     }
