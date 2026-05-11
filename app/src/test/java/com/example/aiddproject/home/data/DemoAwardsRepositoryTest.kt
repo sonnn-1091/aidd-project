@@ -119,12 +119,37 @@ class DemoAwardsRepositoryTest {
         }
 
     @Test
-    fun `list returns four demo awards sorted by sort order`() =
+    fun `detail returns best manager payload matching figma node 6885 10616`() =
+        runTest {
+            val result = repository.detail("00000000-0000-0000-0000-000000000a05", Language.VN)
+
+            val detail = result.getOrNull()!!
+            assertEquals("Best Manager", detail.name)
+            assertEquals(1, detail.quantity)
+            assertEquals("Cá nhân", detail.quantityUnit)
+            assertEquals("10.000.000 VNĐ", detail.prizeValue)
+            assertEquals(
+                "android.resource://com.example.aiddproject/drawable/ic_award_best_manager",
+                detail.imageUrl,
+            )
+            assertEquals(5, detail.sortOrder)
+            assertTrue(
+                "description starts with 'Giải thưởng Best Manager vinh danh'",
+                detail.description.startsWith("Giải thưởng Best Manager vinh danh"),
+            )
+            assertTrue(
+                "description ends with the cách-mạng clause",
+                detail.description.endsWith("những thay đổi có tính cách mạng."),
+            )
+        }
+
+    @Test
+    fun `list returns five demo awards sorted by sort order`() =
         runTest {
             val result = repository.list()
 
             val awards = result.getOrNull()!!
-            assertEquals(4, awards.size)
+            assertEquals(5, awards.size)
             assertEquals(
                 listOf(
                     Award(
@@ -150,6 +175,12 @@ class DemoAwardsRepositoryTest {
                         name = "Top Project Leader Award",
                         thumbnailUrl = null,
                         sortOrder = 4,
+                    ),
+                    Award(
+                        id = "00000000-0000-0000-0000-000000000a05",
+                        name = "Best Manager Award",
+                        thumbnailUrl = null,
+                        sortOrder = 5,
                     ),
                 ),
                 awards,

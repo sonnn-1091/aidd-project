@@ -53,6 +53,12 @@ class DemoAwardsRepository : AwardsRepository {
                     thumbnailUrl = null,
                     sortOrder = 4,
                 ),
+                Award(
+                    id = "00000000-0000-0000-0000-000000000a05",
+                    name = "Best Manager Award",
+                    thumbnailUrl = null,
+                    sortOrder = 5,
+                ),
             )
 
         val DEMO_DETAILS: List<AwardDetail> =
@@ -142,6 +148,32 @@ class DemoAwardsRepository : AwardsRepository {
                     // INSTANCE `6885:10537` layout.
                     imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_project_leader",
                     sortOrder = 4,
+                ),
+                AwardDetail(
+                    id = "00000000-0000-0000-0000-000000000a05",
+                    name = "Best Manager",
+                    // Description pulled verbatim from Figma node `6885:10616`
+                    // of frame `7y195PPTxQ` ([iOS] Award_Best Manager), per
+                    // delta-spec § Data Requirements. quantity=1 renders as
+                    // "01" via the shipped Q-TP-2 %02d formatter.
+                    description =
+                        "Giải thưởng Best Manager vinh danh những nhà lãnh đạo tiêu biểu – " +
+                            "người đã dẫn dắt đội ngũ của mình tạo ra kết quả vượt kỳ vọng, " +
+                            "tác động nổi bật đến hiệu quả kinh doanh và sự phát triển bền " +
+                            "vững của tổ chức. Dưới sự lãnh đạo của họ, đội ngũ luôn chinh " +
+                            "phục và làm chủ mọi mục tiêu bằng năng lực đa nhiệm, khả năng " +
+                            "phối hợp hiệu quả, và tư duy ứng dụng công nghệ linh hoạt trong " +
+                            "kỷ nguyên số. Họ truyền cảm hứng để tập thể trở nên tự tin tràn " +
+                            "đầy năng lượng, sẵn sàng đón nhận, thậm chí dẫn dắt tạo ra " +
+                            "những thay đổi có tính cách mạng.",
+                    quantity = 1,
+                    quantityUnit = "Cá nhân",
+                    prizeValue = "10.000.000 VNĐ",
+                    // Bundled Figma badge — BG (160×160, shared hash) +
+                    // single-line "BEST MANAGER" wordmark (111×15) centered,
+                    // per Picture-Award INSTANCE `6885:10611` layout.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_best_manager",
+                    sortOrder = 5,
                 ),
             )
     }
