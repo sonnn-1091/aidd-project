@@ -72,11 +72,23 @@ class DemoAwardsRepository : AwardsRepository {
                 AwardDetail(
                     id = "00000000-0000-0000-0000-000000000a02",
                     name = "Top Project",
+                    // Description, quantity, and quantity_unit pulled
+                    // verbatim from Figma node `6885:10468` of frame
+                    // `FQoJZLkG_d` ([iOS] Award_Top project). Resolves
+                    // Q-TP-1 from the delta-spec: previous DEMO values
+                    // (5 + "Dự án" + summary description) drifted from
+                    // Figma; Figma + product copy is the source of truth.
                     description =
-                        "Top Project ghi nhận những dự án đem lại tác động lớn nhất tới khách " +
-                            "hàng, đội nhóm, và cộng đồng Sun* trong năm 2025.",
-                    quantity = 5,
-                    quantityUnit = "Dự án",
+                        "Giải thưởng Top Project vinh danh các tập thể dự án xuất sắc với kết " +
+                            "quả kinh doanh vượt kỳ vọng, hiệu quả vận hành tối ưu và tinh thần " +
+                            "làm việc tận tâm. Đây là các dự án có độ phức tạp kỹ thuật cao, " +
+                            "hiệu quả tối ưu hóa nguồn lực và chi phí tốt, đề xuất các ý tưởng " +
+                            "có giá trị cho khách hàng, đem lại lợi nhuận vượt trội và nhận " +
+                            "được phản hồi tích cực từ khách hàng. Các thành viên tuân thủ " +
+                            "nghiêm ngặt các tiêu chuẩn phát triển nội bộ trong phát triển dự " +
+                            "án, tạo nên một hình mẫu về sự xuất sắc và chuyên nghiệp.",
+                    quantity = 2,
+                    quantityUnit = "Tập thể",
                     prizeValue = "15.000.000 VNĐ",
                     imageUrl = null,
                     sortOrder = 2,
