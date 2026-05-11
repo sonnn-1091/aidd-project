@@ -148,6 +148,7 @@ fun AwardDetailScreenContent(
                         }
                         item {
                             AwardInfoBlock(
+                                awardName = activeName,
                                 description = detail.detail.description,
                                 quantity = detail.detail.quantity,
                                 quantityUnit = detail.detail.quantityUnit,
