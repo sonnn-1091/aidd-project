@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aiddproject.auth.login.data.AuthRepository
 import com.example.aiddproject.auth.login.ui.LoginScreen
+import com.example.aiddproject.awarddetail.ui.AwardDetailScreen
 import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
@@ -121,9 +122,26 @@ fun AppNavigation(
         composable(
             route = Routes.AWARD_DETAIL_PATTERN,
             arguments = listOf(navArgument("awardId") { type = NavType.StringType }),
-        ) { backStackEntry ->
-            val awardId = backStackEntry.arguments?.getString("awardId").orEmpty()
-            PlaceholderScreen(label = "Award detail: $awardId")
+        ) {
+            // `awardId` flows in via the back-stack-entry arguments and is
+            // surfaced to the VM through Hilt's SavedStateHandle injection —
+            // no manual extraction needed here.
+            AwardDetailScreen(
+                onNavigateToHome = {
+                    navController.popBackStack(Routes.HOME, inclusive = false)
+                },
+                onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
+                onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+                onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+                onNavigateToNotifications = {
+                    // Notifications are surfaced as a ModalBottomSheet on the
+                    // Home route; until Award Detail's own NotificationsSheet
+                    // wire-in lands in Phase 6 the bell deep-links back to
+                    // Home which then auto-shows the sheet. For Phase 3 we
+                    // just route to Home so the user has a working exit.
+                    navController.popBackStack(Routes.HOME, inclusive = false)
+                },
+            )
         }
     }
 }
