@@ -144,6 +144,10 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.mockk.android)
+    // Hilt testing (T005b — resolves blocker for Slice D T019 + T044 which use
+    // `createAndroidComposeRule<HiltTestActivity>()` + `@HiltAndroidTest`).
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
