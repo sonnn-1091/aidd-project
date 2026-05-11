@@ -87,7 +87,7 @@ fun AwardCategoryDropdown(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val activeName = activeAwardName(categories, activeAwardId)
+    val activeName = activeAwardName(categories, activeAwardId)?.let { displayName(it) }
     val a11yLabel = stringResource(R.string.a11y_award_category_dropdown, activeName.orEmpty())
     val expandedState =
         if (expanded) {
@@ -202,7 +202,7 @@ fun AwardCategoryDropdown(
                                         horizontalArrangement = Arrangement.Start,
                                     ) {
                                         Text(
-                                            text = award.name,
+                                            text = displayName(award.name),
                                             color = Color.White,
                                             style =
                                                 MaterialTheme.typography.bodyMedium.copy(
@@ -258,6 +258,16 @@ private fun activeAwardName(
         is AwardsState.Populated -> state.items.firstOrNull { it.id == activeId }?.name
         else -> null
     }
+
+/**
+ * Trim the trailing `" Award"` suffix that `DemoAwardsRepository`'s
+ * list rows carry for Home's carousel design (`"Top Talent Award"`).
+ * The Award Detail dropdown design — Figma node `6885:10290` — renders
+ * just the short name (`"Top Talent"`), so we strip it at the display
+ * layer instead of mutating Home's card data. Idempotent: short names
+ * pass through unchanged.
+ */
+private fun displayName(name: String): String = name.removeSuffix(" Award")
 
 private val AwardDropdownBorderColor: Color = Color(0xFF998C5F)
 private val AwardMenuSurfaceColor: Color = Color(0xFF00070C)
