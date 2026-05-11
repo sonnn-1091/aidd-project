@@ -82,6 +82,15 @@ android {
         // Login feature additions (T003)
         buildConfig = true
     }
+    // Hilt testing (T005b) pulls JUnit5 jupiter jars transitively, each
+    // carrying its own META-INF/LICENSE.md → merge conflict at
+    // mergeDebugAndroidTestJavaResource. Exclude the duplicates.
+    packaging {
+        resources {
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 // ktlint configuration (T006). Enforces Kotlin official style on every
