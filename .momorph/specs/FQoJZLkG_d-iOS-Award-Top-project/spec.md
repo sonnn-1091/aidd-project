@@ -165,36 +165,50 @@ Identical to the canonical spec's § Key Entities. The `awards` table
 already carries the Top Project row (seeded in DEMO; production
 backend is the source of truth for column values).
 
-**DEMO_DETAILS row for Top Project** (already in
-`DemoAwardsRepository`):
+**DEMO_DETAILS row for Top Project** (resolved per Q-TP-1, commit
+`daaf526` — values now match Figma node `6885:10468` verbatim):
 
 ```kotlin
 AwardDetail(
     id = "00000000-0000-0000-0000-000000000a02",
     name = "Top Project",
-    description = "Top Project ghi nhận những dự án đem lại tác động lớn nhất tới khách hàng, đội nhóm, và cộng đồng Sun* trong năm 2025.",
-    quantity = 5,           // ⚠ MISMATCH WITH FIGMA — see Open Question Q-TP-1
-    quantityUnit = "Dự án", // ⚠ MISMATCH WITH FIGMA ("Tập thể") — see Q-TP-1
+    description = "Giải thưởng Top Project vinh danh các tập thể dự án xuất sắc " +
+        "với kết quả kinh doanh vượt kỳ vọng, hiệu quả vận hành tối ưu " +
+        "và tinh thần làm việc tận tâm. …",  // full 8-sentence Figma copy
+    quantity = 2,
+    quantityUnit = "Tập thể",
     prizeValue = "15.000.000 VNĐ",
-    imageUrl = null,
+    imageUrl = null, // composite badge unavailable from MoMorph; text overlay used
     sortOrder = 2,
 )
 ```
 
 **Resolved Q-TP-1 (data alignment with Figma — 2026-05-11)**:
-DEMO_DETAILS for Top Project was updated to match Figma node
-`6885:10468` verbatim:
+Previous demo values had drifted from Figma — `quantity = 5`,
+`quantityUnit = "Dự án"`, and a short summary description. All three
+were updated to match Figma node `6885:10468` verbatim in commit
+`daaf526`. Visual smoke on emulator-5554 confirmed the body now
+renders the full Figma copy + `2 Tập thể` + `15.000.000 VNĐ`.
 
-- `quantity`: `5` → **`2`**
-- `quantityUnit`: `"Dự án"` → **`"Tập thể"`**
-- `description`: short summary → **full Figma copy** ("Giải thưởng
-  Top Project vinh danh các tập thể dự án xuất sắc với kết quả kinh
-  doanh vượt kỳ vọng…")
+**Still open — backend confirmation**: production Supabase `awards`
+table row for Top Project should mirror these Figma values. If the
+production row differs, Figma + product copy is the source of truth
+— file a follow-on migration to align. Non-blocking for the demo
+build.
 
-**Still open** (deferred to backend confirmation): production Supabase
-`awards` table row for Top Project should mirror these Figma values.
-If the production row differs, Figma + product copy is the source of
-truth — file a follow-on migration to align.
+**Resolved Q-TP-2 (quantity display formatting — 2026-05-11)**:
+Figma node `6885:10475` displays `02` (zero-padded) for `quantity = 2`,
+but the impl previously rendered `quantity.toString()` which yielded
+`2`. Top Talent's `quantity = 10` masked the discrepancy.
+
+**Chosen Option A**: zero-pad single-digit counts client-side via
+`"%02d".format(quantity)` in `AwardInfoBlock.QuantityValueRow`. The
+Java/Kotlin `%02d` directive formats AT LEAST 2 digits — 3+ digit
+counts pass through unchanged. Effects across the demo set:
+
+- Top Talent (`10`) → `10 Cá nhân` (unchanged)
+- Top Project (`2`) → `02 Tập thể` ✓ matches Figma
+- Top Heart (`8`) → `08 Cá nhân` (consistent with the pattern)
 
 ---
 
@@ -242,16 +256,23 @@ Identical to canonical spec § Success Criteria.
   follow-on polish)
 - [x] `DemoAwardsRepository.DEMO_DETAILS` already carries a Top
   Project entry (commit `203e196`)
-- [ ] **Q-TP-1 resolution**: update DEMO_DETAILS to match Figma
-  values (quantity / unit / description) — see § Data Requirements
-  open question. Block ratification of any visual regression test
-  for this frame until resolved.
-- [ ] **Top Project badge image**: bundle `ic_award_top_project.png`
-  (download Figma node `6885:10458` or whatever the Top Project
-  composite resolves to via `get_media_files` on this frame) and
-  wire it into `DemoAwardsRepository`'s Top Project `imageUrl`
-  field. Mirrors the Top Talent badge wiring (T100 from canonical
-  tasks).
+- [x] **Q-TP-1 resolution**: DEMO_DETAILS values aligned with Figma
+  (`quantity = 2`, `quantityUnit = "Tập thể"`, full description) —
+  shipped in commit `daaf526`.
+- [x] **Q-TP-2 resolution**: zero-padded single-digit quantity
+  formatting (`"%02d".format(quantity)`) wired into
+  `AwardInfoBlock.QuantityValueRow`. See § Data Requirements
+  Q-TP-2.
+- [ ] **Top Project badge image**: MoMorph's `get_media_files`
+  returns `null` for the Top Project Picture-Award composite node
+  (the BG + wordmark layers exist separately but no pre-composited
+  PNG is exported). Current path: the existing
+  `AwardHeroBlock` text-overlay fallback renders the uppercased
+  award name (`TOP PROJECT`) on the placeholder. To match Figma's
+  graphic exactly, either (a) bundle the BG + wordmark layers and
+  composite at render time, or (b) wait for Supabase Storage to
+  ship a pre-composited URL via `awards.image_url`. Tracked as a
+  visual-polish follow-on, not blocking ratification.
 
 ---
 

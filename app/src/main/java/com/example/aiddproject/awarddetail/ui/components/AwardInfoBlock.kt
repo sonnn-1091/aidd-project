@@ -134,7 +134,12 @@ private fun QuantityValueRow(
     unit: String?,
 ) {
     val placeholder = stringResource(R.string.award_detail_placeholder_value)
-    val valueText = quantity?.toString() ?: placeholder
+    // Zero-pad single-digit counts to two digits so Top Project's
+    // `2` renders as `02 Tập thể` matching Figma node `6885:10475`
+    // (delta-spec FQoJZLkG_d § Q-TP-2 Option A). Counts ≥ 10 pass
+    // through unchanged — `%02d` formats AT LEAST 2 digits, never
+    // truncates.
+    val valueText = quantity?.let { "%02d".format(it) } ?: placeholder
     val unitText = unit.orEmpty()
     Row(
         verticalAlignment = Alignment.CenterVertically,
