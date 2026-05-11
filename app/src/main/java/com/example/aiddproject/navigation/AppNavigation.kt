@@ -133,14 +133,6 @@ fun AppNavigation(
                 onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
-                onNavigateToNotifications = {
-                    // Notifications are surfaced as a ModalBottomSheet on the
-                    // Home route; until Award Detail's own NotificationsSheet
-                    // wire-in lands in Phase 6 the bell deep-links back to
-                    // Home which then auto-shows the sheet. For Phase 3 we
-                    // just route to Home so the user has a working exit.
-                    navController.popBackStack(Routes.HOME, inclusive = false)
-                },
             )
         }
     }

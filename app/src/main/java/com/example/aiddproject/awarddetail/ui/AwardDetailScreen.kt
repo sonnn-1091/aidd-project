@@ -2,21 +2,30 @@ package com.example.aiddproject.awarddetail.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.aiddproject.core.locale.LocaleViewModel
 import com.example.aiddproject.home.ui.components.HomeNavTab
+import com.example.aiddproject.home.ui.components.NotificationsSheet
 
 /**
  * Stateful entry point for the Award Detail route. Owns the
- * [AwardDetailViewModel] + the shared [LocaleViewModel]; forwards
- * navigation callbacks to the NavHost layer.
+ * [AwardDetailViewModel] + the shared [LocaleViewModel] + the
+ * Notifications sheet `mutableStateOf` flag.
  *
- * **Phase 3 scope**: every header / bottom-nav / Sun*Kudos / dropdown
- * callback is wired to the navigation-level lambdas passed in by
- * [AppNavigation]. The category dropdown trigger is a no-op until
- * Phase 4 wires the real popup. Sticky chrome is in place from this
- * phase forward (FR-014).
+ * Header / bottom-nav / Sun*Kudos / dropdown callbacks were stubbed
+ * in Phase 3 and progressively wired through Phase 4 (dropdown) and
+ * Phase 6 (search / bell / language). Per Resolved Q3 the Sun*Kudos
+ * Chi tiết and the bottom-nav Kudos tab share one
+ * [onNavigateToKudosOverview] lambda so both surfaces funnel into the
+ * Kudos hub.
+ *
+ * The bell opens a `NotificationsSheet` mirroring Home's pattern —
+ * the sheet is mounted at the screen root so a 401-driven NavHost
+ * tear-down implicitly removes it.
  */
 @Composable
 fun AwardDetailScreen(
@@ -24,21 +33,22 @@ fun AwardDetailScreen(
     onNavigateToKudosOverview: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToSearch: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
     viewModel: AwardDetailViewModel = hiltViewModel(),
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var notificationsSheetVisible by rememberSaveable { mutableStateOf(false) }
 
     AwardDetailScreenContent(
         state = state,
         onRetry = viewModel::onRetry,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
-        onBellClick = onNavigateToNotifications,
+        onBellClick = { notificationsSheetVisible = true },
         onTabSelect = { tab ->
             when (tab) {
-                // Awards re-tap is a no-op for Phase 3; Phase 5 wires scroll-to-top.
+                // Awards re-tap scrolls to top — handled in
+                // AwardDetailScreenContent (which owns the LazyListState).
                 HomeNavTab.Awards -> Unit
                 HomeNavTab.Saa2025 -> onNavigateToHome()
                 HomeNavTab.Kudos -> onNavigateToKudosOverview()
@@ -46,9 +56,14 @@ fun AwardDetailScreen(
             }
         },
         onCategorySelected = { award -> viewModel.onCategorySelected(award.id) },
-        // Per Resolved Q3 the Sun*Kudos block's Chi tiết destination is
-        // the same as the bottom-nav Kudos tab — both fire
-        // [onNavigateToKudosOverview].
         onKudosChiTietClick = onNavigateToKudosOverview,
     )
+
+    // Sheet mounted at the screen root so a 401-driven popUpTo(GATE)
+    // tear-down implicitly removes it (mirrors HomeScreen's pattern).
+    if (notificationsSheetVisible) {
+        NotificationsSheet(
+            onDismissRequest = { notificationsSheetVisible = false },
+        )
+    }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -46,6 +48,7 @@ import com.example.aiddproject.home.ui.components.HomeHeader
 import com.example.aiddproject.home.ui.components.HomeNavTab
 import com.example.aiddproject.home.ui.components.KudosSection
 import com.example.aiddproject.ui.theme.SaaCream
+import kotlinx.coroutines.launch
 
 /**
  * Stateless layout for the Award Detail screen. The full Scaffold +
@@ -77,6 +80,16 @@ fun AwardDetailScreenContent(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
+    val scope = rememberCoroutineScope()
+    val tabSelectHandler: (HomeNavTab) -> Unit = { tab ->
+        // Re-tap of the active Awards tab scrolls the body to the top
+        // per Resolved Q2 / US3 acceptance scenario 4. Mirrors Home's
+        // SAA-tab re-tap behaviour.
+        if (tab == HomeNavTab.Awards) {
+            scope.launch { lazyListState.animateScrollToItem(0) }
+        }
+        onTabSelect(tab)
+    }
     Scaffold(
         modifier =
             modifier
@@ -90,12 +103,17 @@ fun AwardDetailScreenContent(
                 onSearchClick = onSearchClick,
                 onBellClick = onBellClick,
                 unreadCount = state.unreadCount,
+                // Scaffold's topBar slot doesn't auto-apply status-bar
+                // insets — without this, HomeHeader renders under the
+                // system status bar and the OS intercepts taps on the
+                // bell / search / language pill.
+                modifier = Modifier.statusBarsPadding(),
             )
         },
         bottomBar = {
             HomeBottomBar(
                 selected = HomeNavTab.Awards,
-                onTabSelect = onTabSelect,
+                onTabSelect = tabSelectHandler,
             )
         },
     ) { padding ->
