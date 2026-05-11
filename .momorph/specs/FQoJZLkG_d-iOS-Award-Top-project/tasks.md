@@ -153,8 +153,8 @@ discovery progress, screens table, navigation graph, and discovery log
 all reflect the post-2026-05-11 reality (5 specs, Awards branch
 wired up).
 
-- [ ] T052 [US3] Update `SCREENFLOW.md` Discovery Progress table (Total Screens 3→5, Spec Shipped 3→5). Add screens table rows for `c-QM3_zjkG-iOS-Award-Top-talent` + `FQoJZLkG_d-iOS-Award-Top-project` with status `spec_shipped` + correct Detail File paths. Set Last Updated to 2026-05-11. | .momorph/SCREENFLOW.md
-- [ ] T053 [US3] Extend the Mermaid navigation graph: add `AwardTopTalent` + `AwardTopProject` nodes; add solid edge `Home -- "Awards tab tap" --> AwardTopTalent`; add dotted edge `AwardTopTalent -. "dropdown select Top Project" .-> AwardTopProject` (and reverse). Add Discovery Log entries for the Award Top Talent + Award Top Project spec ratification + implementation dates. | .momorph/SCREENFLOW.md
+- [x] T052 [US3] Update `SCREENFLOW.md` Discovery Progress table (Total Screens 3→5, Spec Shipped 3→5). Add screens table rows for `c-QM3_zjkG-iOS-Award-Top-talent` + `FQoJZLkG_d-iOS-Award-Top-project` with status `spec_shipped` + correct Detail File paths. Set Last Updated to 2026-05-11. | .momorph/SCREENFLOW.md  → ✅ Shipped 2026-05-11.
+- [x] T053 [US3] Extend the Mermaid navigation graph: add `AwardTopTalent` + `AwardTopProject` nodes; add solid edge `Home -- "Awards tab tap" --> AwardTopTalent`; add dotted edge `AwardTopTalent -. "dropdown select Top Project" .-> AwardTopProject` (and reverse). Add Discovery Log entries for the Award Top Talent + Award Top Project spec ratification + implementation dates. | .momorph/SCREENFLOW.md  → ✅ Shipped 2026-05-11: nav graph now shows Home → Awards-tab → Top Talent, Chi tiết → Top Project, dropdown sibling-state transitions, Sun*Kudos Chi tiết → Home. Screen Groups + Shared Components tables also updated. Discovery Log has 5 new entries (Award Top Talent ship, Top Project delta-spec + Q-TP-1/Q-TP-2, Slice D backfill, Slice A badge).
 
 **Checkpoint**: Project navigation graph reflects reality. Future
 delta-spec authors (Top Heart, MVP, Best Manager, Signature 2025)
