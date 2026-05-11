@@ -10,12 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -122,14 +121,14 @@ fun AwardCategoryDropdown(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier =
                     Modifier
-                        // Widened from Figma's 160dp to fit the longest
-                        // active award name on a single line without
-                        // ellipsis — "MVP (Most Valuable Person)" needs
-                        // ≈230dp of text width at 14sp; 280dp gives a
-                        // buffer for future award names + chrome
-                        // (chevron + spacer + padding). Pairs with the
-                        // 280dp row width below so anchor + menu match.
-                        .width(280.dp)
+                        // Dynamic width: Figma's 160dp acts as the floor
+                        // (short names like "Top Talent" render at that
+                        // anchor width). Longer names grow the pill to
+                        // their content width — "MVP (Most Valuable
+                        // Person)", "Signature 2025 - Creator" — so the
+                        // active award is always shown on one line
+                        // without truncation.
+                        .widthIn(min = 160.dp)
                         .height(40.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(SaaCream.copy(alpha = 0.10f))
@@ -149,21 +148,19 @@ fun AwardCategoryDropdown(
                             fontWeight = FontWeight.Normal,
                             letterSpacing = 0.25.sp,
                         ),
-                    // Single line + no truncation contract: the parent
-                    // Row is wide enough (280dp) to fit every current
-                    // award name in one line. `softWrap = false`
-                    // suppresses wrapping; `maxLines = 1` is defensive
-                    // against future Compose default changes. No
-                    // ellipsis — names show in full.
+                    // Single line — `softWrap = false` prevents wrapping
+                    // even when the parent Row hits a max constraint
+                    // higher up. With `widthIn(min = 160.dp)` the Row
+                    // grows to fit any text width, so this Text takes
+                    // its intrinsic single-line width naturally.
                     maxLines = 1,
                     softWrap = false,
-                    modifier = Modifier.weight(1f),
                 )
-                Spacer(Modifier.width(4.dp))
                 Text(
                     text = "▾",
                     color = Color.White,
                     fontSize = 16.sp,
+                    modifier = Modifier.padding(start = 4.dp),
                 )
             }
         }
@@ -192,7 +189,7 @@ fun AwardCategoryDropdown(
                                 modifier =
                                     Modifier
                                         .testTag(awardRowTag(award.id))
-                                        .width(280.dp)
+                                        .widthIn(min = 160.dp)
                                         .heightIn(min = 48.dp)
                                         .then(
                                             if (isSelected) {
@@ -254,7 +251,7 @@ private fun EmptyOrErrorRow(text: String) {
     Row(
         modifier =
             Modifier
-                .width(280.dp)
+                .widthIn(min = 160.dp)
                 .heightIn(min = 48.dp)
                 .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
