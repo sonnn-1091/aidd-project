@@ -14,9 +14,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Screens | 6 |
-| Discovered | 6 |
-| Spec Shipped | 6 |
+| Total Screens | 7 |
+| Discovered | 7 |
+| Spec Shipped | 7 |
 | Spec In Progress | 0 |
 | Completion | 100% |
 
@@ -32,6 +32,7 @@
 | 4 | [iOS] Award_Top talent | c-QM3_zjkG | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=c-QM3_zjkG | spec_shipped | specs/c-QM3_zjkG-iOS-Award-Top-talent/spec.md | Home (Awards-tab nav, Chi tiết carousel tap) | Login (on 401), Sun*Kudos (Chi tiết tap) |
 | 5 | [iOS] Award_Top project | FQoJZLkG_d | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=FQoJZLkG_d | spec_shipped (delta-spec) | specs/FQoJZLkG_d-iOS-Award-Top-project/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Top Project card) | Same as canonical Award Detail — renders through the same parametric AwardDetailScreen composable |
 | 6 | [iOS] Award_Top project leader | QQvsfK3yaK | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=QQvsfK3yaK | spec_shipped (delta-spec) | specs/QQvsfK3yaK-iOS-Award-Top-project-leader/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Top Project Leader card — requires DEMO append) | Same as canonical Award Detail — pure data swap, no new Q-numbers (quantity = 3 renders as "03" via shipped Q-TP-2 formatter) |
+| 7 | [iOS] Award_Best Manager | 7y195PPTxQ | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=7y195PPTxQ | spec_shipped (delta-spec) | specs/7y195PPTxQ-iOS-Award-Best-Manager/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Best Manager card — requires DEMO append) | Same as canonical Award Detail — pure data swap, no new Q-numbers (quantity = 1 renders as "01", prizeValue 10.000.000 VNĐ is new value but still pre-formatted per Q5) |
 
 ---
 
@@ -123,6 +124,7 @@ flowchart TD
 | 2026-05-11 | Slice D test backfill shipped | Award Detail (cross-frame) | 33 instrumented + unit tests across 5 files (commit `d69a6c8`): AwardInfoBlockTest (Q-TP-2 regression), DemoAwardsRepositoryTest (Q-TP-1 regression), AwardDetailScreenTest, AwardCategoryDropdownTest, BottomNavAwardsTabTest. Closes canonical T026–T056 evidence gap (tasks marked [x] without test files existing). Also bumps mockk 1.13.13 → 1.14.3 for 16KB-page alignment. |
 | 2026-05-11 | Slice A badge bundle shipped | [iOS] Award_Top project (FQoJZLkG_d) | Top Project Figma badge composite bundled (commit `1417e25`). MoMorph composite endpoint returned null → fell back to downloading BG (160×160) + wordmark (106×16) layers separately and compositing offline with Python + Pillow. DemoAwardsRepository.DEMO_DETAILS[1].imageUrl flipped null → resource URI. |
 | 2026-05-11 | Delta-spec authored | [iOS] Award_Top project leader (QQvsfK3yaK) | Lightweight delta-spec referencing canonical c-QM3_zjkG (no commit yet — spec only). Data shape identical to Top Talent (quantity=3 "Cá nhân", prize 7.000.000 VNĐ); no new Q-numbers introduced since shipped Q-TP-2 `"%02d"` formatter renders "03" automatically. Description text deliberately not inlined — pulled from Figma node `6885:10542` at impl time. Pending DEMO_AWARDS + DEMO_DETAILS append + badge composite bundle (Slice A equivalent). |
+| 2026-05-11 | Delta-spec authored | [iOS] Award_Best Manager (7y195PPTxQ) | Third delta-spec following the now-validated pattern. Pure data append — `quantity=1` (renders "01"), `unit="Cá nhân"`, `prizeValue="10.000.000 VNĐ"` (new value, still pre-formatted). No new Q-numbers. Description full Figma copy at node `6885:10616`. Pending DEMO append + badge bundle. |
 
 ---
 
