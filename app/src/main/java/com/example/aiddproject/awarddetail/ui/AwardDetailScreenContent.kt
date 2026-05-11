@@ -90,109 +90,112 @@ fun AwardDetailScreenContent(
         }
         onTabSelect(tab)
     }
-    Scaffold(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .testTag(TEST_TAG_AWARD_DETAIL_SCREEN),
-        containerColor = Color.Transparent,
-        topBar = {
-            HomeHeader(
-                selectedLanguage = state.language,
-                onLanguageSelected = onLanguageSelected,
-                onSearchClick = onSearchClick,
-                onBellClick = onBellClick,
-                unreadCount = state.unreadCount,
-                // Scaffold's topBar slot doesn't auto-apply status-bar
-                // insets — without this, HomeHeader renders under the
-                // system status bar and the OS intercepts taps on the
-                // bell / search / language pill.
-                modifier = Modifier.statusBarsPadding(),
-            )
-        },
-        bottomBar = {
-            HomeBottomBar(
-                selected = HomeNavTab.Awards,
-                onTabSelect = tabSelectHandler,
-            )
-        },
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            // Full-bleed keyvisual background, same drawable Home uses.
-            Image(
-                painter = painterResource(R.drawable.bg_home),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                colors =
-                                    listOf(
-                                        Color(0xE600101A),
-                                        Color.Transparent,
-                                    ),
-                            ),
+    Box(modifier = modifier.fillMaxSize().testTag(TEST_TAG_AWARD_DETAIL_SCREEN)) {
+        // Full-bleed keyvisual + top gradient overlay sit OUTSIDE the
+        // Scaffold so they render under topBar + body + bottomBar.
+        // This is what lets HomeBottomBar's 15% SaaCream tint composite
+        // visibly over the keyvisual (T097) and gives HomeHeader its
+        // dark gradient backdrop (T096). Mirrors the pattern Home uses.
+        Image(
+            painter = painterResource(R.drawable.bg_home),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    Color(0xE600101A),
+                                    Color.Transparent,
+                                ),
                         ),
-            )
-            // Render body keyed on the detail state — Loading/Error
-            // sections occupy the same vertical region as the populated
-            // body so the screen height is stable across transitions.
-            when (val detail = state.detail) {
-                is AwardDetailState.Loading -> BodyLoading()
-                is AwardDetailState.Error -> BodyError(messageRes = detail.messageRes, onRetry = onRetry)
-                is AwardDetailState.Loaded -> {
-                    val activeName = detail.detail.name
-                    LazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                        item { KvKudosBanner() }
-                        item {
-                            HighlightBlock(
-                                categories = state.categories,
-                                activeAwardId = state.activeAwardId,
-                                onCategorySelected = onCategorySelected,
-                            )
-                        }
-                        item {
-                            AwardHeroBlock(
-                                awardName = activeName,
-                                imageUrl = detail.detail.imageUrl,
-                            )
-                        }
-                        item {
-                            AwardInfoBlock(
-                                awardName = activeName,
-                                description = detail.detail.description,
-                                quantity = detail.detail.quantity,
-                                quantityUnit = detail.detail.quantityUnit,
-                                prizeValue = detail.detail.prizeValue,
-                            )
-                        }
-                        item { Spacer(Modifier.height(16.dp)) }
-                        item {
-                            KudosSection(
-                                state =
-                                    KudosState.Loaded(
-                                        KudosSummary(
-                                            isKudosAvailable = true,
-                                            bannerImageUrl = null,
-                                            badgeText = null,
-                                            descriptionText = "",
+                    ),
+        )
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
+                HomeHeader(
+                    selectedLanguage = state.language,
+                    onLanguageSelected = onLanguageSelected,
+                    onSearchClick = onSearchClick,
+                    onBellClick = onBellClick,
+                    unreadCount = state.unreadCount,
+                    // Scaffold's topBar slot doesn't auto-apply status-bar
+                    // insets — without this, HomeHeader renders under the
+                    // system status bar and the OS intercepts taps on the
+                    // bell / search / language pill.
+                    modifier = Modifier.statusBarsPadding(),
+                )
+            },
+            bottomBar = {
+                HomeBottomBar(
+                    selected = HomeNavTab.Awards,
+                    onTabSelect = tabSelectHandler,
+                )
+            },
+        ) { padding ->
+            Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                // Render body keyed on the detail state — Loading/Error
+                // sections occupy the same vertical region as the populated
+                // body so the screen height is stable across transitions.
+                when (val detail = state.detail) {
+                    is AwardDetailState.Loading -> BodyLoading()
+                    is AwardDetailState.Error -> BodyError(messageRes = detail.messageRes, onRetry = onRetry)
+                    is AwardDetailState.Loaded -> {
+                        val activeName = detail.detail.name
+                        LazyColumn(
+                            state = lazyListState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            item { KvKudosBanner() }
+                            item {
+                                HighlightBlock(
+                                    categories = state.categories,
+                                    activeAwardId = state.activeAwardId,
+                                    onCategorySelected = onCategorySelected,
+                                )
+                            }
+                            item {
+                                AwardHeroBlock(
+                                    awardName = activeName,
+                                    imageUrl = detail.detail.imageUrl,
+                                )
+                            }
+                            item {
+                                AwardInfoBlock(
+                                    awardName = activeName,
+                                    description = detail.detail.description,
+                                    quantity = detail.detail.quantity,
+                                    quantityUnit = detail.detail.quantityUnit,
+                                    prizeValue = detail.detail.prizeValue,
+                                )
+                            }
+                            item { Spacer(Modifier.height(16.dp)) }
+                            item {
+                                KudosSection(
+                                    state =
+                                        KudosState.Loaded(
+                                            KudosSummary(
+                                                isKudosAvailable = true,
+                                                bannerImageUrl = null,
+                                                badgeText = null,
+                                                descriptionText = "",
+                                            ),
                                         ),
-                                    ),
-                                onChiTietClick = onKudosChiTietClick,
-                            )
+                                    onChiTietClick = onKudosChiTietClick,
+                                )
+                            }
+                            item { Spacer(Modifier.height(24.dp)) }
                         }
-                        item { Spacer(Modifier.height(24.dp)) }
+                        // `state.categories` is consumed by the dropdown wired in Phase 4.
                     }
-                    // `state.categories` is consumed by the dropdown wired in Phase 4.
                 }
             }
         }

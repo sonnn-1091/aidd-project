@@ -314,6 +314,23 @@ final QA gate, doc updates.
 
 ---
 
+## Phase 8: Post-ship bug fixes (background fidelity)
+
+**Purpose**: visual-fidelity regressions surfaced after Phase 7 shipped.
+Root cause for T096 + T097 is the same: my `Scaffold` clips the body's
+keyvisual background image to the body region only (because the body
+Box uses `Modifier.padding(padding)`), leaving the topBar and bottomBar
+sitting on the Scaffold's black `containerColor` instead of the
+keyvisual + their own translucent overlays. Home solves this by placing
+the bg image OUTSIDE the chrome — we mirror that here.
+
+- [x] T096 Bug — header missing gradient overlay — wrap the Scaffold in a parent `Box` so the keyvisual `bg_home` image renders full-bleed under topBar + body + bottomBar. Add the same 140dp top-anchored vertical gradient overlay Home uses (`#00101A` at 0.9 alpha → transparent) so the status-bar text + header chrome read against the dark band. Fixes the "header has no gradient" regression. | app/src/main/java/com/example/aiddproject/awarddetail/ui/AwardDetailScreenContent.kt
+- [x] T097 Bug — bottom nav cream tint invisible — same root cause as T096. Once the bg image renders behind the bottomBar (via T096's full-bleed restructure), `HomeBottomBar`'s 15%-alpha SaaCream tint composites visibly over the keyvisual artwork instead of disappearing into black. No change to `HomeBottomBar` itself. | app/src/main/java/com/example/aiddproject/awarddetail/ui/AwardDetailScreenContent.kt
+- [x] T098 Bug — Top Talent badge placeholder unreadable — overlay the active award's name (uppercased) on top of `ic_award_badge_placeholder` when `image_url` is null / load fails. Makes the demo screen recognizable without bundling per-award badge graphics. When the live `awards.image_url` lands, the AsyncImage covers the overlay naturally. | app/src/main/java/com/example/aiddproject/awarddetail/ui/components/AwardHeroBlock.kt
+- [x] T099 Verify dropdown chrome — visual check that the closed-pill trigger (10% SaaCream fill + 1dp `#998C5F` border) and the open menu (`#00070C` surface + 1dp gold border + 6dp inset) match Figma node `6885:10287` (already passes per the Phase 4 visual smoke). Read-only verification; no edit unless a regression surfaces. | (no file — verification only)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

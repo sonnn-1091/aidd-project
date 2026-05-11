@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,7 +19,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.aiddproject.R
@@ -65,6 +70,7 @@ fun AwardHeroBlock(
                         color = SaaCream,
                         shape = RoundedCornerShape(11.dp),
                     ).semantics { contentDescription = badgeContentDescription },
+            contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
                 model =
@@ -80,6 +86,27 @@ fun AwardHeroBlock(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(160.dp),
             )
+            // When `image_url` is null the Coil request resolves to the
+            // placeholder branch — overlay the uppercased award name so
+            // the demo screen reads as "TOP TALENT" / "TOP PROJECT" /
+            // "TOP HEART" instead of an unidentified star glyph. The
+            // overlay is z-ordered above the placeholder; when a real
+            // `image_url` lands, the AsyncImage covers it naturally.
+            if (imageUrl.isNullOrBlank()) {
+                Text(
+                    text = awardName.uppercase(),
+                    color = SaaCream,
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 18.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                        ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
         }
     }
 }
