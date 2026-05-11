@@ -122,7 +122,14 @@ fun AwardCategoryDropdown(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier =
                     Modifier
-                        .width(160.dp)
+                        // Widened from Figma's 160dp to fit the longest
+                        // active award name on a single line without
+                        // ellipsis — "MVP (Most Valuable Person)" needs
+                        // ≈230dp of text width at 14sp; 280dp gives a
+                        // buffer for future award names + chrome
+                        // (chevron + spacer + padding). Pairs with the
+                        // 280dp row width below so anchor + menu match.
+                        .width(280.dp)
                         .height(40.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(SaaCream.copy(alpha = 0.10f))
@@ -142,11 +149,14 @@ fun AwardCategoryDropdown(
                             fontWeight = FontWeight.Normal,
                             letterSpacing = 0.25.sp,
                         ),
-                    // Show the full award name; long names like MVP /
-                    // Signature 2025 — Creator wrap to a second line.
-                    // The earlier single-line+ellipsis fix dropped the
-                    // last few characters which made the active award
-                    // unreadable — reverted per user feedback.
+                    // Single line + no truncation contract: the parent
+                    // Row is wide enough (280dp) to fit every current
+                    // award name in one line. `softWrap = false`
+                    // suppresses wrapping; `maxLines = 1` is defensive
+                    // against future Compose default changes. No
+                    // ellipsis — names show in full.
+                    maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(4.dp))
@@ -182,7 +192,7 @@ fun AwardCategoryDropdown(
                                 modifier =
                                     Modifier
                                         .testTag(awardRowTag(award.id))
-                                        .width(180.dp)
+                                        .width(280.dp)
                                         .heightIn(min = 48.dp)
                                         .then(
                                             if (isSelected) {
@@ -216,6 +226,8 @@ fun AwardCategoryDropdown(
                                                     fontWeight = FontWeight.Normal,
                                                     letterSpacing = 0.25.sp,
                                                 ),
+                                            maxLines = 1,
+                                            softWrap = false,
                                         )
                                     }
                                 },
@@ -242,7 +254,7 @@ private fun EmptyOrErrorRow(text: String) {
     Row(
         modifier =
             Modifier
-                .width(180.dp)
+                .width(280.dp)
                 .heightIn(min = 48.dp)
                 .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
