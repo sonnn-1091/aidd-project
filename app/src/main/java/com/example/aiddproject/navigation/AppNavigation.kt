@@ -112,7 +112,21 @@ fun AppNavigation(
 
         // Home-feature outbound placeholders (UI implement-ui pass) — replaced
         // by real screens in subsequent feature plans.
-        composable(Routes.AWARDS_OVERVIEW) { PlaceholderScreen(label = "Awards overview") }
+        //
+        // AWARDS_OVERVIEW now resolves to the real `AwardDetailScreen` — tapping
+        // the Awards bottom-nav tab from Home lands on the Award Detail with no
+        // `awardId`, and the VM's init coroutine falls back to first-by-
+        // `sort_order` per FR-001 + Resolved Q1 (c-QM3_zjkG spec § Phase 8 T101).
+        composable(Routes.AWARDS_OVERVIEW) {
+            AwardDetailScreen(
+                onNavigateToHome = {
+                    navController.popBackStack(Routes.HOME, inclusive = false)
+                },
+                onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
+                onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+                onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+            )
+        }
         composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(label = "Kudos overview") }
         composable(Routes.KUDOS_FEED) { PlaceholderScreen(label = "Kudos feed") }
         composable(Routes.KUDOS_DETAIL) { PlaceholderScreen(label = "Kudos detail") }

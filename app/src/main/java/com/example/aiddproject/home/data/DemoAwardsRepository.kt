@@ -61,7 +61,12 @@ class DemoAwardsRepository : AwardsRepository {
                     quantity = 10,
                     quantityUnit = "Cá nhân",
                     prizeValue = "7.000.000 VNĐ",
-                    imageUrl = null,
+                    // Bundled Figma badge (`ic_award_top_talent` — exported from
+                    // node `6885:10293` of spec c-QM3_zjkG). Coil 2.x resolves
+                    // the named-form Android resource URI; when the live
+                    // `awards.image_url` ships from Supabase Storage this DEMO
+                    // row goes away.
+                    imageUrl = "android.resource://com.example.aiddproject/drawable/ic_award_top_talent",
                     sortOrder = 1,
                 ),
                 AwardDetail(

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -155,6 +155,21 @@ fun HomeScreenContent(
                 .fillMaxSize()
                 .testTag(TEST_TAG_HOME_SCREEN),
         containerColor = Color.Transparent,
+        // T102 (c-QM3_zjkG spec): lift HomeHeader into the sticky topBar
+        // slot so Home's header pins on scroll like Award Detail's, with
+        // statusBarsPadding so the OS doesn't intercept bell/search/lang
+        // taps. The Figma header gradient stays drawn behind it (140dp
+        // band in the body Box below) so the visual reads identically.
+        topBar = {
+            HomeHeader(
+                selectedLanguage = state.language,
+                onLanguageSelected = onLanguageSelected,
+                onSearchClick = onSearchClick,
+                onBellClick = onBellClick,
+                unreadCount = state.unreadCount,
+                modifier = Modifier.statusBarsPadding(),
+            )
+        },
         bottomBar = {
             HomeBottomBar(
                 selected = selectedTab,
@@ -198,20 +213,13 @@ fun HomeScreenContent(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .systemBarsPadding(),
+                        .padding(padding),
             ) {
-                item {
-                    HomeHeader(
-                        selectedLanguage = state.language,
-                        onLanguageSelected = onLanguageSelected,
-                        onSearchClick = onSearchClick,
-                        onBellClick = onBellClick,
-                        unreadCount = state.unreadCount,
-                    )
-                }
-                // 40dp gap between header end (y=104 in Figma) and hero start
-                // (y=144) per `mms_1_header` → `mms_2_content` distance.
+                // HomeHeader is now in Scaffold's topBar slot (T102) — no
+                // longer a LazyColumn item. The 40dp gap that previously
+                // sat between the in-list header and the hero is preserved
+                // so the hero countdown still anchors at its Figma y=144
+                // position.
                 item { Spacer(Modifier.height(40.dp)) }
                 item {
                     HomeHero(
