@@ -233,8 +233,16 @@ theme
 **Scenario 6 — Star tier badge (TC_IOS_KUDOS_FUN_006)**
 - **Given** the recipient of a Kudos has received N total Kudos,
 - **When** the card renders the recipient info,
-- **Then** their star-tier badge reflects: 1 star at 10 Kudos, 2
-  stars at 20, 3 stars at 50.
+- **Then** their star-tier badge follows a **threshold-tier** rule:
+  - **N < 10** → no badge
+  - **10 ≤ N < 20** → 1 star
+  - **20 ≤ N < 50** → 2 stars
+  - **N ≥ 50** → 3 stars
+  The thresholds are server-side properties of the recipient's
+  Kudos count; the client renders the badge tier verbatim from a
+  `recipient.star_tier: 0 | 1 | 2 | 3` field on the kudos payload
+  (no client-side bucket math — prevents drift if the thresholds
+  change product-side).
 
 ### US6: Open Send Kudos compose flow [P1]
 
@@ -481,13 +489,19 @@ adjacent labeled Node IDs).
 | B.2 — section title band | `6885:9090` | FRAME | Display |
 | B.2.1 / B.2.2 — carousel arrows | `null` | buttons | Advance/retreat carousel (also via swipe) |
 | B.3 — highlight card (5 instances) | `6885:9091`, `9092`, `9093`, `9263`, `9264`, `9265` | INSTANCE | Tap card body / "Xem chi tiết" → detail (US7); tap avatar → profile (US8); heart → like (US5); copy link → US13 |
-| B.3.1 — sender avatar | `I…;89:2951;89:2598` per instance | ELLIPSE | Tap → sender profile |
+| B.3.1 — sender avatar | `I…;89:2951;89:2598` per instance | ELLIPSE | Tap → sender profile when `sender_visible_to_me = true`; no-op otherwise (Q-K-3) |
+| B.3.2 — sender info (name + emp code + tier badge) | `I…;89:2951;89:2599` per instance | FRAME | Tap → sender profile (same rule as B.3.1). When anonymous-to-viewer, render `anonymous_nickname` without tap target |
+| B.3.4 — direction arrow (→) | `I…;89:2952` per instance | FRAME | Display only |
 | B.3.5 — receiver avatar | `I…;89:2951;89:2717` per instance | ELLIPSE | Tap → receiver profile |
+| B.3.6 — receiver info (name + emp code + star-tier badge) | `null` | FRAME | Tap → receiver profile; star-tier badge follows US5 Scenario 6 thresholds |
 | B.4 — content area | `I…;89:2956` per instance | FRAME | Layout |
 | B.4.1 — post time | `I…;89:2957` per instance | TEXT | Display only |
 | B.4.2 — message body | `I…;89:2959` per instance | FRAME | Truncated to 3 lines; "..." overflow |
 | B.4.3 — hashtag chips | `I…;89:2969` per instance | FRAME | Tap chip → set Hashtag filter (US3 scenario 4) |
-| B.4.4 — action row | `I…;89:2972` per instance | FRAME | Hosts heart + Copy Link + Xem chi tiết |
+| B.4.4 — action row | `I…;89:2972` per instance | FRAME | Layout container |
+| B.4.4.1 — heart icon + count | `null` (child of B.4.4) | button | Toggle like (US5). Disabled when `kudos.like_disabled_for_me = true` (Q-K-5) |
+| B.4.4.2 — Copy Link | `null` (child of B.4.4) | button | Copy share URL to clipboard + show toast (US13) |
+| B.4.4.3 — Xem chi tiết | `null` (child of B.4.4) | button | Navigate to Kudo detail (US7) |
 | B.5 — pagination | `6885:9098` | INSTANCE | Prev / current/total / Next |
 | B.5.2 — page indicator | `I6885:9098;93:2086` | TEXT | "1/5" format |
 | B.6 — Spotlight header | `null` | section header | Display |
@@ -504,8 +518,14 @@ adjacent labeled Node IDs).
 | C.1 — section header | `null` | section header | Display |
 | C.2 — "View all Kudos" link | `null` | button | Navigate to `[iOS] Sun*Kudos_All Kudos` (US14) |
 | C.3 — Kudos post card | `null` (one instance per kudos) | INSTANCE | Same interactions as B.3 (detail, profile, like, copy link, hashtag) |
-| C.3.5 — content card | `null` | FRAME | Message truncated to 5 lines; attached image taps → full screen |
-| C.3.6 — image attachment | `null` | INSTANCE | Tap → full-screen image viewer (US7 scenario for images) |
+| C.3.1 — sender info | `null` | FRAME | Same tap-to-profile rule as B.3.2 (per-viewer `sender_visible_to_me`) |
+| C.3.2 — direction icon (→) | `null` | FRAME | Display only |
+| C.3.3 — receiver info (+ star-tier badge) | `null` | FRAME | Tap → receiver profile; star-tier rules per US5 Scenario 6 |
+| C.3.4 — post time label | `null` | TEXT | Same format as B.4.1 |
+| C.3.5 — content card | `null` | FRAME | Layout: title + message body (5-line truncate) + hashtag chips (1-line max) + photos + action row |
+| C.3.6 — image attachment | `null` | INSTANCE | Tap → full-screen image viewer |
+| C.3.7 — hashtag chips (feed) | `null` | FRAME | Tap chip → set Hashtag filter (US3 scenario 4) — same as B.4.3 |
+| C.3.8 — action row (heart + Copy Link + Xem chi tiết) | `null` | FRAME | Same children + behaviors as B.4.4 (heart, copy link, xem chi tiết) |
 
 ### D — Personal stats + rewards
 
@@ -545,7 +565,7 @@ adjacent labeled Node IDs).
 | `kudos.liked_by_current_user` | server (derived) | Hydrates heart state on load |
 | `kudos.like_disabled_for_me` | server (derived, Q-K-5) | `true` when current user is sender OR recipient — drives heart icon disabled state |
 | `kudos.heart_count` | server | Display verbatim |
-| Recipient star tier | derived | 1★ at 10 received, 2★ at 20, 3★ at 50 |
+| Recipient star tier | server (`recipient.star_tier: 0|1|2|3`) | Threshold-tier per US5 Scenario 6: 0 below 10 Kudos, 1 at [10,20), 2 at [20,50), 3 at ≥50. Client renders the field verbatim — no client-side bucket math |
 | Spotlight total | Returned in the `/api/v1/spotlight/graph` response payload as `total_kudos_count: number` | Refreshed by mount + pull-to-refresh only (Q-K-2) |
 | Spotlight graph | `GET /api/v1/spotlight/graph` | Pan/zoom/search payload |
 | Personal stats | `GET /api/v1/users/me/stats` | `kudos_received_count`, `kudos_sent_count`, `hearts_received`, `secret_boxes_opened`, `secret_boxes_unopened` |
@@ -740,6 +760,17 @@ Language Dropdown + Award Detail's category dropdown.
   `Job.cancel()` per the canonical AwardDetailViewModel pattern).
 - Heart tap is single-flight per `kudosId`; rapid double-tap on the
   same card is debounced via `rememberSingleClickHandler`.
+- Pull-to-refresh while a refresh is already in flight is a no-op
+  — the indicator stays visible and the second pull does NOT
+  trigger a fresh fetch chain. The `PullRefreshState` `isRefreshing`
+  flag gates new requests.
+- Open Secret Box tap while the open-flow modal is mounting is a
+  no-op (TC_IOS_KUDOS_FUN_025) — guarded by the local
+  `secretBoxBusy` flag + `rememberSingleClickHandler`.
+- Personal stats refresh + Secret Box success: when both arrive
+  concurrently, the Secret Box success payload wins
+  (`secret_boxes_opened += 1`, `secret_boxes_unopened -= 1`
+  applied to the latest stats response).
 
 ---
 
@@ -754,6 +785,14 @@ Language Dropdown + Award Detail's category dropdown.
   by `j_a2GQWKDJ-iOS-Sun-Kudos-All-Kudos`.
 - The **Open Secret Box animation** — owned by
   `kQk65hSYF2-iOS-Open-secret-box` (already discovered).
+- The **Hashtag bottom sheet** internals — own frame `V5GRjAdJyb`
+  (`[iOS] Sun*Kudos_dropdown hashtag`). This hub spec covers the
+  trigger (B.1.1 tap) + the filter-application result (US3); the
+  bottom-sheet's own list rendering, search, scroll, dismiss
+  semantics ship in `V5GRjAdJyb`'s spec.
+- The **Phòng ban bottom sheet** internals — own frame
+  `76k69LQPfj` (`[iOS] Sun*Kudos_dropdown phòng ban`). Same
+  scope-boundary as the hashtag sheet above.
 - Visual specs (colors / typography / spacing / motion) — per
   Constitution Principle II + canonical Out of Scope. The
   implementer fetches per-section CSS via `query_section` at
