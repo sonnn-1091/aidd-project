@@ -164,10 +164,10 @@ Login when navigating to or while on Sun*Kudos.
 expect Login. With valid session → expire it (set token to expired)
 → trigger any repo call → expect redirect.
 
-- [ ] T053 [US2] Confirm `core/session/SessionGate` already wraps the entire authenticated route tree (existing infra). Read-only verification — no edit. | (verification — no file)
-- [ ] T054 [US2] Wire `KudosViewModel` to invoke `AuthRedirectController.onAuthExpired()` when any repo Result.failure carries a 401 / `HttpRequestException(status = 401)` (same pattern as `AwardDetailViewModel`). | app/src/main/java/com/example/aiddproject/kudos/ui/KudosViewModel.kt
-- [ ] T055 [P] [US2] Write `KudosViewModelTest.401_repository_failure_emits_AuthExpired_event` — stub repo to return 401; assert the event is forwarded. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
-- [ ] T056 [P] [US2] Write `KudosAuthRedirectTest.unauthenticated_user_redirected_to_login` — mount KudosScreen with no session; assert the screen does not mount AND `Routes.LOGIN` is the current backstack top. Mirrors `HomeAuthRedirectTest`. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosAuthRedirectTest.kt
+- [x] T053 [US2] Confirm `core/session/SessionGate` already wraps the entire authenticated route tree (existing infra). Read-only verification — no edit. Verified at `AppNavigation.kt:69-82` (NavHost root `composable(Routes.GATE) { SessionGate(...) }`). | (verification — no file)
+- [x] T054 [US2] NO-OP per canonical pattern. The 401/403 redirect is enforced at the Ktor HttpClient layer via `AuthErrorInterceptor` (installed once in `core/di/SupabaseModule.kt`), so every Supabase Postgrest call funnels through it before the repository returns. The Phase 3 `KudosViewModel` inherits that bounce for free — matching `AwardDetailViewModel` which also has no explicit `onAuthExpired` wiring. | (no edit)
+- [x] T055 [P] [US2] SKIPPED — see T054. No VM-level behavior to test; the HTTP-level interceptor is covered by the existing `AuthErrorInterceptorTest` + the instrumented test in T056. | (no edit)
+- [x] T056 [P] [US2] Write `KudosAuthRedirectTest` — mirrors `HomeAuthRedirectTest` for the 5 kudos data-plane paths (`/rest/v1/kudos`, `/rest/v1/reactions`, `/rest/v1/spotlight_graph`, `/rest/v1/user_stats`, `/rest/v1/secret_boxes`). 401 → signOut + Login redirect + `error_oauth_session_expired` snackbar; 403 → Access Denied redirect, no signOut, no sessionExpiredHint. 6 instrumented tests green on emulator. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosAuthRedirectTest.kt
 
 **Checkpoint**: Auth gate parity with Home + Award Detail.
 
