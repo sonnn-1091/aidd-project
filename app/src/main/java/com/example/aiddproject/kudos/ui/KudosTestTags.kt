@@ -22,6 +22,8 @@ object KudosTestTags {
     const val STAR_TIER_BADGE: String = "kudos_star_tier_badge"
     const val SPOTLIGHT: String = "kudos_spotlight"
     const val FEED: String = "kudos_feed"
+    const val FEED_CARD: String = "kudos_feed_card"
+    const val VIEW_ALL_KUDOS_LINK: String = "kudos_view_all_link"
     const val STATS: String = "kudos_stats"
     const val TOP_TEN: String = "kudos_top_ten"
     const val OPEN_SECRET_BOX_CTA: String = "kudos_open_secret_box_cta"

@@ -50,8 +50,7 @@ fun KudosScreen(
         onSelectHashtag = viewModel::onSelectHashtag,
         onSelectDepartment = viewModel::onSelectDepartment,
         onCardTap = { _ -> onNavigateToKudosDetail() },
-        // Phase 7 wires optimistic reaction.
-        onHeartTap = { _ -> },
+        onHeartTap = viewModel::onHeartTap,
         // Phase 9 wires clipboard + Snackbar.
         onCopyLink = { _ -> },
         onHashtagChipTap = viewModel::onHashtagChipTap,

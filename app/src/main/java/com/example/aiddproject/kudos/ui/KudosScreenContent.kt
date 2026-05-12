@@ -200,7 +200,17 @@ fun KudosScreenContent(
                         )
                     }
                     item { SpotlightBoard(state = state.spotlight) }
-                    item { AllKudosFeed(state = state.allKudos) }
+                    item {
+                        AllKudosFeed(
+                            state = state.allKudos,
+                            onHeartTap = onHeartTap,
+                            onCopyLink = onCopyLink,
+                            onCardTap = onCardTap,
+                            onHashtagChipTap = onHashtagChipTap,
+                            onProfileTap = onProfileTap,
+                            onViewAllKudos = onViewAllKudos,
+                        )
+                    }
                     item { PersonalStatsPanel(state = state.stats) }
                     item {
                         val loadedStats = state.stats as? PersonalStatsState.Loaded
@@ -237,10 +247,9 @@ fun KudosScreenContent(
             onDismiss = { departmentSheetVisible = false },
         )
     }
-    // Suppress unused-parameter lint for Phase 9-12 callbacks not
-    // yet wired beyond the carousel.
+    // Suppress unused-parameter lint for Phase 10 spotlight search.
     @Suppress("UNUSED_EXPRESSION")
     SaaCream
     @Suppress("UNUSED_EXPRESSION", "UnusedExpressions")
-    listOf(onViewAllKudos, onSpotlightSearchChange)
+    listOf(onSpotlightSearchChange)
 }

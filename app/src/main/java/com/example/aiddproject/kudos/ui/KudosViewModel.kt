@@ -121,6 +121,79 @@ class KudosViewModel
         }
 
         /**
+         * Toggle a heart with optimistic update + rollback on failure
+         * (spec § US5, plan § Optimistic reaction rollback).
+         *
+         * - If `kudos.likeDisabledForMe` is true (Q-K-5: viewer is the
+         *   sender or recipient), the tap is a silent no-op.
+         * - Pre-compute the optimistic patch: heart count ±1, or ±2
+         *   when [KudosUiState.specialDayActive] (Q-K-1).
+         * - Apply the patch locally in both Highlight + AllKudos slices
+         *   (single mutation via [applyKudosLocally]).
+         * - Persist via repo.addReaction / repo.removeReaction.
+         * - On failure, restore the pre-tap snapshot + raise the
+         *   ReactionFailed Snackbar.
+         */
+        fun onHeartTap(kudosId: String) {
+            val current = findKudos(kudosId) ?: return
+            if (current.likeDisabledForMe) return
+            val wasLiked = current.likedByCurrentUser
+            val delta = if (_uiState.value.specialDayActive) 2 else 1
+            val optimistic =
+                current.copy(
+                    likedByCurrentUser = !wasLiked,
+                    heartCount = (current.heartCount + if (wasLiked) -delta else delta).coerceAtLeast(0),
+                )
+            applyKudosLocally(optimistic)
+            viewModelScope.launch {
+                val result =
+                    if (wasLiked) {
+                        repository.removeReaction(kudosId)
+                    } else {
+                        repository.addReaction(kudosId)
+                    }
+                if (result.isFailure) {
+                    applyKudosLocally(current)
+                    _uiState.update {
+                        it.copy(snackbar = com.example.aiddproject.kudos.domain.SnackbarMessage.ReactionFailed)
+                    }
+                }
+            }
+        }
+
+        private fun findKudos(kudosId: String): com.example.aiddproject.kudos.domain.Kudos? {
+            val highlight = (_uiState.value.highlight as? KudosHighlightState.Loaded)?.items.orEmpty()
+            val feed = (_uiState.value.allKudos as? AllKudosState.Loaded)?.items.orEmpty()
+            return highlight.firstOrNull { it.id == kudosId }
+                ?: feed.firstOrNull { it.id == kudosId }
+        }
+
+        /**
+         * Patch the same Kudos in every section that contains it so
+         * the two feeds stay in sync — single mutation point per
+         * plan § Optimistic mechanic.
+         */
+        private fun applyKudosLocally(kudos: com.example.aiddproject.kudos.domain.Kudos) {
+            _uiState.update { state ->
+                val newHighlight =
+                    when (val h = state.highlight) {
+                        is KudosHighlightState.Loaded -> h.copy(items = h.items.replaceById(kudos))
+                        else -> h
+                    }
+                val newAllKudos =
+                    when (val a = state.allKudos) {
+                        is AllKudosState.Loaded -> a.copy(items = a.items.replaceById(kudos))
+                        else -> a
+                    }
+                state.copy(highlight = newHighlight, allKudos = newAllKudos)
+            }
+        }
+
+        private fun List<com.example.aiddproject.kudos.domain.Kudos>.replaceById(
+            kudos: com.example.aiddproject.kudos.domain.Kudos,
+        ): List<com.example.aiddproject.kudos.domain.Kudos> = map { if (it.id == kudos.id) kudos else it }
+
+        /**
          * User-initiated refresh per Q-K-2. Gates concurrent calls via
          * [KudosUiState.isRefreshing] — a second pull-down before the
          * first completes is a no-op.
