@@ -1,6 +1,5 @@
 package com.example.aiddproject.kudos.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -116,29 +112,9 @@ fun KudosScreenContent(
                 .semantics { contentDescription = a11yScreenLabel }
                 .testTag(KudosTestTags.SCREEN),
     ) {
-        // KV background sits at the top of the screen (375×723px in
-        // Figma — `6885:9061`). Below the banner the screen falls back
-        // to the dark navy fill applied to the outer Box.
-        Image(
-            painter = painterResource(R.drawable.kudos_kv_bg),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(360.dp),
-        )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color(0xE600101A), Color.Transparent),
-                        ),
-                    ),
-        )
+        // KV background is now owned by KudosHeroBanner itself
+        // (deviation D1 fix) — the rest of the screen renders on
+        // the solid `#00070C` background applied to this outer Box.
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
