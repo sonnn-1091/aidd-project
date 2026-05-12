@@ -1,5 +1,6 @@
 package com.example.aiddproject.kudos.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -21,8 +22,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -112,9 +116,24 @@ fun KudosScreenContent(
                 .semantics { contentDescription = a11yScreenLabel }
                 .testTag(KudosTestTags.SCREEN),
     ) {
-        // KV background is now owned by KudosHeroBanner itself
-        // (deviation D1 fix) — the rest of the screen renders on
-        // the solid `#00070C` background applied to this outer Box.
+        // Background — mirrors Home's `HomeScreen` chrome: full-bleed
+        // `bg_home` PNG behind everything + a 140dp top gradient
+        // overlay (dark → transparent) so the system-bar text still
+        // reads against the dark band. Matches the canonical SAA
+        // screen background convention.
+        Image(
+            painter = painterResource(R.drawable.bg_home),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(HeaderGradient),
+        )
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
@@ -221,6 +240,23 @@ fun KudosScreenContent(
     @Suppress("UNUSED_EXPRESSION")
     SaaCream
 }
+
+/**
+ * Three-stop vertical gradient mirroring Home's `HeaderGradient`
+ * (the 0.9-opacity `#00101A` top band that fades to transparent).
+ * Used here as the chrome behind the system status bar and the
+ * HomeHeader topBar so the bell/search/language pill stay readable
+ * against the keyvisual background.
+ */
+private val HeaderGradient: Brush =
+    Brush.verticalGradient(
+        colors =
+            listOf(
+                Color(0xE6001019),
+                Color(0x4D00101A),
+                Color(0x00001019),
+            ),
+    )
 
 /**
  * Shared "ALL KUDOS" block header — Figma `mms_C_All kudos / header`
