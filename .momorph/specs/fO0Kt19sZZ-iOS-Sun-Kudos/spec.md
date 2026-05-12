@@ -196,11 +196,15 @@ theme
   same amount that was added (1 or 2), and the reaction is removed
   via `DELETE /api/v1/kudos/{kudosId}/reactions`.
 
-**Scenario 3 — Sender cannot like own Kudos (TC_IOS_KUDOS_FUN_008)**
-- **Given** the displayed Kudos was sent by the current user,
+**Scenario 3 — Sender OR recipient cannot like own Kudos
+(TC_IOS_KUDOS_FUN_008 extended per Q-K-5)**
+- **Given** the displayed Kudos was sent by OR received by the
+  current user (`current_user.id == kudos.sender_id` OR
+  `current_user.id == kudos.recipient_id`),
 - **When** they observe the card,
 - **Then** the heart icon is disabled (not tappable) and no
-  reaction request is fired on tap.
+  reaction request is fired on tap. Server MUST enforce the same
+  rule at the API level (client-side disable is a UX hint only).
 
 **Scenario 4 — Special-day x2 (TC_IOS_KUDOS_FUN_010)**
 - **Given** the server marks today as a special day,
@@ -278,12 +282,19 @@ theme
 **Scenario 3 — Top 10 gift recipient row (TC_IOS_KUDOS_ACC_008)**
 - Tap a Sunner row in the Top 10 → profile screen.
 
-**Scenario 4 — Anonymous sender**
+**Scenario 4 — Anonymous sender (Q-K-3 resolution)**
 - **Given** a Kudos was sent with `is_anonymous = true`,
 - **When** the user observes the card,
-- **Then** the sender section renders the `anonymous_nickname`
-  (e.g., "Một người Sun*") with NO tappable navigation — only the
-  recipient avatar is interactive.
+- **Then** the rendering depends on the per-viewer
+  `sender_visible_to_me` flag served by the API:
+  - **When the current user is the recipient** (or the real
+    sender): `sender_visible_to_me = true` — real sender avatar +
+    name render; tap → sender profile. Anonymity is only against
+    other viewers.
+  - **When the current user is any other viewer**:
+    `sender_visible_to_me = false` — the sender section renders
+    `anonymous_nickname` (e.g., "Một người Sun*") with NO tappable
+    navigation; only the recipient avatar is interactive.
 
 ### US9: Spotlight Board — explore the recognition network [P2]
 
@@ -612,9 +623,11 @@ policies enforce read scope at the row level. The auth gate +
 - Personal stats refetch on `secretBoxOpened` success (US11) and on
   screen-resume (`Lifecycle.Event.ON_RESUME`) to capture
   cross-session changes.
-- Spotlight total: poll every 60 s while the screen is visible (or
-  subscribe via realtime channel — implementer's call). Stop
-  polling on dispose.
+- **Pull-to-refresh contract (Q-K-2 resolution)**: the screen wraps
+  the body in a `PullRefresh`/`SwipeRefresh` container. Pulling
+  refetches all sections together — Highlight + All Kudos +
+  Spotlight (graph + total) + personal stats + Top 10. No
+  realtime channel; no auto-poll timer.
 
 ### Concurrency / race rules
 
@@ -715,17 +728,72 @@ test cases organized by component/section).
 - SCREENFLOW: this spec adds one more authenticated-main-app screen
   on top of Home + Award Detail.
 
-### Open questions (to resolve before plan phase)
+### Open questions
 
 - **Q-K-1**: Does the "special day" flag come from a system-flags
-  endpoint or is it encoded in the JWT? — implementer call.
-- **Q-K-2**: For the Spotlight total counter, is realtime via
-  Supabase channels acceptable or do we poll? — defer to plan.
-- **Q-K-3**: Anonymous Kudos — does the recipient still know the
-  sender via a server-side "fully anonymous vs blind-to-receiver"
-  flag? — not in MoMorph; defer to product.
-- **Q-K-4**: Copy Link URL format — `https://saa2025.sun-asterisk.com/kudos/{id}` ?
-  — confirm with backend.
-- **Q-K-5**: When user is the **recipient** of a Kudos but not the
-  sender, can they like their own received Kudos? — TC_FUN_008
-  only forbids sender-side. Product confirmation needed.
+  endpoint or is it encoded in the JWT? — implementer call, no
+  product input required.
+
+### Resolved questions (2026-05-12)
+
+- **Q-K-2** — **Resolved: pull-to-refresh only**. The Spotlight total
+  counter (B.7.1) refreshes ONLY when the user performs a
+  pull-to-refresh gesture on the screen. NO realtime channel, NO
+  polling timer. State management section updated accordingly —
+  drop the 60 s polling note; rely on the screen-level
+  `SwipeRefresh`/`PullToRefresh` to trigger every section's refetch
+  together (Highlight + All Kudos + Spotlight total + personal
+  stats + Top 10). Spotlight graph data only re-fetches if the user
+  explicitly pulls.
+
+- **Q-K-3** — **Resolved: anonymous sender is visible to recipient**.
+  When `kudos.is_anonymous = true`:
+  - **Other viewers** (anyone on the hub feed who is NOT the
+    recipient) see the sender as the `anonymous_nickname` (e.g.,
+    "Một người Sun*"); tapping the sender row is a no-op.
+  - **The recipient** of the Kudos sees the real sender's avatar +
+    name; tapping navigates to the sender's profile.
+  - The server determines viewer identity from the auth JWT and
+    serves a per-viewer payload (the kudos response includes a
+    derived `sender_visible_to_me` flag — true for recipient + the
+    real sender, false otherwise).
+  - The client renders accordingly: when `sender_visible_to_me`
+    is true → real sender info + tap-to-profile; when false →
+    anonymous nickname + no tap.
+
+- **Q-K-4** — **Resolved: web URL format `https://saa.sun-asterisk.com/kudos/{kudosId}`**
+  (confirmed 2026-05-12). Copy Link copies this exact URL verbatim
+  to the system clipboard; toast text remains
+  `"Link copied — ready to share!"`. Android App Links / iOS
+  Universal Links MAY be layered on the same URL in a follow-on —
+  same shareable link opens the app if installed, web fallback
+  otherwise.
+
+- **Q-K-5** — **Resolved: neither sender nor recipient can like a Kudos
+  they participated in**. Extends TC_IOS_KUDOS_FUN_008's
+  sender-only constraint to cover recipients too. The heart icon
+  is disabled when:
+  - `current_user.id == kudos.sender_id`, OR
+  - `current_user.id == kudos.recipient_id`.
+  Rationale: liking a Kudos you received yourself would inflate
+  your own heart count via your own action — undermines the
+  recognition-from-peers semantics. Server MUST enforce both rules
+  at the RLS / API level too (client-side disable is a UX hint,
+  not the source of truth).
+
+### Spec updates from resolved questions
+
+- **US5 Scenario 3** is updated: "Sender OR recipient cannot like
+  own Kudos. The heart icon is disabled when the current user is
+  the sender OR the recipient of the displayed Kudos."
+- **US7 / US8 anonymous handling** is updated: the recipient sees
+  the real sender; other viewers see the anonymous nickname.
+  Detail screen (`T0TR16k0vH` vs `5C2BL6GYXL`) routing remains
+  driven by `is_anonymous`, but the in-detail rendering will
+  similarly check the per-viewer `sender_visible_to_me` flag.
+- **State management section** drops the "Spotlight total: poll
+  every 60 s" line — refresh is pull-to-refresh-driven only.
+- **API Requirements**: the kudos GET responses (highlight + feed +
+  detail) MUST include the derived `sender_visible_to_me` boolean.
+- **Out of Scope**: realtime updates remain out of scope (Q-K-2
+  resolution forces pull-to-refresh contract).
