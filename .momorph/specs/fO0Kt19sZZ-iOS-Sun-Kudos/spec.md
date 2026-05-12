@@ -4,7 +4,7 @@
 **Frame Name**: `[iOS] Sun*Kudos`
 **File Key**: `9ypp4enmFmdK3YAFJLIu6C`
 **Created**: 2026-05-12
-**Status**: Draft
+**Status**: Ratified (review pass 2026-05-12)
 
 ---
 
@@ -85,6 +85,16 @@ hunting for sections
 - **When** the data state resolves to error,
 - **Then** that section shows a localized inline error message
   + a Retry control. Other sections render normally.
+
+**Scenario 5 — Pull-to-refresh (Q-K-2 contract)**
+- **Given** the hub has loaded any combination of sections,
+- **When** the user performs a pull-down gesture from the top of
+  the body,
+- **Then** every section refetches in parallel — Highlight + All
+  Kudos + Spotlight (graph + total counter) + personal stats + Top
+  10. The refresh indicator dismisses when all sections resolve;
+  individual section failures still show their own inline error
+  states without blocking the others.
 
 ### US2: Auth gate (redirect when unauthenticated/expired) [P1]
 
@@ -272,9 +282,10 @@ theme
 **Scenario 1 — Highlight card avatars (TC_IOS_KUDOS_ACC_006)**
 - **Given** a Highlight center card shows sender + receiver,
 - **When** the user taps either avatar/name,
-- **Then** navigation pushes to `[iOS] Profile bản thân` if it's the
-  current user, otherwise `[iOS] Profile người khác` with the
-  tapped Sunner's `user_id`.
+- **Then** navigation pushes to `[iOS] Profile bản thân`
+  (`hSH7L8doXB`) if the tapped user is the current user, otherwise
+  `[iOS] Profile người khác` (`bEpdheM0yU`) with the tapped
+  Sunner's `user_id` as a route argument.
 
 **Scenario 2 — All Kudos avatars (TC_IOS_KUDOS_ACC_007)**
 - Same flow from the feed cards.
@@ -324,13 +335,16 @@ theme
 - The search input caps at 100 characters. Typing the 101st
   character is suppressed.
 
-**Scenario 5 — Total counter (TC_IOS_KUDOS_FUN_012)**
-- **Given** the Spotlight is interactive,
-- **When** another user sends a new Kudos elsewhere,
+**Scenario 5 — Total counter refresh (TC_IOS_KUDOS_FUN_012 +
+Q-K-2 resolution)**
+- **Given** the Spotlight is interactive AND the displayed total
+  is stale (another user sent a Kudos elsewhere since this client
+  last fetched),
+- **When** the user performs a pull-to-refresh on the screen,
 - **Then** the total-Kudos label (e.g., "388 KUDOS") refreshes to
-  reflect the latest DB state. The refresh strategy (poll vs
-  realtime) is the implementer's choice — server is the source of
-  truth.
+  reflect the latest DB state. NO realtime channel, NO polling —
+  the label is only as fresh as the most recent pull-to-refresh
+  or initial mount.
 
 **Scenario 6 — Empty state (TC_IOS_KUDOS_FUN_011)**
 - **Given** the Spotlight has no data,
@@ -525,11 +539,14 @@ adjacent labeled Node IDs).
 | `kudos.message` | server | Highlight: 3-line truncate; Feed: 5-line truncate |
 | `kudos.title` | server | UPPERCASE category title (e.g., "TEAMWORK") |
 | `kudos_hashtags[].tag_name` | server (relation) | Max 5 chips per line; overflow "..." |
-| `kudos.is_anonymous` | server | When true, hide sender info; show `anonymous_nickname` |
+| `kudos.is_anonymous` | server | Drives detail-screen route (`T0TR16k0vH` vs `5C2BL6GYXL`); does NOT directly hide sender on the hub (see `sender_visible_to_me`) |
+| `kudos.sender_visible_to_me` (derived, per-viewer) | server (Q-K-3) | When `true`, render real sender avatar + name + tap-to-profile; when `false`, render `anonymous_nickname` non-interactively |
+| `kudos.anonymous_nickname` | server | Display fallback when `sender_visible_to_me = false` (e.g., "Một người Sun*") |
 | `kudos.liked_by_current_user` | server (derived) | Hydrates heart state on load |
+| `kudos.like_disabled_for_me` | server (derived, Q-K-5) | `true` when current user is sender OR recipient — drives heart icon disabled state |
 | `kudos.heart_count` | server | Display verbatim |
 | Recipient star tier | derived | 1★ at 10 received, 2★ at 20, 3★ at 50 |
-| Spotlight total | `GET /api/v1/kudos/count` (or `/spotlight/summary`) | Reactive (poll or realtime) |
+| Spotlight total | `GET /api/v1/kudos/count` (or `/spotlight/summary`) | Refreshed by mount + pull-to-refresh only (Q-K-2) |
 | Spotlight graph | `GET /api/v1/spotlight/graph` | Pan/zoom/search payload |
 | Personal stats | `GET /api/v1/users/me/stats` | `kudos_received_count`, `kudos_sent_count`, `hearts_received`, `secret_boxes_opened`, `secret_boxes_unopened` |
 | x2 fire bonus flag | `GET /api/v1/system/flags` (or session) | Boolean — toggled by admin |
@@ -545,7 +562,10 @@ adjacent labeled Node IDs).
 
 ### Data relationships
 
-- `kudos.sender_id → users.id` (nullable when `is_anonymous`)
+- `kudos.sender_id → users.id` — **always populated** server-side
+  (NOT nullable). Anonymity is enforced at the **read** layer via
+  the per-viewer `sender_visible_to_me` derivation (Q-K-3), not by
+  scrubbing `sender_id`.
 - `kudos.recipient_id → users.id`
 - `kudos.hashtag_id → hashtags.id` (many-to-many via
   `kudos_hashtags`)
@@ -580,6 +600,90 @@ adjacent labeled Node IDs).
 Authentication: all endpoints require a valid Supabase JWT; RLS
 policies enforce read scope at the row level. The auth gate +
 401-redirect pipeline already established by Home applies verbatim.
+
+### Server-derived per-viewer fields on every kudos payload
+
+The `GET /api/v1/kudos`, `GET /api/v1/kudos/highlight`, and
+`GET /api/v1/kudos/{kudosId}` responses MUST include the following
+derived booleans on each `kudos` object — computed from the auth
+JWT's `user_id` at request time:
+
+- `liked_by_current_user: boolean` — hydrates heart icon state
+- `sender_visible_to_me: boolean` (Q-K-3) — `true` when current
+  user is the recipient OR the real sender; `false` for any other
+  viewer of an anonymous kudos
+- `like_disabled_for_me: boolean` (Q-K-5) — `true` when current
+  user is the sender OR the recipient; disables the heart icon
+  client-side (server still enforces the rule at write time)
+
+These derived fields keep the client renderer simple — no
+client-side equality checks against `current_user.id` are needed.
+
+---
+
+## Accessibility Behavior
+
+Per Constitution Principle III, the screen MUST be navigable with
+TalkBack and conform to WCAG 2.1 AA. The following accessibility
+behaviors are part of the spec contract (they affect what gets
+implemented, distinct from visual accessibility like contrast which
+the implementer handles via `design-style` tokens at task-execution
+time):
+
+### Touch targets
+
+- Every tappable element ≥48×48 dp (Constitution III + TR-008 from
+  Award Detail spec): Send Kudos pill, Hashtag filter, Phòng ban
+  filter, carousel arrows, each Highlight card body + Xem chi
+  tiết + Copy Link + heart, hashtag chips, each All Kudos card
+  + its action row, Open Secret Box CTA, Top 10 recipient rows,
+  "View all Kudos" link, Spotlight search input.
+
+### Screen reader (TalkBack) contentDescription contract
+
+| Component | `contentDescription` |
+|---|---|
+| A.1 Send Kudos pill | "Gửi Kudos, nhập tên người nhận" |
+| B.1.1 Hashtag filter trigger | "Lọc theo hashtag, {hashtag tên đang chọn / 'chưa chọn'}, danh sách thả xuống" |
+| B.1.2 Phòng ban filter trigger | "Lọc theo phòng ban, {phòng ban tên đang chọn / 'chưa chọn'}, danh sách thả xuống" |
+| B.3 Highlight card | "Kudos từ {sender hoặc 'Một người Sun*'} gửi {recipient}, {N} tim, hashtag {tags}" |
+| B.4.4 heart icon | `Role.Button` + `stateDescription` toggling between "đã thích" / "chưa thích"; `enabled = false` (TalkBack reads "đã tắt") when `like_disabled_for_me = true` |
+| B.4.4 "Xem chi tiết" | `Role.Button` + "Xem chi tiết Kudos" |
+| B.4.4 Copy Link | `Role.Button` + "Sao chép liên kết Kudos" |
+| B.5 page indicator | "Trang {N} trên {Total}" |
+| B.7.3 Sunner search | "Tìm kiếm Sunner trong bảng Spotlight" |
+| C.2 "View all Kudos" | `Role.Button` + "Xem tất cả Kudos" |
+| D.2 Open Secret Box | `Role.Button` + "Mở Secret Box, còn {N} chiếc" (or "Mở Secret Box, đã hết hộp" when disabled) |
+| D.3.2 recipient row | "Sunner {full_name}, {reward description}" |
+
+### Focus order
+
+Top-to-bottom matches the visual reading order:
+1. Send Kudos pill (A.1)
+2. Hashtag filter (B.1.1) → Phòng ban filter (B.1.2)
+3. Highlight carousel cards (one focus group per card; swipe
+   gesture also moves focus)
+4. Spotlight header → Spotlight search → pan/zoom canvas
+   (canvas focusable as a single group)
+5. Personal stats tiles (D.1.2 → D.1.3 → D.1.4 → D.1.6 → D.1.7)
+6. Open Secret Box CTA
+7. Top 10 recipient rows
+8. All Kudos feed cards
+9. "View all Kudos" link
+
+### Font scaling
+
+All text scales with the system font setting. Truncation lines
+(3 lines for Highlight, 5 lines for Feed) MUST respect the scaled
+line height — the implementer uses `androidx.compose.material3`
+typography tokens without hard-coded heights.
+
+### Predictive back
+
+Bottom sheets (hashtag, department) and any modal popups (e.g.,
+Open Secret Box flow before navigating) MUST close on predictive
+back without popping the screen itself — same contract as
+Language Dropdown + Award Detail's category dropdown.
 
 ---
 
