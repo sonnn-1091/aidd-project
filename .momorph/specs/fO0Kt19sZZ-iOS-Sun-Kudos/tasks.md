@@ -291,22 +291,22 @@ KUDOS_FEED placeholder. Tap sender avatar on a non-anonymous kudos
 → PROFILE placeholder. On an anonymous kudos as non-recipient, tap
 sender row → no-op.
 
-- [ ] T099 [US13] Implement `KudosViewModel.onCopyLink(kudosId: String)` — read `R.string.kudos_copy_link_url_template`, format with `kudosId`, write to `ClipboardManager` (provided via composition local), set `state.snackbar = SnackbarMessage.LinkCopied`. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosViewModel.kt
-- [ ] T100 [P] [US13] Replace `CopyLinkSnackbarHost.kt` stub with full impl: observe `state.snackbar`, push to `SnackbarHostState.showSnackbar(...)`, then `state.snackbar = null` to dismiss. | app/src/main/java/com/example/aiddproject/kudos/ui/components/CopyLinkSnackbarHost.kt
-- [ ] T101 [P] [US13] Wire HighlightCard's Copy Link button to `onCopyLink(kudos.id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt
-- [ ] T102 [P] [US13] Wire KudosFeedCard's Copy Link button to `onCopyLink(kudos.id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/KudosFeedCard.kt
-- [ ] T103 [P] [US13] Write `KudosViewModelTest.onCopyLink_writes_url_to_clipboard_and_sets_snackbar` — fake ClipboardManager; assert URL formatted with kudosId + snackbar set. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
-- [ ] T104 [P] [US13] Write `KudosScreenTest.copy_link_shows_snackbar_text` — tap Copy Link via test tag; assert "Link copied — ready to share!" snackbar visible. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
-- [ ] T105 [US14] Create `ViewAllKudosLink.kt` — text link with arrow icon; invokes `onViewAllKudos` callback. Min 48dp touch target. | app/src/main/java/com/example/aiddproject/kudos/ui/components/ViewAllKudosLink.kt
-- [ ] T106 [US14] Wire `onViewAllKudos` through `KudosScreen` → `navController.navigate(Routes.KUDOS_FEED)`. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosScreen.kt + AppNavigation.kt
-- [ ] T107 [P] [US14] Add ViewAllKudosLink to bottom of `AllKudosFeed.kt` body. | app/src/main/java/com/example/aiddproject/kudos/ui/components/AllKudosFeed.kt
-- [ ] T108 [P] [US14] Write `KudosScreenTest.view_all_kudos_link_fires_callback` — | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
-- [ ] T109 [US8] Implement `KudosViewModel.onProfileTap(userId: String)` — emits a one-shot nav event to `Routes.PROFILE` (passing userId). Anonymous-with-no-tap is enforced at the component level (HighlightCard / KudosFeedCard read `sender_visible_to_me` before wiring the tap). | app/src/main/java/com/example/aiddproject/kudos/ui/KudosViewModel.kt
-- [ ] T110 [US8] In HighlightCard + KudosFeedCard, conditionally wire the sender row's tap to `onProfileTap(kudos.sender.id)` only when `kudos.sender_visible_to_me = true` (Q-K-3). Recipient row always tappable. | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt + KudosFeedCard.kt
-- [ ] T111 [P] [US8] Write `KudosFeedCardTest.anonymous_sender_row_no_tap_for_other_viewer` — fixture has is_anonymous=true + sender_visible_to_me=false; assert tap on sender row does NOT fire onProfileTap. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
-- [ ] T112 [P] [US8] Write `KudosFeedCardTest.anonymous_sender_visible_to_recipient` — sender_visible_to_me=true; tap fires callback. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
-- [ ] T113 [P] [US8] Write `KudosFeedCardTest.recipient_row_always_tappable` — | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
-- [ ] T114 [P] [US8] Wire Top 10 row tap (T044 component) to `onProfileTap`. (Full Top 10 impl in Phase 12; this task wires the placeholder.) | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
+- [x] T099 [US13] Implement `KudosViewModel.onCopyLink(kudosId: String)` — read `R.string.kudos_copy_link_url_template`, format with `kudosId`, write to `ClipboardManager` (provided via composition local), set `state.snackbar = SnackbarMessage.LinkCopied`. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosViewModel.kt
+- [x] T100 [P] [US13] Replace `CopyLinkSnackbarHost.kt` stub with full impl: observe `state.snackbar`, push to `SnackbarHostState.showSnackbar(...)`, then `state.snackbar = null` to dismiss. | app/src/main/java/com/example/aiddproject/kudos/ui/components/CopyLinkSnackbarHost.kt
+- [x] T101 [P] [US13] Wire HighlightCard's Copy Link button to `onCopyLink(kudos.id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt
+- [x] T102 [P] [US13] Wire KudosFeedCard's Copy Link button to `onCopyLink(kudos.id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/KudosFeedCard.kt
+- [x] T103 [P] [US13] Write `KudosViewModelTest.onCopyLink_writes_url_to_clipboard_and_sets_snackbar` — fake ClipboardManager; assert URL formatted with kudosId + snackbar set. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
+- [x] T104 [P] [US13] Write `KudosScreenTest.copy_link_shows_snackbar_text` — tap Copy Link via test tag; assert "Link copied — ready to share!" snackbar visible. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
+- [x] T105 [US14] Create `ViewAllKudosLink.kt` — text link with arrow icon; invokes `onViewAllKudos` callback. Min 48dp touch target. | app/src/main/java/com/example/aiddproject/kudos/ui/components/ViewAllKudosLink.kt
+- [x] T106 [US14] Wire `onViewAllKudos` through `KudosScreen` → `navController.navigate(Routes.KUDOS_FEED)`. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosScreen.kt + AppNavigation.kt
+- [x] T107 [P] [US14] Add ViewAllKudosLink to bottom of `AllKudosFeed.kt` body. | app/src/main/java/com/example/aiddproject/kudos/ui/components/AllKudosFeed.kt
+- [x] T108 [P] [US14] Write `KudosScreenTest.view_all_kudos_link_fires_callback` — | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
+- [x] T109 [US8] Implement `KudosViewModel.onProfileTap(userId: String)` — emits a one-shot nav event to `Routes.PROFILE` (passing userId). Anonymous-with-no-tap is enforced at the component level (HighlightCard / KudosFeedCard read `sender_visible_to_me` before wiring the tap). | app/src/main/java/com/example/aiddproject/kudos/ui/KudosViewModel.kt
+- [x] T110 [US8] In HighlightCard + KudosFeedCard, conditionally wire the sender row's tap to `onProfileTap(kudos.sender.id)` only when `kudos.sender_visible_to_me = true` (Q-K-3). Recipient row always tappable. | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt + KudosFeedCard.kt
+- [x] T111 [P] [US8] Write `KudosFeedCardTest.anonymous_sender_row_no_tap_for_other_viewer` — fixture has is_anonymous=true + sender_visible_to_me=false; assert tap on sender row does NOT fire onProfileTap. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
+- [x] T112 [P] [US8] Write `KudosFeedCardTest.anonymous_sender_visible_to_recipient` — sender_visible_to_me=true; tap fires callback. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
+- [x] T113 [P] [US8] Write `KudosFeedCardTest.recipient_row_always_tappable` — | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
+- [x] T114 [P] [US8] Wire Top 10 row tap (T044 component) to `onProfileTap`. (Full Top 10 impl in Phase 12; this task wires the placeholder.) | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
 
 **Checkpoint**: Copy Link + View All + Profile nav working.
 

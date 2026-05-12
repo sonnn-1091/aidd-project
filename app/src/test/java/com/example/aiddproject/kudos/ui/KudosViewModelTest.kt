@@ -214,6 +214,30 @@ class KudosViewModelTest {
         }
 
     @Test
+    fun on_copy_link_sets_link_copied_snackbar() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+
+            viewModel.onCopyLink("k01")
+
+            assertTrue(
+                viewModel.uiState.value.snackbar
+                    is com.example.aiddproject.kudos.domain.SnackbarMessage.LinkCopied,
+            )
+        }
+
+    @Test
+    fun on_snackbar_dismissed_clears_slot() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+            viewModel.onCopyLink("k01")
+
+            viewModel.onSnackbarDismissed()
+
+            assertTrue(viewModel.uiState.value.snackbar == null)
+        }
+
+    @Test
     fun heart_tap_failure_rolls_back_and_emits_snackbar() =
         runTest {
             val viewModel = newViewModel(FailingReactionRepo(DemoKudosRepository()))

@@ -121,6 +121,26 @@ class KudosViewModel
         }
 
         /**
+         * Surface the "Link copied" Snackbar (spec § US13). The
+         * clipboard write itself happens in the Composable layer
+         * (`KudosScreen`) since [ClipboardManager] requires the
+         * Compose composition local — keeping it out of the VM
+         * preserves Constitution II (no Android system imports in
+         * `domain/`/`data/`).
+         */
+        fun onCopyLink(kudosId: String) {
+            Timber.tag(TELEMETRY_TAG).i("kudos_hub.copy_link id=%s", kudosId)
+            _uiState.update {
+                it.copy(snackbar = com.example.aiddproject.kudos.domain.SnackbarMessage.LinkCopied)
+            }
+        }
+
+        /** Clears the snackbar slot once the host has consumed it. */
+        fun onSnackbarDismissed() {
+            _uiState.update { it.copy(snackbar = null) }
+        }
+
+        /**
          * Toggle a heart with optimistic update + rollback on failure
          * (spec § US5, plan § Optimistic reaction rollback).
          *
