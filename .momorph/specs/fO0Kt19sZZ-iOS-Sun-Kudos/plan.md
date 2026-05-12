@@ -37,8 +37,9 @@ follows the server-derived `like_disabled_for_me` flag (Q-K-5).
 **Net new code** is concentrated in a new `kudos/` feature package
 mirroring `awarddetail/`'s `ui/data/domain` layout, plus a Spotlight
 pan/zoom canvas + Spotlight live search debouncer that have no
-prior analogue. The placeholder at `AppNavigation.kt:???` flips to
-the real composable.
+prior analogue. The placeholder at `AppNavigation.kt:130`
+(`composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(...) }`)
+flips to the real composable.
 
 ---
 
@@ -243,7 +244,7 @@ dependencies, no constitution amendments needed.
 | `ui/components/PersonalStatsPanel.kt` | D.1 — 5 stat tiles + conditional x2 fire badge (US10) |
 | `ui/components/OpenSecretBoxCta.kt` | D.2 — Open Secret Box button with disabled state + single-click suppression (US11) |
 | `ui/components/TopTenRecipients.kt` | D.3 — Top 10 latest gift recipients list (US12) |
-| `ui/components/ToastHost.kt` | Localized toast for "Link copied — ready to share!" (US13) |
+| `ui/components/CopyLinkSnackbarHost.kt` | M3 `SnackbarHost` driving the Copy Link feedback message "Link copied — ready to share!" (US13). Compose `SnackbarHostState` is held in `KudosViewModel`; `showSnackbar(...)` fires on successful `Clipboard.setText(url)`. NOT an Android `Toast` — Snackbar matches the project's existing M3 chrome elsewhere. |
 | `data/KudosRepository.kt` | Interface — 15 conceptual endpoints |
 | `data/SupabaseKudosRepository.kt` | Production Supabase Postgrest impl |
 | `data/DemoKudosRepository.kt` | DEMO fixture impl (seed data for ~10 kudos + hashtags + departments + stats + top 10) |
@@ -269,18 +270,20 @@ dependencies, no constitution amendments needed.
 
 **Resources** (`app/src/main/res/`):
 
-| File | Purpose |
-|---|---|
-| `values/strings.xml` | Add ~25 new `kudos_*` strings — section headers, empty/error copy, A11y `contentDescription` templates, toast text |
-| `values-en/strings.xml` | EN locale parity |
-| `drawable-mdpi/ic_kudos_*.png` | Section icons (heart, send, secret-box, fire-x2) — pulled from Figma via `get_media_files` in Phase 0 |
+| File | Status | Purpose |
+|---|---|---|
+| `values/strings.xml` | Modified | Add ~25 `kudos_*` strings (see Modified Files table for the Q-K-4 URL template). |
+| `values-en/strings.xml` | Modified | EN locale parity for the new keys (Constitution's `StringResourceParityTest` validates parity at unit-test time). |
+| `drawable-mdpi/ic_kudos_*.png` | New | Section icons (heart, send, secret-box, fire-x2) — pulled from Figma via `get_media_files` in Phase 0 |
 
 #### Modified files
 
 | File | Changes |
 |---|---|
-| `app/src/main/java/com/example/aiddproject/navigation/AppNavigation.kt` | Replace `composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(label = "Kudos overview") }` with real `KudosScreen()` Hilt-injected wiring + outbound nav callbacks (send-kudos, kudo-detail, all-kudos, open-secret-box, profile-self/other) |
+| `app/src/main/java/com/example/aiddproject/navigation/AppNavigation.kt` | Line 130: replace `composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(label = "Kudos overview") }` with real `KudosScreen()` Hilt-injected wiring + outbound nav callbacks (send-kudos, kudo-detail, all-kudos, open-secret-box, profile-self/other). Also wire `KudosScreen`'s callbacks to existing routes: `Routes.WRITE_KUDO` (US6), `Routes.KUDOS_DETAIL` (US7), `Routes.KUDOS_FEED` (US14), `Routes.PROFILE` (US8 + US12), `Routes.SECRET_BOX_OPEN` (US11 — NEW route). |
+| `app/src/main/java/com/example/aiddproject/navigation/Routes.kt` | Add one new constant: `const val SECRET_BOX_OPEN: String = "route_secret_box_open"` (US11). Existing `KUDOS_OVERVIEW`, `KUDOS_FEED`, `KUDOS_DETAIL`, `WRITE_KUDO`, `PROFILE` constants are reused as-is. |
 | `app/src/main/java/com/example/aiddproject/MainActivity.kt` | (none expected — Hilt module registers automatically) |
+| `app/src/main/res/values/strings.xml` | Add `kudos_copy_link_url_template` = `https://saa.sun-asterisk.com/kudos/%1$s` (Q-K-4) plus ≈25 other `kudos_*` strings — section headers, empty/error copy, A11y contentDescription templates, Snackbar text. |
 
 #### Tests
 
@@ -318,8 +321,10 @@ add it as a Phase 0 task. Verify at Phase 0 (T002).
 
 ### Phase breakdown
 
-The 14 user stories naturally cluster into 9 implementation phases,
-sequenced by dependency.
+The 14 user stories naturally cluster into 13 implementation
+phases (Phase 0 – Phase 12), sequenced by dependency. Phase 0 +
+Phase 1 are infrastructure / setup; Phases 2–11 deliver the user
+stories in priority order; Phase 12 is final polish.
 
 **Phase 0 — Setup**: Asset pull, dependency verification, package scaffold.
 
@@ -578,9 +583,10 @@ because this feature touches PII + new tables. Updated above.
 After this plan is approved:
 
 1. **Run `/momorph.tasks`** to generate the task breakdown.
-   Expected: ~120-180 tasks across 12 implementation phases. The
-   first task list is the largest in the project to date — bigger
-   than canonical Award Detail (103 tasks).
+   Expected: ~150-180 tasks across 13 implementation phases
+   (Phase 0 – Phase 12). The first task list is the largest in
+   the project to date — bigger than canonical Award Detail
+   (103 tasks).
 2. **Decide on the production backend path**: build entirely
    against `DemoKudosRepository` first (recommended — unblocks
    client work immediately), then layer Supabase production
