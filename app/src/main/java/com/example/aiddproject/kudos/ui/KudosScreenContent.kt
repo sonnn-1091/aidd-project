@@ -218,7 +218,12 @@ fun KudosScreenContent(
                             onViewAllKudos = onViewAllKudos,
                         )
                     }
-                    item { PersonalStatsPanel(state = state.stats) }
+                    item {
+                        PersonalStatsPanel(
+                            state = state.stats,
+                            x2BonusActive = state.x2BonusActive,
+                        )
+                    }
                     item {
                         val loadedStats = state.stats as? PersonalStatsState.Loaded
                         val unopened = loadedStats?.stats?.secretBoxesUnopened ?: 0

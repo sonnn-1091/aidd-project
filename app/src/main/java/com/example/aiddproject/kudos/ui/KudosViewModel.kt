@@ -437,7 +437,12 @@ class KudosViewModel
         private suspend fun fetchSystemFlags() {
             repository.systemFlags().fold(
                 onSuccess = { flags: SystemFlags ->
-                    _uiState.update { it.copy(specialDayActive = flags.specialDayActive) }
+                    _uiState.update {
+                        it.copy(
+                            specialDayActive = flags.specialDayActive,
+                            x2BonusActive = flags.x2BonusActive,
+                        )
+                    }
                 },
                 // SystemFlags failure is non-fatal — fall back to defaults
                 // (no special-day x2, no x2 fire badge) so the rest of the

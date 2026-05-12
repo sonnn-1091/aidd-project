@@ -40,6 +40,7 @@ data class KudosUiState(
     val isRefreshing: Boolean = false,
     val snackbar: SnackbarMessage? = null,
     val specialDayActive: Boolean = false,
+    val x2BonusActive: Boolean = false,
     val language: Language = Language.Default,
 ) {
     companion object {

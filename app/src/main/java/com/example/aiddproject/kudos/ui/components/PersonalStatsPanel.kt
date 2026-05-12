@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +41,7 @@ import com.example.aiddproject.ui.theme.SaaCream
 @Composable
 fun PersonalStatsPanel(
     state: PersonalStatsState,
+    x2BonusActive: Boolean,
     modifier: Modifier = Modifier,
 ) {
     @Suppress("UNUSED_VARIABLE", "unused")
@@ -52,14 +56,20 @@ fun PersonalStatsPanel(
         when (state) {
             PersonalStatsState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
             is PersonalStatsState.Error -> SectionPlaceholder(text = stringResource(state.messageRes))
-            is PersonalStatsState.Loaded -> StatsGrid(state.stats)
+            is PersonalStatsState.Loaded -> StatsGrid(state.stats, x2BonusActive = x2BonusActive)
         }
     }
 }
 
 @Composable
-private fun StatsGrid(stats: PersonalStats) {
+private fun StatsGrid(
+    stats: PersonalStats,
+    x2BonusActive: Boolean,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (x2BonusActive) {
+            X2BadgeRow()
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -75,6 +85,28 @@ private fun StatsGrid(stats: PersonalStats) {
             StatTile(value = stats.secretBoxesOpened, label = stringResource(R.string.kudos_stats_boxes_opened))
             StatTile(value = stats.secretBoxesUnopened, label = stringResource(R.string.kudos_stats_boxes_unopened))
         }
+    }
+}
+
+private val X2BadgeColor: Color = Color(0xFFFF8A3D)
+
+@Composable
+private fun X2BadgeRow() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.LocalFireDepartment,
+            contentDescription = null,
+            tint = X2BadgeColor,
+            modifier = Modifier.heightIn(min = 16.dp),
+        )
+        Text(
+            text = "x2",
+            color = X2BadgeColor,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
+        )
     }
 }
 
