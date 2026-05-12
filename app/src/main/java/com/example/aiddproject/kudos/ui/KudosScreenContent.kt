@@ -205,17 +205,10 @@ fun KudosScreenContent(
                             onSpotlightSearchChange = onSpotlightSearchChange,
                         )
                     }
-                    item {
-                        AllKudosFeed(
-                            state = state.allKudos,
-                            onHeartTap = onHeartTap,
-                            onCopyLink = onCopyLink,
-                            onCardTap = onCardTap,
-                            onHashtagChipTap = onHashtagChipTap,
-                            onProfileTap = onProfileTap,
-                            onViewAllKudos = onViewAllKudos,
-                        )
-                    }
+                    // ALL KUDOS block — per Figma `mms_C_All kudos`
+                    // (`6885:9220`): section header → Stats → Top 10 →
+                    // feed cards → View all link.
+                    item { AllKudosSectionHeader() }
                     item {
                         val loadedStats = state.stats as? PersonalStatsState.Loaded
                         val unopened = loadedStats?.stats?.secretBoxesUnopened ?: 0
@@ -232,6 +225,17 @@ fun KudosScreenContent(
                             onProfileTap = onProfileTap,
                         )
                     }
+                    item {
+                        AllKudosFeed(
+                            state = state.allKudos,
+                            onHeartTap = onHeartTap,
+                            onCopyLink = onCopyLink,
+                            onCardTap = onCardTap,
+                            onHashtagChipTap = onHashtagChipTap,
+                            onProfileTap = onProfileTap,
+                            onViewAllKudos = onViewAllKudos,
+                        )
+                    }
                     item { Spacer(Modifier.height(24.dp)) }
                 }
             }
@@ -240,4 +244,21 @@ fun KudosScreenContent(
     // Keep SaaCream import alive if unused later.
     @Suppress("UNUSED_EXPRESSION")
     SaaCream
+}
+
+/**
+ * Shared "ALL KUDOS" block header — Figma `mms_C_All kudos / header`
+ * (`6885:9221`). Rendered ONCE above the Stats + Top 10 + feed sub-
+ * sections per Figma layout.
+ */
+@Composable
+private fun AllKudosSectionHeader() {
+    com.example.aiddproject.kudos.ui.components
+        .KudosSectionHeader(
+            title = stringResource(R.string.kudos_section_all_title),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+        )
 }

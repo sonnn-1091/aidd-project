@@ -1,40 +1,39 @@
 package com.example.aiddproject.kudos.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.domain.SpotlightSearchResult
 import com.example.aiddproject.kudos.domain.states.SpotlightState
 import com.example.aiddproject.kudos.ui.KudosTestTags
-import com.example.aiddproject.ui.theme.SaaCream
 
 /**
- * Spotlight Board section (spec § US9).
+ * Spotlight Board section (spec § US9, Figma `6885:9099`).
  *
- * Renders section header + total counter + pan/zoom canvas + live
- * search input. Search results: Loading → spinner-like text, Match
- * → canvas highlights the node, NoMatch → "Không tìm thấy kết quả".
+ * The baked Figma image (`kudos_spotlight.png`) already contains
+ * the "388 KUDOS" title, the "Tìm kiếm" search field treatment, the
+ * Sunner network cloud, and the recent-activity ribbon. We render
+ * only the Compose section header above the image — the prior
+ * Compose-side total counter + search input were duplicates of what
+ * the image renders, so they've been removed in this pass.
+ *
+ * The interactive search (US9 live debounce) is temporarily inert
+ * while the canvas is a static image. When a proper interactive
+ * canvas lands, the search input + match-highlight logic can move
+ * back into this composable.
  */
 @Composable
 fun SpotlightBoard(
     state: SpotlightState,
-    searchQuery: String,
-    searchResult: SpotlightSearchResult,
-    onSpotlightSearchChange: (String) -> Unit,
+    @Suppress("UNUSED_PARAMETER") searchQuery: String,
+    @Suppress("UNUSED_PARAMETER") searchResult: SpotlightSearchResult,
+    @Suppress("UNUSED_PARAMETER") onSpotlightSearchChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -46,43 +45,13 @@ fun SpotlightBoard(
     ) {
         KudosSectionHeader(
             title = stringResource(R.string.kudos_section_spotlight_title),
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
         )
         when (state) {
             SpotlightState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
             SpotlightState.Empty -> SectionPlaceholder(text = stringResource(R.string.kudos_section_empty_generic))
             is SpotlightState.Error -> SectionPlaceholder(text = stringResource(state.messageRes))
-            is SpotlightState.Loaded -> {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.kudos_spotlight_total_label),
-                        color = Color.White.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                    )
-                    Text(
-                        text = state.graph.totalKudosCount.toString(),
-                        color = SaaCream,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, fontWeight = FontWeight.Bold),
-                    )
-                }
-                SpotlightSearchInput(
-                    query = searchQuery,
-                    onQueryChange = onSpotlightSearchChange,
-                )
-                if (searchResult is SpotlightSearchResult.NoMatch) {
-                    Text(
-                        text = stringResource(R.string.kudos_spotlight_no_results),
-                        color = Color.White.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
-                }
-                SpotlightCanvas()
-            }
+            is SpotlightState.Loaded -> SpotlightCanvas()
         }
     }
 }

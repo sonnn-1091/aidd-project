@@ -40,10 +40,6 @@ fun AllKudosFeed(
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.FEED),
     ) {
-        KudosSectionHeader(
-            title = stringResource(R.string.kudos_section_all_title),
-            modifier = Modifier.padding(bottom = 12.dp),
-        )
         when (state) {
             AllKudosState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
             AllKudosState.Empty -> SectionPlaceholder(text = stringResource(R.string.kudos_empty))
