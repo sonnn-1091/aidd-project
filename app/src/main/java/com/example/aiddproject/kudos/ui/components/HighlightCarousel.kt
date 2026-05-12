@@ -25,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
+import com.example.aiddproject.kudos.domain.Department
+import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.KudosHighlightState
 import com.example.aiddproject.kudos.ui.KudosTestTags
@@ -46,8 +48,12 @@ fun HighlightCarousel(
     filterResetTick: Int,
     selectedHashtagLabel: String?,
     selectedDepartmentLabel: String?,
-    onHashtagTriggerTap: () -> Unit,
-    onDepartmentTriggerTap: () -> Unit,
+    hashtags: List<Hashtag>,
+    departments: List<Department>,
+    activeHashtagId: String?,
+    activeDepartmentId: String?,
+    onSelectHashtag: (Hashtag?) -> Unit,
+    onSelectDepartment: (Department?) -> Unit,
     onHeartTap: (kudosId: String) -> Unit,
     onCopyLink: (kudosId: String) -> Unit,
     onCardTap: (Kudos) -> Unit,
@@ -67,8 +73,12 @@ fun HighlightCarousel(
         HighlightFilterRow(
             selectedHashtagLabel = selectedHashtagLabel,
             selectedDepartmentLabel = selectedDepartmentLabel,
-            onHashtagTriggerTap = onHashtagTriggerTap,
-            onDepartmentTriggerTap = onDepartmentTriggerTap,
+            hashtags = hashtags,
+            departments = departments,
+            activeHashtagId = activeHashtagId,
+            activeDepartmentId = activeDepartmentId,
+            onSelectHashtag = onSelectHashtag,
+            onSelectDepartment = onSelectDepartment,
         )
         when (state) {
             KudosHighlightState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
@@ -87,7 +97,10 @@ fun HighlightCarousel(
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxWidth().testTag(KudosTestTags.HIGHLIGHT_PAGER),
-                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    // 32dp peek so the adjacent (faded) cards show on
+                    // either side per Figma `mms_B.2_HIGHLIGHT KUDOS`.
+                    contentPadding = PaddingValues(horizontal = 32.dp),
+                    pageSpacing = 8.dp,
                 ) { page ->
                     val active = pagerState.currentPage == page
                     HighlightCard(
@@ -99,7 +112,6 @@ fun HighlightCarousel(
                         onProfileTap = onProfileTap,
                         modifier =
                             Modifier
-                                .padding(horizontal = 4.dp)
                                 .alpha(if (active) 1f else 0.5f)
                                 .testTag("${KudosTestTags.HIGHLIGHT_CARD}_$page"),
                     )

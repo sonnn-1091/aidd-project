@@ -81,10 +81,7 @@ fun SpotlightBoard(
                         modifier = Modifier.padding(vertical = 4.dp),
                     )
                 }
-                SpotlightCanvas(
-                    graph = state.graph,
-                    searchResult = searchResult,
-                )
+                SpotlightCanvas()
             }
         }
     }

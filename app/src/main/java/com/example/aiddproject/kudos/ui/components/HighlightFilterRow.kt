@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -16,6 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,41 +31,65 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.core.ui.rememberSingleClickHandler
+import com.example.aiddproject.kudos.domain.Department
+import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.ui.KudosTestTags
 import com.example.aiddproject.ui.theme.SaaCream
 
 /**
- * Highlight filter row stub (Figma `B.1.1` + `B.1.2`).
- *
- * Phase 3 MVP renders two passive pill triggers — Hashtag + Phòng
- * ban — wired to callbacks so the hub renders. Bottom-sheet pickers
- * + active selection rendering land in Phase 5 (US3).
+ * Highlight filter row — two pill triggers, each acts as the anchor
+ * for its own [HashtagFilterDropdown] / [DepartmentFilterDropdown]
+ * M3 menu (mirrors Home's `LanguageSelector` pattern).
  */
 @Composable
 fun HighlightFilterRow(
     selectedHashtagLabel: String?,
     selectedDepartmentLabel: String?,
-    onHashtagTriggerTap: () -> Unit,
-    onDepartmentTriggerTap: () -> Unit,
+    hashtags: List<Hashtag>,
+    departments: List<Department>,
+    activeHashtagId: String?,
+    activeDepartmentId: String?,
+    onSelectHashtag: (Hashtag?) -> Unit,
+    onSelectDepartment: (Department?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(vertical = 8.dp)
                 .testTag(KudosTestTags.FILTER_ROW),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        var hashtagOpen by remember { mutableStateOf(false) }
+        var departmentOpen by remember { mutableStateOf(false) }
         FilterTrigger(
             label = selectedHashtagLabel ?: stringResource(R.string.kudos_filter_hashtag_label),
-            onTap = onHashtagTriggerTap,
+            onTap = { hashtagOpen = true },
             modifier = Modifier.testTag(KudosTestTags.FILTER_HASHTAG_TRIGGER),
+            dropdown = {
+                HashtagFilterDropdown(
+                    expanded = hashtagOpen,
+                    hashtags = hashtags,
+                    activeHashtagId = activeHashtagId,
+                    onSelect = onSelectHashtag,
+                    onDismiss = { hashtagOpen = false },
+                )
+            },
         )
         FilterTrigger(
             label = selectedDepartmentLabel ?: stringResource(R.string.kudos_filter_department_label),
-            onTap = onDepartmentTriggerTap,
+            onTap = { departmentOpen = true },
             modifier = Modifier.testTag(KudosTestTags.FILTER_DEPARTMENT_TRIGGER),
+            dropdown = {
+                DepartmentFilterDropdown(
+                    expanded = departmentOpen,
+                    departments = departments,
+                    activeDepartmentId = activeDepartmentId,
+                    onSelect = onSelectDepartment,
+                    onDismiss = { departmentOpen = false },
+                )
+            },
         )
     }
 }
@@ -70,36 +99,41 @@ private fun FilterTrigger(
     label: String,
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
+    dropdown: @Composable () -> Unit,
 ) {
     val click = rememberSingleClickHandler { onTap() }
-    Row(
-        modifier =
-            modifier
-                .heightIn(min = 40.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(SaaCream.copy(alpha = 0.10f))
-                .border(width = 1.dp, color = FilterBorderColor, shape = RoundedCornerShape(4.dp))
-                .clickable(onClick = click)
-                .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(
-            text = label,
-            color = Color.White,
-            style =
-                MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    letterSpacing = 0.25.sp,
-                ),
-        )
-        Icon(
-            imageVector = Icons.Filled.KeyboardArrowDown,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(24.dp),
-        )
+    Box(modifier = modifier) {
+        Row(
+            modifier =
+                Modifier
+                    .heightIn(min = 40.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(SaaCream.copy(alpha = 0.10f))
+                    .border(width = 1.dp, color = FilterBorderColor, shape = RoundedCornerShape(4.dp))
+                    .clickable(onClick = click)
+                    .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = label,
+                color = Color.White,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        letterSpacing = 0.25.sp,
+                    ),
+            )
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        // Anchor the menu beneath the trigger.
+        dropdown()
     }
 }
 

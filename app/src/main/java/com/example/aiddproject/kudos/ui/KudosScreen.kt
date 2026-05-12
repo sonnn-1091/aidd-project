@@ -53,8 +53,8 @@ fun KudosScreen(
             }
         },
         onSendKudos = onNavigateToSendKudos,
-        onSelectHashtag = viewModel::onSelectHashtag,
-        onSelectDepartment = viewModel::onSelectDepartment,
+        onSelectHashtagId = viewModel::onSelectHashtag,
+        onSelectDepartmentId = viewModel::onSelectDepartment,
         onCardTap = { _ -> onNavigateToKudosDetail() },
         onHeartTap = viewModel::onHeartTap,
         onCopyLink = { kudosId ->

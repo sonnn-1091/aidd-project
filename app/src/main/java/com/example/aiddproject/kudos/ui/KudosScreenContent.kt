@@ -19,11 +19,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -43,8 +40,6 @@ import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.PersonalStatsState
 import com.example.aiddproject.kudos.ui.components.AllKudosFeed
 import com.example.aiddproject.kudos.ui.components.CopyLinkSnackbarHost
-import com.example.aiddproject.kudos.ui.components.DepartmentFilterDropdown
-import com.example.aiddproject.kudos.ui.components.HashtagFilterDropdown
 import com.example.aiddproject.kudos.ui.components.HighlightCarousel
 import com.example.aiddproject.kudos.ui.components.KudosHeroBanner
 import com.example.aiddproject.kudos.ui.components.PersonalStatsPanel
@@ -79,8 +74,8 @@ fun KudosScreenContent(
     onBellClick: () -> Unit,
     onTabSelect: (HomeNavTab) -> Unit,
     onSendKudos: () -> Unit,
-    onSelectHashtag: (hashtagId: String?) -> Unit,
-    onSelectDepartment: (departmentId: String?) -> Unit,
+    onSelectHashtagId: (hashtagId: String?) -> Unit,
+    onSelectDepartmentId: (departmentId: String?) -> Unit,
     filterResetTick: Int,
     onCardTap: (Kudos) -> Unit,
     onHeartTap: (kudosId: String) -> Unit,
@@ -98,8 +93,6 @@ fun KudosScreenContent(
     val snackbarHost = remember { SnackbarHostState() }
     val pullState = rememberPullToRefreshState()
     val a11yScreenLabel = stringResource(R.string.a11y_kudos_screen)
-    var hashtagSheetVisible by rememberSaveable { mutableStateOf(false) }
-    var departmentSheetVisible by rememberSaveable { mutableStateOf(false) }
 
     val activeHashtagLabel: String? =
         state.hashtags.firstOrNull { it.id == state.selectedHashtagId }?.let { "#${it.tagName}" }
@@ -191,8 +184,12 @@ fun KudosScreenContent(
                             filterResetTick = filterResetTick,
                             selectedHashtagLabel = activeHashtagLabel,
                             selectedDepartmentLabel = activeDepartmentLabel,
-                            onHashtagTriggerTap = { hashtagSheetVisible = true },
-                            onDepartmentTriggerTap = { departmentSheetVisible = true },
+                            hashtags = state.hashtags,
+                            departments = state.departments,
+                            activeHashtagId = state.selectedHashtagId,
+                            activeDepartmentId = state.selectedDepartmentId,
+                            onSelectHashtag = { hashtag -> onSelectHashtagId(hashtag?.id) },
+                            onSelectDepartment = { department -> onSelectDepartmentId(department?.id) },
                             onHeartTap = onHeartTap,
                             onCopyLink = onCopyLink,
                             onCardTap = onCardTap,
@@ -239,22 +236,6 @@ fun KudosScreenContent(
                 }
             }
         }
-    }
-    if (hashtagSheetVisible) {
-        HashtagFilterDropdown(
-            hashtags = state.hashtags,
-            activeHashtagId = state.selectedHashtagId,
-            onSelect = { hashtag -> onSelectHashtag(hashtag?.id) },
-            onDismiss = { hashtagSheetVisible = false },
-        )
-    }
-    if (departmentSheetVisible) {
-        DepartmentFilterDropdown(
-            departments = state.departments,
-            activeDepartmentId = state.selectedDepartmentId,
-            onSelect = { department -> onSelectDepartment(department?.id) },
-            onDismiss = { departmentSheetVisible = false },
-        )
     }
     // Keep SaaCream import alive if unused later.
     @Suppress("UNUSED_EXPRESSION")
