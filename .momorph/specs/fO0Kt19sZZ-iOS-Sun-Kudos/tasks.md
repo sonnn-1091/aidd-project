@@ -397,17 +397,17 @@ With 0 → "Chưa có dữ liệu". Tap a row → profile nav.
 contentDescription contract), pull-to-refresh edge cases, full QA
 gate, plan retrospective update, final commit.
 
-- [ ] T147 A11y audit pass — verify every interactive component carries the localized contentDescription from spec § Accessibility table. Cross-check each row against the implemented Composable. | (audit — no file)
-- [ ] T148 [P] Write per-section contentDescription assertion tests across the existing test suite (extend each `*Test.kt` with one assertion comparing the rendered semantic to `ctx.getString(R.string.…)`). | app/src/androidTest/java/com/example/aiddproject/kudos/ (multiple files)
-- [ ] T149 [P] Write `KudosScreenA11yTest.focus_order_is_top_to_bottom_visual_reading_order` — assert TalkBack focus order matches spec § A11y focus order (Send Kudos pill → filters → carousel → Spotlight → stats → Secret Box → Top 10 → feed → View all). | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenA11yTest.kt
-- [ ] T150 [P] Write `KudosScreenA11yTest.every_interactive_meets_48dp_touch_target` — parametric over a list of test tags; assert each `getBoundsInRoot()` ≥ 48×48dp. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenA11yTest.kt
-- [ ] T151 [P] Write `KudosViewModelTest.pullToRefresh_during_in_flight_refresh_is_noop` — concurrency rule from spec. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
-- [ ] T152 [P] Write `KudosViewModelTest.openSecretBox_during_animation_modal_mount_is_noop` — concurrency rule. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
-- [ ] T153 [P] Write `KudosViewModelTest.stats_refresh_and_secret_box_success_concurrent_secretbox_payload_wins` — concurrency rule. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
-- [ ] T154 Run the full quality gate: `./gradlew lint ktlintCheck testDebugUnitTest connectedDebugAndroidTest`. All green; no new lint warnings; no test failures. Fix root causes — do NOT skip with `--no-verify`. | (build — no file)
-- [ ] T155 [P] Update `plan.md` § Implementation Strategy retrospective: mark Phases 0–12 as `✅ shipped` with commit hashes. | .momorph/specs/fO0Kt19sZZ-iOS-Sun-Kudos/plan.md
-- [ ] T156 [P] Update `SCREENFLOW.md` discovery log with the Sun*Kudos ship date + commit hashes. | .momorph/SCREENFLOW.md
-- [ ] T157 Final commit per memory `feedback_commit_per_task.md`: granular commits per phase or coherent task group. Conventional message styles: `test(kudos): …` for test tasks; `feat(kudos): …` for impl; `chore(kudos): …` for setup; `docs(kudos): …` for plan/SCREENFLOW updates. | (git — no file)
+- [x] T147 A11y audit pass — verify every interactive component carries the localized contentDescription from spec § Accessibility table. Cross-check each row against the implemented Composable. | (audit — no file)
+- [x] T148 [P] Write per-section contentDescription assertion tests across the existing test suite (extend each `*Test.kt` with one assertion comparing the rendered semantic to `ctx.getString(R.string.…)`). | app/src/androidTest/java/com/example/aiddproject/kudos/ (multiple files)
+- [x] T149 [P] Write `KudosScreenA11yTest.focus_order_is_top_to_bottom_visual_reading_order` — assert TalkBack focus order matches spec § A11y focus order (Send Kudos pill → filters → carousel → Spotlight → stats → Secret Box → Top 10 → feed → View all). | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenA11yTest.kt
+- [x] T150 [P] Write `KudosScreenA11yTest.every_interactive_meets_48dp_touch_target` — parametric over a list of test tags; assert each `getBoundsInRoot()` ≥ 48×48dp. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenA11yTest.kt
+- [x] T151 [P] Write `KudosViewModelTest.pullToRefresh_during_in_flight_refresh_is_noop` — concurrency rule from spec. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
+- [x] T152 [P] Write `KudosViewModelTest.openSecretBox_during_animation_modal_mount_is_noop` — concurrency rule. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
+- [x] T153 [P] Write `KudosViewModelTest.stats_refresh_and_secret_box_success_concurrent_secretbox_payload_wins` — concurrency rule. | app/src/test/java/com/example/aiddproject/kudos/ui/KudosViewModelTest.kt
+- [x] T154 Run the full quality gate: `./gradlew lint ktlintCheck testDebugUnitTest connectedDebugAndroidTest`. All green; no new lint warnings; no test failures. Fix root causes — do NOT skip with `--no-verify`. | (build — no file)
+- [x] T155 [P] Update `plan.md` § Implementation Strategy retrospective: mark Phases 0–12 as `✅ shipped` with commit hashes. | .momorph/specs/fO0Kt19sZZ-iOS-Sun-Kudos/plan.md
+- [x] T156 [P] Update `SCREENFLOW.md` discovery log with the Sun*Kudos ship date + commit hashes. | .momorph/SCREENFLOW.md
+- [x] T157 Final commit per memory `feedback_commit_per_task.md`: granular commits per phase or coherent task group. Conventional message styles: `test(kudos): …` for test tasks; `feat(kudos): …` for impl; `chore(kudos): …` for setup; `docs(kudos): …` for plan/SCREENFLOW updates. | (git — no file)
 
 ---
 

@@ -1,7 +1,6 @@
 package com.example.aiddproject.kudos
 
 import android.content.res.Configuration
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -178,12 +177,11 @@ class KudosScreenTest {
         setContent(emptyState)
 
         // Both Highlight + AllKudos render the same `kudos_empty`
-        // copy — assert at least one is visible (the top one, in the
-        // viewport without scrolling).
+        // copy. LazyColumn doesn't compose off-screen items, so only
+        // the top Highlight Empty is in the semantics tree without
+        // scrolling — assert at least one is visible.
         val emptyCopy = ctx.getString(R.string.kudos_empty)
-        val matches = composeRule.onAllNodesWithText(emptyCopy)
-        matches.assertCountEquals(2)
-        matches.onFirst().assertIsDisplayed()
+        composeRule.onAllNodesWithText(emptyCopy).onFirst().assertIsDisplayed()
     }
 
     @Test
