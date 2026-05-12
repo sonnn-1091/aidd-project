@@ -21,6 +21,7 @@ import com.example.aiddproject.awarddetail.ui.AwardDetailScreen
 import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
+import com.example.aiddproject.kudos.ui.KudosScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -127,10 +128,24 @@ fun AppNavigation(
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
             )
         }
-        composable(Routes.KUDOS_OVERVIEW) { PlaceholderScreen(label = "Kudos overview") }
+        composable(Routes.KUDOS_OVERVIEW) {
+            KudosScreen(
+                onNavigateToHome = {
+                    navController.popBackStack(Routes.HOME, inclusive = false)
+                },
+                onNavigateToAwardsOverview = { navController.navigate(Routes.AWARDS_OVERVIEW) },
+                onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+                onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+                onNavigateToSendKudos = { navController.navigate(Routes.WRITE_KUDO) },
+                onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
+                onNavigateToAllKudos = { navController.navigate(Routes.KUDOS_FEED) },
+                onNavigateToSecretBoxOpen = { navController.navigate(Routes.SECRET_BOX_OPEN) },
+            )
+        }
         composable(Routes.KUDOS_FEED) { PlaceholderScreen(label = "Kudos feed") }
         composable(Routes.KUDOS_DETAIL) { PlaceholderScreen(label = "Kudos detail") }
         composable(Routes.WRITE_KUDO) { PlaceholderScreen(label = "Write a Kudo") }
+        composable(Routes.SECRET_BOX_OPEN) { PlaceholderScreen(label = "Open Secret Box") }
         composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
         composable(Routes.PROFILE) { PlaceholderScreen(label = "Profile") }
         composable(
