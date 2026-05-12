@@ -381,11 +381,11 @@ reward description). Empty state. Row tap → profile.
 **Independent Test**: With DEMO 8 recipients → all 8 rows render.
 With 0 → "Chưa có dữ liệu". Tap a row → profile nav.
 
-- [ ] T142 [US12] Replace `TopTenRecipients.kt` stub with full impl: section title + LazyColumn of up to 10 rows (avatar via Coil + full_name + reward_name); on row tap fire `onProfileTap(user_id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
-- [ ] T143 [US12] Empty state: when `state.topTen is TopTenState.Empty`, render single placeholder row with "Chưa có dữ liệu". | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
-- [ ] T144 [P] [US12] Write `TopTenRecipientsTest.renders_up_to_ten_rows_from_state` — fixture with 8 recipients; assert all 8 visible. | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
-- [ ] T145 [P] [US12] Write `TopTenRecipientsTest.empty_state_shows_localized_no_data_string` — | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
-- [ ] T146 [P] [US12] Write `TopTenRecipientsTest.row_tap_fires_callback_with_user_id` — | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
+- [x] T142 [US12] Replace `TopTenRecipients.kt` stub with full impl: section title + LazyColumn of up to 10 rows (avatar via Coil + full_name + reward_name); on row tap fire `onProfileTap(user_id)`. | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
+- [x] T143 [US12] Empty state: when `state.topTen is TopTenState.Empty`, render single placeholder row with "Chưa có dữ liệu". | app/src/main/java/com/example/aiddproject/kudos/ui/components/TopTenRecipients.kt
+- [x] T144 [P] [US12] Write `TopTenRecipientsTest.renders_up_to_ten_rows_from_state` — fixture with 8 recipients; assert all 8 visible. | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
+- [x] T145 [P] [US12] Write `TopTenRecipientsTest.empty_state_shows_localized_no_data_string` — | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
+- [x] T146 [P] [US12] Write `TopTenRecipientsTest.row_tap_fires_callback_with_user_id` — | app/src/androidTest/java/com/example/aiddproject/kudos/TopTenRecipientsTest.kt
 
 **Checkpoint**: Top 10 rendering + tap nav working.
 
