@@ -44,10 +44,8 @@ fun SpotlightBoard(
                 .padding(horizontal = 20.dp, vertical = 16.dp)
                 .testTag(KudosTestTags.SPOTLIGHT),
     ) {
-        Text(
-            text = stringResource(R.string.kudos_section_spotlight_title),
-            color = SaaCream,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+        KudosSectionHeader(
+            title = stringResource(R.string.kudos_section_spotlight_title),
             modifier = Modifier.padding(bottom = 8.dp),
         )
         when (state) {

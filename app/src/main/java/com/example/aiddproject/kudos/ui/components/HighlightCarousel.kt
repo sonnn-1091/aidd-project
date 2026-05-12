@@ -1,6 +1,7 @@
 package com.example.aiddproject.kudos.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,14 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.KudosHighlightState
 import com.example.aiddproject.kudos.ui.KudosTestTags
-import com.example.aiddproject.ui.theme.SaaCream
 
 /**
  * Highlight carousel (spec § US4).
@@ -45,6 +44,10 @@ import com.example.aiddproject.ui.theme.SaaCream
 fun HighlightCarousel(
     state: KudosHighlightState,
     filterResetTick: Int,
+    selectedHashtagLabel: String?,
+    selectedDepartmentLabel: String?,
+    onHashtagTriggerTap: () -> Unit,
+    onDepartmentTriggerTap: () -> Unit,
     onHeartTap: (kudosId: String) -> Unit,
     onCopyLink: (kudosId: String) -> Unit,
     onCardTap: (Kudos) -> Unit,
@@ -58,12 +61,14 @@ fun HighlightCarousel(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.HIGHLIGHT),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.kudos_section_highlight_title),
-            color = SaaCream,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
-            modifier = Modifier.padding(bottom = 12.dp),
+        KudosSectionHeader(title = stringResource(R.string.kudos_section_highlight_title))
+        HighlightFilterRow(
+            selectedHashtagLabel = selectedHashtagLabel,
+            selectedDepartmentLabel = selectedDepartmentLabel,
+            onHashtagTriggerTap = onHashtagTriggerTap,
+            onDepartmentTriggerTap = onDepartmentTriggerTap,
         )
         when (state) {
             KudosHighlightState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))

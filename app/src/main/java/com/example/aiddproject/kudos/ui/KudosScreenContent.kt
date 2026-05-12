@@ -46,9 +46,7 @@ import com.example.aiddproject.kudos.ui.components.CopyLinkSnackbarHost
 import com.example.aiddproject.kudos.ui.components.DepartmentFilterDropdown
 import com.example.aiddproject.kudos.ui.components.HashtagFilterDropdown
 import com.example.aiddproject.kudos.ui.components.HighlightCarousel
-import com.example.aiddproject.kudos.ui.components.HighlightFilterRow
 import com.example.aiddproject.kudos.ui.components.KudosHeroBanner
-import com.example.aiddproject.kudos.ui.components.OpenSecretBoxCta
 import com.example.aiddproject.kudos.ui.components.PersonalStatsPanel
 import com.example.aiddproject.kudos.ui.components.SendKudosCta
 import com.example.aiddproject.kudos.ui.components.SpotlightBoard
@@ -121,14 +119,21 @@ fun KudosScreenContent(
         modifier =
             modifier
                 .fillMaxSize()
+                .background(Color(0xFF00070C))
                 .semantics { contentDescription = a11yScreenLabel }
                 .testTag(KudosTestTags.SCREEN),
     ) {
+        // KV background sits at the top of the screen (375×723px in
+        // Figma — `6885:9061`). Below the banner the screen falls back
+        // to the dark navy fill applied to the outer Box.
         Image(
-            painter = painterResource(R.drawable.bg_home),
+            painter = painterResource(R.drawable.kudos_kv_bg),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillWidth,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(360.dp),
         )
         Box(
             modifier =
@@ -181,17 +186,13 @@ fun KudosScreenContent(
                     item { KudosHeroBanner() }
                     item { SendKudosCta(onSendKudos = onSendKudos) }
                     item {
-                        HighlightFilterRow(
+                        HighlightCarousel(
+                            state = state.highlight,
+                            filterResetTick = filterResetTick,
                             selectedHashtagLabel = activeHashtagLabel,
                             selectedDepartmentLabel = activeDepartmentLabel,
                             onHashtagTriggerTap = { hashtagSheetVisible = true },
                             onDepartmentTriggerTap = { departmentSheetVisible = true },
-                        )
-                    }
-                    item {
-                        HighlightCarousel(
-                            state = state.highlight,
-                            filterResetTick = filterResetTick,
                             onHeartTap = onHeartTap,
                             onCopyLink = onCopyLink,
                             onCardTap = onCardTap,
@@ -219,15 +220,11 @@ fun KudosScreenContent(
                         )
                     }
                     item {
+                        val loadedStats = state.stats as? PersonalStatsState.Loaded
+                        val unopened = loadedStats?.stats?.secretBoxesUnopened ?: 0
                         PersonalStatsPanel(
                             state = state.stats,
                             x2BonusActive = state.x2BonusActive,
-                        )
-                    }
-                    item {
-                        val loadedStats = state.stats as? PersonalStatsState.Loaded
-                        val unopened = loadedStats?.stats?.secretBoxesUnopened ?: 0
-                        OpenSecretBoxCta(
                             hasUnopenedBox = unopened > 0,
                             onOpenSecretBox = onOpenSecretBox,
                         )

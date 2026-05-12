@@ -4,20 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.AllKudosState
 import com.example.aiddproject.kudos.ui.KudosTestTags
-import com.example.aiddproject.ui.theme.SaaCream
 
 /**
  * All Kudos feed (spec § US1).
@@ -45,10 +40,8 @@ fun AllKudosFeed(
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.FEED),
     ) {
-        Text(
-            text = stringResource(R.string.kudos_section_all_title),
-            color = SaaCream,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+        KudosSectionHeader(
+            title = stringResource(R.string.kudos_section_all_title),
             modifier = Modifier.padding(bottom = 12.dp),
         )
         when (state) {

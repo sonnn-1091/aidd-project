@@ -5,8 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
@@ -24,6 +26,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -32,11 +35,11 @@ import com.example.aiddproject.kudos.ui.KudosTestTags
 import com.example.aiddproject.ui.theme.SaaCream
 
 /**
- * Open Secret Box CTA stub (Figma `D.2`).
+ * Open Secret Box CTA — Figma `Button` (`6885:9254`).
  *
- * Phase 3 MVP renders the button + click callback. Disabled state
- * (`hasUnopenedBox = false`) + actual navigation to
- * `Routes.SECRET_BOX_OPEN` land in Phase 11 (US11).
+ * 40dp tall, full-width, SaaCream filled with 4dp radius. Label is
+ * 14sp Montserrat Medium dark (#00101A) + 24dp gift-box icon on the
+ * right. Disabled state dims to 40% alpha and suppresses the tap.
  */
 @Composable
 fun OpenSecretBoxCta(
@@ -51,28 +54,47 @@ fun OpenSecretBoxCta(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(SaaCream.copy(alpha = 0.20f * alpha))
-                .let { base -> if (hasUnopenedBox) base.clickable(onClick = click) else base }
-                .semantics {
-                    role = Role.Button
-                    contentDescription = a11y
-                }.padding(horizontal = 16.dp, vertical = 12.dp)
-                .testTag(KudosTestTags.OPEN_SECRET_BOX_CTA),
+                .padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(
-            imageVector = Icons.Filled.CardGiftcard,
-            contentDescription = null,
-            tint = SaaCream.copy(alpha = alpha),
-        )
-        Text(
-            text = stringResource(R.string.kudos_secret_box_open),
-            color = Color.White.copy(alpha = alpha),
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(SaaCream.copy(alpha = alpha))
+                    .let { base -> if (hasUnopenedBox) base.clickable(onClick = click) else base }
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = a11y
+                    }.padding(horizontal = 12.dp)
+                    .testTag(KudosTestTags.OPEN_SECRET_BOX_CTA),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.kudos_secret_box_open),
+                color = ButtonDarkText.copy(alpha = alpha),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+            )
+            Icon(
+                imageVector = Icons.Filled.CardGiftcard,
+                contentDescription = null,
+                tint = ButtonDarkText.copy(alpha = alpha),
+                modifier =
+                    Modifier
+                        .padding(start = 8.dp)
+                        .size(24.dp),
+            )
+        }
     }
 }
+
+private val ButtonDarkText: Color = Color(0xFF00101A)

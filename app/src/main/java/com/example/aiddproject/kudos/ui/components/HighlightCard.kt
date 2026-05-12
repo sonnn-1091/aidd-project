@@ -1,12 +1,15 @@
 package com.example.aiddproject.kudos.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,21 +35,22 @@ import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.core.ui.rememberSingleClickHandler
 import com.example.aiddproject.kudos.domain.Kudos
+import com.example.aiddproject.kudos.ui.KudosTestTags
 import com.example.aiddproject.ui.theme.SaaCream
 
 /**
- * Single Highlight-carousel card (spec § US4, US5, US7, US8, US13).
+ * Highlight carousel card — Figma `mms_B.3_KUDO - Highlight`
+ * (`6885:8424` component, instance `6885:9092`).
  *
- * Composition (top → bottom):
- *  - Sender → recipient identity row (with star-tier on the
- *    recipient + anonymous-aware sender label per Q-K-3)
- *  - Title (optional) + message body (3-line truncate)
- *  - Hashtag chip row
- *  - Action row: HeartIcon + Copy Link + Xem chi tiết
- *
- * Phase 6 wires the layout. Heart toggle + Copy Link + chip taps +
- * profile nav fan in via callbacks; the actual side effects land in
- * Phases 7/9.
+ * Specs:
+ *  - Background `#FFF8E1` (light cream) — NOT the dark surface
+ *  - 1dp #FFEA9E (SaaCream) border, 8dp radius
+ *  - 8px top/bottom + 12px horizontal padding
+ *  - Internal sections separated by 1dp SaaCream dividers
+ *  - Body text is DARK on cream (10sp Montserrat for most copy,
+ *    title is 10sp Bold)
+ *  - Hashtags are red (#D4271D, 10sp Regular)
+ *  - Action row has tiny pill buttons (24dp tall, 2dp radius)
  */
 @Composable
 fun HighlightCard(
@@ -57,6 +64,8 @@ fun HighlightCard(
 ) {
     val cardClick = rememberSingleClickHandler { onCardTap(kudos) }
     val copyClick = rememberSingleClickHandler { onCopyLink(kudos.id) }
+    val detailClick = rememberSingleClickHandler { onCardTap(kudos) }
+    val heartClick = rememberSingleClickHandler { onHeartTap(kudos.id) }
     val senderClick =
         if (kudos.senderVisibleToMe) {
             rememberSingleClickHandler { onProfileTap(kudos.sender.id) }
@@ -69,167 +78,248 @@ fun HighlightCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .heightIn(min = 240.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White.copy(alpha = 0.08f))
+                .clip(RoundedCornerShape(8.dp))
+                .background(CardSurface)
+                .border(width = 1.dp, color = SaaCream, shape = RoundedCornerShape(8.dp))
                 .clickable(onClick = cardClick)
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Sender + recipient row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            val senderName =
-                if (kudos.senderVisibleToMe) {
-                    kudos.sender.fullName
-                } else {
-                    kudos.anonymousNickname ?: stringResource(R.string.kudos_anonymous_nickname_fallback)
-                }
-            AvatarPill(
-                name = senderName,
-                onTap = senderClick,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = "→",
-                color = SaaCream,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
-            )
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AvatarPill(
-                    name = kudos.recipient.fullName,
-                    onTap = recipientClick,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                if (kudos.recipient.starTier > 0) {
-                    StarTierBadge(tier = kudos.recipient.starTier)
-                }
-            }
-        }
-
-        if (kudos.title != null) {
-            Text(
-                text = kudos.title,
-                color = SaaCream,
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
-            )
-        }
-        Text(
-            text = kudos.message,
-            color = Color.White.copy(alpha = 0.85f),
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
-            maxLines = 3,
+        SenderRecipientRow(
+            kudos = kudos,
+            onSenderTap = senderClick,
+            onRecipientTap = recipientClick,
         )
-
-        if (kudos.hashtags.isNotEmpty()) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                kudos.hashtags.take(3).forEach { hashtag ->
-                    HashtagChip(
-                        tagName = hashtag.tagName,
-                        onTap = { onHashtagChipTap(hashtag.id) },
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            HeartIcon(
-                liked = kudos.likedByCurrentUser,
-                count = kudos.heartCount,
-                disabled = kudos.likeDisabledForMe,
-                onTap = { onHeartTap(kudos.id) },
-            )
-            Row(
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable(onClick = copyClick)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ContentCopy,
-                    contentDescription = stringResource(R.string.a11y_kudos_copy_link),
-                    tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
-            Box(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(R.string.kudos_card_view_detail_label),
-                color = SaaCream,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable(onClick = cardClick)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-            )
-        }
+        InternalDivider()
+        ContentBlock(kudos = kudos, onHashtagTap = onHashtagChipTap)
+        InternalDivider()
+        ActionRow(
+            kudos = kudos,
+            onHeartTap = heartClick,
+            onCopyLink = copyClick,
+            onViewDetail = detailClick,
+        )
     }
 }
 
 @Composable
-private fun AvatarPill(
+private fun SenderRecipientRow(
+    kudos: Kudos,
+    onSenderTap: (() -> Unit)?,
+    onRecipientTap: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 62.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        val senderName =
+            if (kudos.senderVisibleToMe) {
+                kudos.sender.fullName
+            } else {
+                kudos.anonymousNickname ?: stringResource(R.string.kudos_anonymous_nickname_fallback)
+            }
+        ProfileBlock(
+            name = senderName,
+            avatarColor = SaaCream,
+            onTap = onSenderTap,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "→",
+            color = CardDarkText,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+        )
+        ProfileBlock(
+            name = kudos.recipient.fullName,
+            avatarColor = SaaCream,
+            onTap = onRecipientTap,
+            starTier = kudos.recipient.starTier,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun ProfileBlock(
     name: String,
+    avatarColor: Color,
     onTap: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    starTier: Int = 0,
 ) {
-    val baseModifier =
-        modifier
-            .clip(RoundedCornerShape(12.dp))
-            .padding(horizontal = 4.dp, vertical = 4.dp)
-    val tappable = if (onTap != null) baseModifier.clickable(onClick = onTap) else baseModifier
-    Row(
-        modifier = tappable,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    val base = modifier
+    val tappable = if (onTap != null) base.clickable(onClick = onTap) else base
+    Column(
+        modifier = tappable.padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Box(
             modifier =
                 Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(SaaCream.copy(alpha = 0.3f)),
+                    .background(avatarColor),
         )
         Text(
             text = name,
-            color = Color.White,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+            color = CardDarkText,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
+        )
+        if (starTier > 0) {
+            StarTierBadge(tier = starTier)
+        }
+    }
+}
+
+@Composable
+private fun ContentBlock(
+    kudos: Kudos,
+    onHashtagTap: (hashtagId: String) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = kudos.createdAt,
+            color = CardMuted,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.23.sp),
+        )
+        if (kudos.title != null) {
+            Text(
+                text = kudos.title.uppercase(),
+                color = CardDarkText,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.23.sp),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.5.dp))
+                    .background(SaaCream.copy(alpha = 0.40f))
+                    .border(width = 0.5.dp, color = SaaCream, shape = RoundedCornerShape(5.5.dp))
+                    .padding(4.dp),
+        ) {
+            Text(
+                text = kudos.message,
+                color = CardDarkText,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, lineHeight = 12.sp),
+                maxLines = 3,
+            )
+        }
+        if (kudos.hashtags.isNotEmpty()) {
+            Text(
+                text = kudos.hashtags.joinToString(" ") { "#${it.tagName}" },
+                color = CardRed,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, letterSpacing = 0.23.sp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            val first = kudos.hashtags.firstOrNull() ?: return@clickable
+                            onHashtagTap(first.id)
+                        },
+                maxLines = 1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActionRow(
+    kudos: Kudos,
+    onHeartTap: () -> Unit,
+    onCopyLink: () -> Unit,
+    onViewDetail: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .clickable(enabled = !kudos.likeDisabledForMe, onClick = onHeartTap)
+                    .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = kudos.heartCount.toString(),
+                color = CardDarkText,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+            )
+            Icon(
+                imageVector = if (kudos.likedByCurrentUser) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = null,
+                tint = if (kudos.likeDisabledForMe) CardMuted else CardRed,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        TinyPillButton(
+            label = stringResource(R.string.a11y_kudos_copy_link),
+            icon = Icons.Filled.ContentCopy,
+            onTap = onCopyLink,
+        )
+        Spacer(modifier = Modifier.size(4.dp))
+        TinyPillButton(
+            label = stringResource(R.string.kudos_card_view_detail_label),
+            icon = null,
+            onTap = onViewDetail,
+        )
+    }
+}
+
+@Composable
+private fun TinyPillButton(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector?,
+    onTap: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(2.dp))
+                .background(CardDarkText.copy(alpha = 0.06f))
+                .clickable(onClick = onTap)
+                .padding(horizontal = 6.dp, vertical = 4.dp)
+                .testTag(KudosTestTags.HIGHLIGHT_CARD),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = CardDarkText,
+                modifier = Modifier.size(12.dp),
+            )
+        }
+        Text(
+            text = label,
+            color = CardDarkText,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
             maxLines = 1,
         )
     }
 }
 
 @Composable
-private fun HashtagChip(
-    tagName: String,
-    onTap: () -> Unit,
-) {
-    val click = rememberSingleClickHandler { onTap() }
-    Text(
-        text = "#$tagName",
-        color = SaaCream,
-        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+private fun InternalDivider() {
+    Box(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(SaaCream.copy(alpha = 0.10f))
-                .clickable(onClick = click)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(SaaCream),
     )
 }
+
+private val CardSurface: Color = Color(0xFFFFF8E1)
+private val CardDarkText: Color = Color(0xFF00101A)
+private val CardMuted: Color = Color(0xFF999999)
+private val CardRed: Color = Color(0xFFD4271D)

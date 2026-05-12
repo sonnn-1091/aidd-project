@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -74,24 +75,32 @@ private fun FilterTrigger(
     Row(
         modifier =
             modifier
-                .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(20.dp))
+                .heightIn(min = 40.dp)
+                .clip(RoundedCornerShape(4.dp))
                 .background(SaaCream.copy(alpha = 0.10f))
-                .border(width = 1.dp, color = SaaCream.copy(alpha = 0.4f), shape = RoundedCornerShape(20.dp))
+                .border(width = 1.dp, color = FilterBorderColor, shape = RoundedCornerShape(4.dp))
                 .clickable(onClick = click)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = label,
             color = Color.White,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+            style =
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.25.sp,
+                ),
         )
         Icon(
             imageVector = Icons.Filled.KeyboardArrowDown,
             contentDescription = null,
             tint = Color.White,
+            modifier = Modifier.size(24.dp),
         )
     }
 }
+
+private val FilterBorderColor: Color = Color(0xFF998C5F)

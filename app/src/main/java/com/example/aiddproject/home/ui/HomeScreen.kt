@@ -100,7 +100,10 @@ fun HomeScreen(
                 // SAA re-tap is handled internally by HomeScreenContent (scroll-to-top).
                 HomeNavTab.Saa2025 -> Unit
                 HomeNavTab.Awards -> onNavigateToAwardsOverview()
-                HomeNavTab.Kudos -> onNavigateToKudosFeed()
+                // Sun*Kudos hub is `Routes.KUDOS_OVERVIEW` — the
+                // dedicated feed (`KUDOS_FEED`) only opens via the
+                // "Xem tất cả Kudos" link inside the hub.
+                HomeNavTab.Kudos -> onNavigateToKudosOverview()
                 HomeNavTab.Profile -> onNavigateToProfile()
             }
         },

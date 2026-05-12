@@ -50,10 +50,8 @@ fun TopTenRecipients(
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.TOP_TEN),
     ) {
-        Text(
-            text = stringResource(R.string.kudos_top_ten_title),
-            color = SaaCream,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+        KudosSectionHeader(
+            title = stringResource(R.string.kudos_top_ten_title),
             modifier = Modifier.padding(bottom = 8.dp),
         )
         when (state) {
