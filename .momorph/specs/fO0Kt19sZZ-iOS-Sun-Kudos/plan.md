@@ -167,6 +167,144 @@ dependencies, no constitution amendments needed.
   query. Repository pattern matches `home/data/KudosSummaryRepository`
   style.
 
+### KudosUiState shape (concrete)
+
+```kotlin
+data class KudosUiState(
+    // Section-level sealed states (Loading / Empty / Loaded / Error)
+    val highlight: KudosHighlightState,
+    val allKudos: AllKudosState,
+    val spotlight: SpotlightState,
+    val stats: PersonalStatsState,
+    val topTen: TopTenState,
+
+    // Filter selections (also persisted via SavedStateHandle)
+    val selectedHashtagId: String? = null,
+    val selectedDepartmentId: String? = null,
+
+    // Spotlight search input (debounced into a Flow inside the VM)
+    val spotlightSearchQuery: String = "",
+    val spotlightSearchResult: SpotlightSearchResult = SpotlightSearchResult.Idle,
+
+    // Pull-to-refresh state
+    val isRefreshing: Boolean = false,
+
+    // Snackbar / toast text for Copy Link feedback
+    val snackbar: SnackbarMessage? = null,
+
+    // System flag — drives heart math (+1 vs +2) and x2 fire badge
+    val specialDayActive: Boolean = false,
+
+    // Locale (read from LanguagePreferenceRepository)
+    val language: Language = Language.Default,
+) {
+    companion object {
+        val Empty: KudosUiState = KudosUiState(
+            highlight = KudosHighlightState.Loading,
+            allKudos = AllKudosState.Loading,
+            spotlight = SpotlightState.Loading,
+            stats = PersonalStatsState.Loading,
+            topTen = TopTenState.Loading,
+        )
+    }
+}
+```
+
+### KudosRepository interface (concrete)
+
+The 15 conceptual endpoints from spec § API Requirements collapse
+into this interface — each method returns `Result<T>` so
+optimistic / rollback flows can branch on success vs failure
+without exception handling at the call site (matches
+`AwardsRepository.detail(id, locale)` shape):
+
+```kotlin
+interface KudosRepository {
+    // Highlight + feed (US3, US4)
+    suspend fun listHighlight(filter: KudosFilter): Result<List<Kudos>>
+    suspend fun listKudos(filter: KudosFilter, page: Int, limit: Int): Result<KudosPage>
+    suspend fun detail(kudosId: String): Result<Kudos>
+
+    // Reactions (US5, Q-K-5)
+    suspend fun addReaction(kudosId: String): Result<Unit>
+    suspend fun removeReaction(kudosId: String): Result<Unit>
+
+    // Filter dropdowns
+    suspend fun listHashtags(): Result<List<Hashtag>>
+    suspend fun listDepartments(): Result<List<Department>>
+
+    // Spotlight (US9, Q-K-2)
+    suspend fun loadSpotlightGraph(): Result<SpotlightGraph>  // returns total_kudos_count + graph
+    suspend fun searchSunner(query: String, limit: Int = 20): Result<List<SunnerMatch>>
+
+    // Personal stats (US10) + system flags
+    suspend fun personalStats(): Result<PersonalStats>
+    suspend fun systemFlags(): Result<SystemFlags>  // specialDayActive, x2BonusActive (Q-K-1)
+
+    // Secret box (US11)
+    suspend fun nextUnopenedBox(): Result<SecretBoxRef?>
+    suspend fun openSecretBox(boxId: String): Result<SecretBoxReward>
+
+    // Top 10 (US12)
+    suspend fun listRecentGiftRecipients(limit: Int = 10): Result<List<GiftRecipient>>
+}
+
+data class KudosFilter(
+    val hashtagId: String? = null,
+    val departmentId: String? = null,
+)
+```
+
+### Pull-to-refresh contract (Q-K-2 mechanic)
+
+```kotlin
+// Inside KudosViewModel:
+fun onPullToRefresh() = viewModelScope.launch {
+    if (_uiState.value.isRefreshing) return@launch  // gate per spec Concurrency rule
+    _uiState.update { it.copy(isRefreshing = true) }
+    try {
+        coroutineScope {
+            // Five parallel fetches; section failures isolate via Result.
+            val h = async { fetchHighlight() }
+            val a = async { fetchAllKudos(resetPaging = true) }
+            val s = async { fetchSpotlight() }
+            val p = async { fetchPersonalStats() }
+            val t = async { fetchTopTen() }
+            awaitAll(h, a, s, p, t)
+        }
+    } finally {
+        _uiState.update { it.copy(isRefreshing = false) }
+    }
+}
+```
+
+### Optimistic reaction rollback (US5 mechanic)
+
+```kotlin
+fun onHeartTap(kudosId: String) = viewModelScope.launch {
+    val current = findKudos(kudosId) ?: return@launch
+    if (current.like_disabled_for_me) return@launch
+    val wasLiked = current.liked_by_current_user
+    val delta = if (specialDayActive) 2 else 1
+    val optimistic = current.copy(
+        liked_by_current_user = !wasLiked,
+        heart_count = current.heart_count + (if (wasLiked) -delta else +delta),
+    )
+    applyKudosLocally(optimistic)
+    val result = if (wasLiked) repo.removeReaction(kudosId)
+                 else repo.addReaction(kudosId)
+    if (result.isFailure) {
+        // Rollback to the pre-tap snapshot; surface an inline error toast.
+        applyKudosLocally(current)
+        _uiState.update { it.copy(snackbar = SnackbarMessage.ReactionFailed) }
+    }
+}
+```
+
+`applyKudosLocally(kudos)` patches the kudos in every section's
+state that contains it (Highlight + All Kudos) — single point of
+mutation so the two feeds stay in sync.
+
 ### Backend approach
 
 - **API Design**: Direct Supabase Postgrest reads;
@@ -309,11 +447,17 @@ includes:
 - `androidx.compose.material3:material3` ≥ 1.3.0 (PullToRefreshBox)
 - `androidx.compose.foundation:foundation` ≥ 1.6.0
   (HorizontalPager + transformable + rememberTransformableState)
-- `androidx.compose.material:material-icons-extended` (if not
-  already present, pull from BOM — Send Kudos / Secret Box icons)
-
-If `material-icons-extended` is NOT in `libs.versions.toml`,
-add it as a Phase 0 task. Verify at Phase 0 (T002).
+- `androidx.compose.material:material-icons-extended` — **NOT
+  currently in `libs.versions.toml`**. Verified 2026-05-12 via
+  grep. Phase 0 MUST add it as a new entry in
+  `gradle/libs.versions.toml` (library coordinate
+  `androidx.compose.material:material-icons-extended`; no version
+  ref needed since it's BOM-managed) plus a `implementation(
+  libs.androidx.compose.material.icons.extended)` line in
+  `app/build.gradle.kts`. Used for: fire (x2 badge), gift box
+  (Secret Box), heart filled/outline, copy link, paper plane
+  (Send Kudos). If product wants custom-drawn icons later, swap
+  per-icon without changing the rest of the screen.
 
 ---
 
@@ -325,6 +469,45 @@ The 14 user stories naturally cluster into 13 implementation
 phases (Phase 0 – Phase 12), sequenced by dependency. Phase 0 +
 Phase 1 are infrastructure / setup; Phases 2–11 deliver the user
 stories in priority order; Phase 12 is final polish.
+
+### Phase dependency graph
+
+```text
+Phase 0 (Setup)
+   ↓
+Phase 1 (Foundational: domain + repo + Hilt)
+   ↓
+Phase 2 (US1 MVP — render hub with all section states; 🎯 STOP & VALIDATE)
+   ↓
+Phase 3 (US2 Auth gate) — depends on Phase 2's screen mount
+   ↓
+Phase 4 (US3 Filters) ─┐
+                        ├─ Both depend on Phase 2's section render
+Phase 5 (US4 Carousel) ─┘  but can be staffed in parallel by separate devs
+   ↓
+Phase 6 (US5 Like) — depends on Phase 4 (filter feed has cards to like)
+   ↓
+Phase 7 (US6 Send + US7 Detail nav) ─┐
+                                       ├─ Pure callback-wiring; can run after Phase 2
+Phase 8 (US13 Copy + US14 View all     │
+        + US8 Profile nav)            ─┘
+   ↓
+Phase 9 (US9 Spotlight) — largest single phase; mostly independent of Phases 4-8
+Phase 10 (US10 Stats + US11 Secret Box) — independent of Phases 4-9
+Phase 11 (US12 Top 10) — independent of Phases 4-10
+   ↓
+Phase 12 (Polish + final QA gate) — depends on EVERY prior phase
+```
+
+**MVP path**: Phases 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7. This gives a
+fully P1 working hub (auth gated, filtered, swipeable carousel,
+likeable, send-Kudos shortcut, detail nav). Phases 8–11 layer
+P2+P3 features. Phase 12 gates merge.
+
+**Parallel staffing opportunities**: Phases 4 + 5 (filter and
+carousel are disjoint code paths), Phases 9 + 10 + 11 (all
+independent body sections). A 3-dev team could cut calendar time
+in half on the P2 phases.
 
 **Phase 0 — Setup**: Asset pull, dependency verification, package scaffold.
 
