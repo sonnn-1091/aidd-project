@@ -8,6 +8,7 @@ package com.example.aiddproject.kudos.ui
  */
 object KudosTestTags {
     const val SCREEN: String = "kudos_screen"
+    const val LAZY_COLUMN: String = "kudos_lazy_column"
     const val HERO: String = "kudos_hero"
     const val SEND_KUDOS_CTA: String = "kudos_send_cta"
     const val FILTER_ROW: String = "kudos_filter_row"

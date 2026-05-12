@@ -162,7 +162,7 @@ fun KudosScreenContent(
             ) {
                 LazyColumn(
                     state = lazyListState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().testTag(KudosTestTags.LAZY_COLUMN),
                 ) {
                     item { KudosHeroBanner() }
                     item { SendKudosCta(onSendKudos = onSendKudos) }

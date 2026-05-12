@@ -1,9 +1,14 @@
 package com.example.aiddproject.kudos
 
+import android.content.res.Configuration
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.test.platform.app.InstrumentationRegistry
@@ -41,7 +46,18 @@ class KudosScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+    // `LanguageProvider` overlays a VN configuration on the Compose
+    // tree so `stringResource()` returns Vietnamese copy regardless of
+    // device locale. We mirror that overlay here so `ctx.getString()`
+    // returns the same VN string that the UI rendered — otherwise the
+    // assertion compares VN-rendered text against EN expectations on
+    // an English emulator.
+    private val ctx =
+        run {
+            val base = InstrumentationRegistry.getInstrumentation().targetContext
+            val overlay = Configuration(base.resources.configuration).apply { setLocale(Language.VN.toLocale()) }
+            base.createConfigurationContext(overlay)
+        }
 
     private val seedSunner =
         SunnerNode(id = "u01", fullName = "Nguyễn An", starTier = 1)
@@ -125,13 +141,27 @@ class KudosScreenTest {
     fun scaffold_renders_all_five_sections_when_states_loaded() {
         setContent(loadedState())
 
+        // SCREEN + LAZY_COLUMN + the always-visible top sections exist
+        // without scrolling.
         composeRule.onNodeWithTag(KudosTestTags.SCREEN).assertIsDisplayed()
+        composeRule.onNodeWithTag(KudosTestTags.LAZY_COLUMN).assertIsDisplayed()
         composeRule.onNodeWithTag(KudosTestTags.HERO).assertIsDisplayed()
         composeRule.onNodeWithTag(KudosTestTags.HIGHLIGHT).assertIsDisplayed()
-        composeRule.onNodeWithTag(KudosTestTags.SPOTLIGHT).assertIsDisplayed()
-        composeRule.onNodeWithTag(KudosTestTags.FEED).assertIsDisplayed()
-        composeRule.onNodeWithTag(KudosTestTags.STATS).assertIsDisplayed()
-        composeRule.onNodeWithTag(KudosTestTags.TOP_TEN).assertIsDisplayed()
+
+        // Off-screen sections — scroll the LazyColumn to each in turn
+        // (LazyColumn doesn't compose items below the viewport without
+        // explicit scrolling).
+        listOf(
+            KudosTestTags.SPOTLIGHT,
+            KudosTestTags.FEED,
+            KudosTestTags.STATS,
+            KudosTestTags.TOP_TEN,
+        ).forEach { tag ->
+            composeRule
+                .onNodeWithTag(KudosTestTags.LAZY_COLUMN)
+                .performScrollToNode(hasTestTag(tag))
+            composeRule.onNodeWithTag(tag).assertIsDisplayed()
+        }
     }
 
     @Test
@@ -143,8 +173,13 @@ class KudosScreenTest {
             )
         setContent(emptyState)
 
+        // Both Highlight + AllKudos render the same `kudos_empty`
+        // copy — assert at least one is visible (the top one, in the
+        // viewport without scrolling).
         val emptyCopy = ctx.getString(R.string.kudos_empty)
-        composeRule.onNodeWithText(emptyCopy).assertIsDisplayed()
+        val matches = composeRule.onAllNodesWithText(emptyCopy)
+        matches.assertCountEquals(2)
+        matches.onFirst().assertIsDisplayed()
     }
 
     @Test
@@ -156,7 +191,7 @@ class KudosScreenTest {
         setContent(errorState)
 
         val errorCopy = ctx.getString(R.string.kudos_error)
-        composeRule.onNodeWithText(errorCopy).assertIsDisplayed()
+        composeRule.onAllNodesWithText(errorCopy).onFirst().assertIsDisplayed()
     }
 
     @Test
@@ -164,7 +199,7 @@ class KudosScreenTest {
         var refreshCount = 0
         setContent(loadedState(), onPullToRefresh = { refreshCount++ })
 
-        composeRule.onNodeWithTag(KudosTestTags.SCREEN).performTouchInput { swipeDown() }
+        composeRule.onNodeWithTag(KudosTestTags.LAZY_COLUMN).performTouchInput { swipeDown() }
         composeRule.waitForIdle()
         assertEquals(1, refreshCount)
     }
