@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
@@ -108,6 +109,8 @@ class KudosScreenTest {
     private fun setContent(
         state: KudosUiState,
         onPullToRefresh: () -> Unit = {},
+        onSendKudos: () -> Unit = {},
+        onCardTap: (com.example.aiddproject.kudos.domain.Kudos) -> Unit = {},
     ) {
         composeRule.setContent {
             AIDDProjectTheme {
@@ -120,10 +123,10 @@ class KudosScreenTest {
                         onSearchClick = {},
                         onBellClick = {},
                         onTabSelect = {},
-                        onSendKudos = {},
+                        onSendKudos = onSendKudos,
                         onSelectHashtag = {},
                         onSelectDepartment = {},
-                        onCardTap = {},
+                        onCardTap = onCardTap,
                         onHeartTap = {},
                         onCopyLink = {},
                         onHashtagChipTap = {},
@@ -193,6 +196,27 @@ class KudosScreenTest {
 
         val errorCopy = ctx.getString(R.string.kudos_error)
         composeRule.onAllNodesWithText(errorCopy).onFirst().assertIsDisplayed()
+    }
+
+    @Test
+    fun send_kudos_pill_tap_fires_callback() {
+        var sendCount = 0
+        setContent(loadedState(), onSendKudos = { sendCount++ })
+
+        composeRule.onNodeWithTag(KudosTestTags.SEND_KUDOS_CTA).performClick()
+        composeRule.waitForIdle()
+        assertEquals(1, sendCount)
+    }
+
+    @Test
+    fun highlight_card_tap_fires_card_callback_with_kudos() {
+        var tappedKudos: com.example.aiddproject.kudos.domain.Kudos? = null
+        setContent(loadedState(), onCardTap = { tappedKudos = it })
+
+        // First card is at index 0.
+        composeRule.onNodeWithTag("${KudosTestTags.HIGHLIGHT_CARD}_0").performClick()
+        composeRule.waitForIdle()
+        assertEquals(seedKudos.id, tappedKudos?.id)
     }
 
     @Test

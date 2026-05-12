@@ -266,12 +266,12 @@ Tap any card body / "Xem chi tiết" → navigate to Routes.KUDOS_DETAIL
 **Independent Test**: Tap CTA → expect Write Kudo placeholder
 mounts. Tap a Highlight card body → expect Kudos Detail mounts.
 
-- [ ] T093 [US6] Wire `KudosScreenContent.onSendKudos` callback through `KudosScreen` to `navController.navigate(Routes.WRITE_KUDO)`. SendKudosCta already invokes onSendKudos from T037. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosScreen.kt + AppNavigation.kt
-- [ ] T094 [P] [US6] Write `KudosScreenTest.send_kudos_pill_tap_fires_callback` — find SendKudosCta via test tag, performClick, assert onSendKudos fired exactly once. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
-- [ ] T095 [US7] Wire HighlightCard "Xem chi tiết" + body tap to `onCardTap(kudos)` callback through to `navController.navigate(Routes.KUDOS_DETAIL)`. (Detail screen itself is `Routes.KUDOS_DETAIL` placeholder — Sun*Kudos hub spec doesn't ship it.) | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt + AppNavigation.kt
-- [ ] T096 [P] [US7] Same wiring for KudosFeedCard body tap. | app/src/main/java/com/example/aiddproject/kudos/ui/components/KudosFeedCard.kt
-- [ ] T097 [P] [US7] Write `HighlightCarouselTest.xem_chi_tiet_tap_fires_card_callback_with_kudos_id` — find Xem chi tiết button, performClick, assert callback received the right kudos.id. | app/src/androidTest/java/com/example/aiddproject/kudos/HighlightCarouselTest.kt
-- [ ] T098 [P] [US7] Write `KudosFeedCardTest.body_tap_fires_card_callback_with_kudos_id` — symmetric for feed card. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
+- [x] T093 [US6] Wire `KudosScreenContent.onSendKudos` callback through `KudosScreen` to `navController.navigate(Routes.WRITE_KUDO)`. SendKudosCta already invokes onSendKudos from T037. | app/src/main/java/com/example/aiddproject/kudos/ui/KudosScreen.kt + AppNavigation.kt
+- [x] T094 [P] [US6] Write `KudosScreenTest.send_kudos_pill_tap_fires_callback` — find SendKudosCta via test tag, performClick, assert onSendKudos fired exactly once. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosScreenTest.kt
+- [x] T095 [US7] Wire HighlightCard "Xem chi tiết" + body tap to `onCardTap(kudos)` callback through to `navController.navigate(Routes.KUDOS_DETAIL)`. (Detail screen itself is `Routes.KUDOS_DETAIL` placeholder — Sun*Kudos hub spec doesn't ship it.) | app/src/main/java/com/example/aiddproject/kudos/ui/components/HighlightCard.kt + AppNavigation.kt
+- [x] T096 [P] [US7] Same wiring for KudosFeedCard body tap. | app/src/main/java/com/example/aiddproject/kudos/ui/components/KudosFeedCard.kt
+- [x] T097 [P] [US7] Write `HighlightCarouselTest.xem_chi_tiet_tap_fires_card_callback_with_kudos_id` — find Xem chi tiết button, performClick, assert callback received the right kudos.id. | app/src/androidTest/java/com/example/aiddproject/kudos/HighlightCarouselTest.kt
+- [x] T098 [P] [US7] Write `KudosFeedCardTest.body_tap_fires_card_callback_with_kudos_id` — symmetric for feed card. | app/src/androidTest/java/com/example/aiddproject/kudos/KudosFeedCardTest.kt
 
 **Checkpoint**: Navigation wired; placeholders open. Real
 destinations land when those specs ship.
