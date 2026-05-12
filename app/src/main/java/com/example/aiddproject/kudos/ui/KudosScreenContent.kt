@@ -83,6 +83,7 @@ fun KudosScreenContent(
     onSendKudos: () -> Unit,
     onSelectHashtag: (hashtagId: String?) -> Unit,
     onSelectDepartment: (departmentId: String?) -> Unit,
+    filterResetTick: Int,
     onCardTap: (Kudos) -> Unit,
     onHeartTap: (kudosId: String) -> Unit,
     onCopyLink: (kudosId: String) -> Unit,
@@ -187,7 +188,17 @@ fun KudosScreenContent(
                             onDepartmentTriggerTap = { departmentSheetVisible = true },
                         )
                     }
-                    item { HighlightCarousel(state = state.highlight) }
+                    item {
+                        HighlightCarousel(
+                            state = state.highlight,
+                            filterResetTick = filterResetTick,
+                            onHeartTap = onHeartTap,
+                            onCopyLink = onCopyLink,
+                            onCardTap = onCardTap,
+                            onHashtagChipTap = onHashtagChipTap,
+                            onProfileTap = onProfileTap,
+                        )
+                    }
                     item { SpotlightBoard(state = state.spotlight) }
                     item { AllKudosFeed(state = state.allKudos) }
                     item { PersonalStatsPanel(state = state.stats) }
@@ -226,11 +237,10 @@ fun KudosScreenContent(
             onDismiss = { departmentSheetVisible = false },
         )
     }
-    // Suppress unused-parameter lint for Phase 7-12 callbacks; they
-    // are wired through in later phases without re-touching this
-    // signature.
+    // Suppress unused-parameter lint for Phase 9-12 callbacks not
+    // yet wired beyond the carousel.
     @Suppress("UNUSED_EXPRESSION")
     SaaCream
     @Suppress("UNUSED_EXPRESSION", "UnusedExpressions")
-    listOf(onCardTap, onHeartTap, onCopyLink, onHashtagChipTap, onViewAllKudos, onSpotlightSearchChange)
+    listOf(onViewAllKudos, onSpotlightSearchChange)
 }

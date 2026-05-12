@@ -114,6 +114,7 @@ class KudosScreenTest {
                 LanguageProvider(language = state.language) {
                     KudosScreenContent(
                         state = state,
+                        filterResetTick = 0,
                         onPullToRefresh = onPullToRefresh,
                         onLanguageSelected = {},
                         onSearchClick = {},

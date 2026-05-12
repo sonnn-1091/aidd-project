@@ -30,8 +30,10 @@ fun KudosScreen(
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val filterResetTick by viewModel.filterResetTick.collectAsStateWithLifecycle()
     KudosScreenContent(
         state = state,
+        filterResetTick = filterResetTick,
         onPullToRefresh = viewModel::onPullToRefresh,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
