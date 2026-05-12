@@ -114,6 +114,67 @@ class KudosViewModelTest {
             assertEquals(false, viewModel.uiState.value.isRefreshing)
         }
 
+    @Test
+    fun on_select_hashtag_AND_combined_with_department_refetches_both_feeds() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+
+            viewModel.onSelectHashtag("h01")
+            viewModel.onSelectDepartment("d01")
+
+            val state = viewModel.uiState.value
+            assertEquals("h01", state.selectedHashtagId)
+            assertEquals("d01", state.selectedDepartmentId)
+            // DEMO repo returns rows whose hashtags contain h01 AND
+            // whose sender/recipient department matches d01 — at
+            // least one match exists in the seed.
+            assertTrue(state.highlight is KudosHighlightState.Loaded)
+            assertTrue(state.allKudos is AllKudosState.Loaded)
+        }
+
+    @Test
+    fun filter_change_bumps_reset_tick() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+            val initialTick = viewModel.filterResetTick.value
+
+            viewModel.onSelectHashtag("h01")
+
+            assertEquals(initialTick + 1, viewModel.filterResetTick.value)
+        }
+
+    @Test
+    fun reselecting_active_hashtag_is_a_noop() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+            viewModel.onSelectHashtag("h01")
+            val tickAfterFirst = viewModel.filterResetTick.value
+
+            viewModel.onSelectHashtag("h01") // duplicate
+
+            assertEquals(tickAfterFirst, viewModel.filterResetTick.value)
+        }
+
+    @Test
+    fun on_hashtag_chip_tap_routes_through_select_hashtag() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+
+            viewModel.onHashtagChipTap("h02")
+
+            assertEquals("h02", viewModel.uiState.value.selectedHashtagId)
+        }
+
+    @Test
+    fun load_filters_populates_hashtags_and_departments() =
+        runTest {
+            val viewModel = newViewModel(DemoKudosRepository())
+
+            val state = viewModel.uiState.value
+            assertEquals(5, state.hashtags.size)
+            assertEquals(5, state.departments.size)
+        }
+
     private fun newViewModel(repo: KudosRepository): KudosViewModel =
         KudosViewModel(
             savedStateHandle = SavedStateHandle(),

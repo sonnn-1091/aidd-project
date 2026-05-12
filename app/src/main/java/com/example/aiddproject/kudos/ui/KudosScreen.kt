@@ -45,16 +45,14 @@ fun KudosScreen(
             }
         },
         onSendKudos = onNavigateToSendKudos,
-        // Phase 5 wires filter bottom sheets.
-        onHashtagTriggerTap = {},
-        onDepartmentTriggerTap = {},
+        onSelectHashtag = viewModel::onSelectHashtag,
+        onSelectDepartment = viewModel::onSelectDepartment,
         onCardTap = { _ -> onNavigateToKudosDetail() },
         // Phase 7 wires optimistic reaction.
         onHeartTap = { _ -> },
         // Phase 9 wires clipboard + Snackbar.
         onCopyLink = { _ -> },
-        // Phase 5 re-applies hashtag filter on chip tap.
-        onHashtagChipTap = { _ -> },
+        onHashtagChipTap = viewModel::onHashtagChipTap,
         onProfileTap = { _ -> onNavigateToProfile() },
         onViewAllKudos = onNavigateToAllKudos,
         onOpenSecretBox = onNavigateToSecretBoxOpen,

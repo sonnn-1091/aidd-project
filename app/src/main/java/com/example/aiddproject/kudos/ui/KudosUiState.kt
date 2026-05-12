@@ -1,6 +1,8 @@
 package com.example.aiddproject.kudos.ui
 
 import com.example.aiddproject.core.locale.Language
+import com.example.aiddproject.kudos.domain.Department
+import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.SnackbarMessage
 import com.example.aiddproject.kudos.domain.SpotlightSearchResult
 import com.example.aiddproject.kudos.domain.states.AllKudosState
@@ -31,6 +33,8 @@ data class KudosUiState(
     val topTen: TopTenState,
     val selectedHashtagId: String? = null,
     val selectedDepartmentId: String? = null,
+    val hashtags: List<Hashtag> = emptyList(),
+    val departments: List<Department> = emptyList(),
     val spotlightSearchQuery: String = "",
     val spotlightSearchResult: SpotlightSearchResult = SpotlightSearchResult.Idle,
     val isRefreshing: Boolean = false,

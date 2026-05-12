@@ -15,6 +15,7 @@ import com.example.aiddproject.kudos.domain.states.PersonalStatsState
 import com.example.aiddproject.kudos.domain.states.SpotlightState
 import com.example.aiddproject.kudos.domain.states.TopTenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -64,9 +65,59 @@ class KudosViewModel
                 initialValue = Language.Default,
             )
 
+        /**
+         * Tracks the in-flight filter-driven refetch so a rapid filter
+         * change cancels the previous fetch before issuing the new one
+         * (US3 Edge Case — "Network slow → fast race").
+         */
+        private var filterFetchJob: Job? = null
+
+        /**
+         * One-shot signal to the Highlight carousel that the filter
+         * changed — the carousel collects it inside a `LaunchedEffect`
+         * and resets `pagerState.currentPage = 0` (US3 scenario 3).
+         * Bumped by every successful filter mutation.
+         */
+        private val _filterResetTick = MutableStateFlow(0)
+        val filterResetTick: StateFlow<Int> = _filterResetTick.asStateFlow()
+
         init {
             Timber.tag(TELEMETRY_TAG).i("kudos_hub.entered")
             viewModelScope.launch { refreshAll() }
+            viewModelScope.launch { loadFilters() }
+        }
+
+        /**
+         * Apply a hashtag filter (US3). Pass `null` to clear. Cancels
+         * any in-flight filter fetch + bumps the carousel reset tick so
+         * the pager scrolls to page 0.
+         */
+        fun onSelectHashtag(hashtagId: String?) {
+            val current = _uiState.value.selectedHashtagId
+            if (current == hashtagId) return
+            Timber.tag(TELEMETRY_TAG).i("kudos_hub.select_hashtag id=%s", hashtagId)
+            _uiState.update { it.copy(selectedHashtagId = hashtagId) }
+            triggerFilterFetch()
+        }
+
+        /**
+         * Apply a department filter (US3). AND-combined with the
+         * active hashtag.
+         */
+        fun onSelectDepartment(departmentId: String?) {
+            val current = _uiState.value.selectedDepartmentId
+            if (current == departmentId) return
+            Timber.tag(TELEMETRY_TAG).i("kudos_hub.select_department id=%s", departmentId)
+            _uiState.update { it.copy(selectedDepartmentId = departmentId) }
+            triggerFilterFetch()
+        }
+
+        /**
+         * Tap a hashtag chip inside any feed card (US3 scenario 4).
+         * Behaves like the bottom-sheet selection — does NOT navigate.
+         */
+        fun onHashtagChipTap(hashtagId: String) {
+            onSelectHashtag(hashtagId)
         }
 
         /**
@@ -102,6 +153,37 @@ class KudosViewModel
             // re-renders with the right strings without observing the
             // flow again.
             _uiState.update { it.copy(language = languageState.value) }
+        }
+
+        /**
+         * Fetch Highlight + All Kudos for the current filter selection.
+         * Cancels any in-flight filter fetch first (US3 race). Bumps
+         * the carousel reset tick so the pager rewinds to page 0.
+         */
+        private fun triggerFilterFetch() {
+            filterFetchJob?.cancel()
+            filterFetchJob =
+                viewModelScope.launch {
+                    val filter = currentFilter()
+                    _uiState.update {
+                        it.copy(
+                            highlight = KudosHighlightState.Loading,
+                            allKudos = AllKudosState.Loading,
+                        )
+                    }
+                    coroutineScope {
+                        val h = async { fetchHighlight(filter) }
+                        val a = async { fetchAllKudos(filter) }
+                        awaitAll(h, a)
+                    }
+                    _filterResetTick.update { it + 1 }
+                }
+        }
+
+        private suspend fun loadFilters() {
+            val hashtags = repository.listHashtags().getOrNull().orEmpty()
+            val departments = repository.listDepartments().getOrNull().orEmpty()
+            _uiState.update { it.copy(hashtags = hashtags, departments = departments) }
         }
 
         private suspend fun fetchHighlight(filter: KudosFilter) {

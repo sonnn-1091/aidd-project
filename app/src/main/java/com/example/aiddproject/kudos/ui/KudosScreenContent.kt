@@ -18,8 +18,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,6 +43,8 @@ import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.PersonalStatsState
 import com.example.aiddproject.kudos.ui.components.AllKudosFeed
 import com.example.aiddproject.kudos.ui.components.CopyLinkSnackbarHost
+import com.example.aiddproject.kudos.ui.components.DepartmentFilterDropdown
+import com.example.aiddproject.kudos.ui.components.HashtagFilterDropdown
 import com.example.aiddproject.kudos.ui.components.HighlightCarousel
 import com.example.aiddproject.kudos.ui.components.HighlightFilterRow
 import com.example.aiddproject.kudos.ui.components.KudosHeroBanner
@@ -75,8 +81,8 @@ fun KudosScreenContent(
     onBellClick: () -> Unit,
     onTabSelect: (HomeNavTab) -> Unit,
     onSendKudos: () -> Unit,
-    onHashtagTriggerTap: () -> Unit,
-    onDepartmentTriggerTap: () -> Unit,
+    onSelectHashtag: (hashtagId: String?) -> Unit,
+    onSelectDepartment: (departmentId: String?) -> Unit,
     onCardTap: (Kudos) -> Unit,
     onHeartTap: (kudosId: String) -> Unit,
     onCopyLink: (kudosId: String) -> Unit,
@@ -93,6 +99,13 @@ fun KudosScreenContent(
     val snackbarHost = remember { SnackbarHostState() }
     val pullState = rememberPullToRefreshState()
     val a11yScreenLabel = stringResource(R.string.a11y_kudos_screen)
+    var hashtagSheetVisible by rememberSaveable { mutableStateOf(false) }
+    var departmentSheetVisible by rememberSaveable { mutableStateOf(false) }
+
+    val activeHashtagLabel: String? =
+        state.hashtags.firstOrNull { it.id == state.selectedHashtagId }?.let { "#${it.tagName}" }
+    val activeDepartmentLabel: String? =
+        state.departments.firstOrNull { it.id == state.selectedDepartmentId }?.name
 
     val tabSelectHandler: (HomeNavTab) -> Unit = { tab ->
         // Re-tap of the active Kudos tab scrolls the body to the top
@@ -168,10 +181,10 @@ fun KudosScreenContent(
                     item { SendKudosCta(onSendKudos = onSendKudos) }
                     item {
                         HighlightFilterRow(
-                            selectedHashtagLabel = null,
-                            selectedDepartmentLabel = null,
-                            onHashtagTriggerTap = onHashtagTriggerTap,
-                            onDepartmentTriggerTap = onDepartmentTriggerTap,
+                            selectedHashtagLabel = activeHashtagLabel,
+                            selectedDepartmentLabel = activeDepartmentLabel,
+                            onHashtagTriggerTap = { hashtagSheetVisible = true },
+                            onDepartmentTriggerTap = { departmentSheetVisible = true },
                         )
                     }
                     item { HighlightCarousel(state = state.highlight) }
@@ -197,7 +210,23 @@ fun KudosScreenContent(
             }
         }
     }
-    // Suppress unused-parameter lint for Phase 4-12 callbacks; they
+    if (hashtagSheetVisible) {
+        HashtagFilterDropdown(
+            hashtags = state.hashtags,
+            activeHashtagId = state.selectedHashtagId,
+            onSelect = { hashtag -> onSelectHashtag(hashtag?.id) },
+            onDismiss = { hashtagSheetVisible = false },
+        )
+    }
+    if (departmentSheetVisible) {
+        DepartmentFilterDropdown(
+            departments = state.departments,
+            activeDepartmentId = state.selectedDepartmentId,
+            onSelect = { department -> onSelectDepartment(department?.id) },
+            onDismiss = { departmentSheetVisible = false },
+        )
+    }
+    // Suppress unused-parameter lint for Phase 7-12 callbacks; they
     // are wired through in later phases without re-touching this
     // signature.
     @Suppress("UNUSED_EXPRESSION")
