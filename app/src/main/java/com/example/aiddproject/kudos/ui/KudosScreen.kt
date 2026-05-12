@@ -66,8 +66,7 @@ fun KudosScreen(
         onProfileTap = { _ -> onNavigateToProfile() },
         onViewAllKudos = onNavigateToAllKudos,
         onOpenSecretBox = onNavigateToSecretBoxOpen,
-        // Phase 10 wires debounced sunner search.
-        onSpotlightSearchChange = { _ -> },
+        onSpotlightSearchChange = viewModel::onSpotlightSearchChange,
         onSnackbarDismissed = viewModel::onSnackbarDismissed,
     )
 }

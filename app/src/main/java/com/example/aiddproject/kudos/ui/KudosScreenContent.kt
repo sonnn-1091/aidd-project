@@ -199,7 +199,14 @@ fun KudosScreenContent(
                             onProfileTap = onProfileTap,
                         )
                     }
-                    item { SpotlightBoard(state = state.spotlight) }
+                    item {
+                        SpotlightBoard(
+                            state = state.spotlight,
+                            searchQuery = state.spotlightSearchQuery,
+                            searchResult = state.spotlightSearchResult,
+                            onSpotlightSearchChange = onSpotlightSearchChange,
+                        )
+                    }
                     item {
                         AllKudosFeed(
                             state = state.allKudos,
@@ -247,9 +254,7 @@ fun KudosScreenContent(
             onDismiss = { departmentSheetVisible = false },
         )
     }
-    // Suppress unused-parameter lint for Phase 10 spotlight search.
+    // Keep SaaCream import alive if unused later.
     @Suppress("UNUSED_EXPRESSION")
     SaaCream
-    @Suppress("UNUSED_EXPRESSION", "UnusedExpressions")
-    listOf(onSpotlightSearchChange)
 }

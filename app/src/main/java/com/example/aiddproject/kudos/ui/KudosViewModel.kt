@@ -8,6 +8,7 @@ import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LanguagePreferenceRepository
 import com.example.aiddproject.kudos.data.KudosRepository
 import com.example.aiddproject.kudos.domain.KudosFilter
+import com.example.aiddproject.kudos.domain.SpotlightSearchResult
 import com.example.aiddproject.kudos.domain.SystemFlags
 import com.example.aiddproject.kudos.domain.states.AllKudosState
 import com.example.aiddproject.kudos.domain.states.KudosHighlightState
@@ -15,6 +16,7 @@ import com.example.aiddproject.kudos.domain.states.PersonalStatsState
 import com.example.aiddproject.kudos.domain.states.SpotlightState
 import com.example.aiddproject.kudos.domain.states.TopTenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -23,11 +25,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Hilt-injected ViewModel for the Sun*Kudos hub (spec § US1).
@@ -47,6 +52,7 @@ import javax.inject.Inject
  * Future phases extend this VM with filter/heart/copy-link/profile/
  * spotlight-search/secret-box mechanics.
  */
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class KudosViewModel
     @Inject
@@ -81,10 +87,54 @@ class KudosViewModel
         private val _filterResetTick = MutableStateFlow(0)
         val filterResetTick: StateFlow<Int> = _filterResetTick.asStateFlow()
 
+        /** Spotlight search input stream — debounced into a fetch. */
+        private val spotlightSearchInput = MutableStateFlow("")
+
         init {
             Timber.tag(TELEMETRY_TAG).i("kudos_hub.entered")
             viewModelScope.launch { refreshAll() }
             viewModelScope.launch { loadFilters() }
+            viewModelScope.launch { collectSpotlightSearch() }
+        }
+
+        /** Update the spotlight search query — fed into the debounce stream. */
+        fun onSpotlightSearchChange(query: String) {
+            val trimmed = if (query.length > SPOTLIGHT_SEARCH_MAX_LENGTH) query.take(SPOTLIGHT_SEARCH_MAX_LENGTH) else query
+            _uiState.update { it.copy(spotlightSearchQuery = trimmed) }
+            spotlightSearchInput.value = trimmed
+        }
+
+        private suspend fun collectSpotlightSearch() {
+            spotlightSearchInput
+                .debounce(SPOTLIGHT_SEARCH_DEBOUNCE_MS.milliseconds)
+                .collectLatest { query ->
+                    if (query.isBlank()) {
+                        _uiState.update {
+                            it.copy(spotlightSearchResult = SpotlightSearchResult.Idle)
+                        }
+                        return@collectLatest
+                    }
+                    _uiState.update {
+                        it.copy(spotlightSearchResult = SpotlightSearchResult.Loading)
+                    }
+                    repository.searchSunner(query).fold(
+                        onSuccess = { matches ->
+                            val top = matches.firstOrNull()
+                            val nextResult =
+                                if (top != null) {
+                                    SpotlightSearchResult.Match(top.node)
+                                } else {
+                                    SpotlightSearchResult.NoMatch
+                                }
+                            _uiState.update { it.copy(spotlightSearchResult = nextResult) }
+                        },
+                        onFailure = {
+                            _uiState.update {
+                                it.copy(spotlightSearchResult = SpotlightSearchResult.NoMatch)
+                            }
+                        },
+                    )
+                }
         }
 
         /**
@@ -408,5 +458,7 @@ class KudosViewModel
         private companion object {
             const val TELEMETRY_TAG: String = "KudosTelemetry"
             const val ALL_KUDOS_PAGE_SIZE: Int = 5
+            const val SPOTLIGHT_SEARCH_DEBOUNCE_MS: Long = 300
+            const val SPOTLIGHT_SEARCH_MAX_LENGTH: Int = 100
         }
     }
