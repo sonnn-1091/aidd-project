@@ -6,7 +6,7 @@
 - **Figma File Key**: 9ypp4enmFmdK3YAFJLIu6C
 - **Figma URL**: https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C
 - **Created**: 2026-05-08
-- **Last Updated**: 2026-05-11
+- **Last Updated**: 2026-05-12
 
 ---
 
@@ -14,9 +14,9 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Screens | 9 |
-| Discovered | 9 |
-| Spec Shipped | 9 |
+| Total Screens | 10 |
+| Discovered | 10 |
+| Spec Shipped | 10 |
 | Spec In Progress | 0 |
 | Completion | 100% |
 
@@ -35,6 +35,7 @@
 | 7 | [iOS] Award_Best Manager | 7y195PPTxQ | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=7y195PPTxQ | spec_shipped (delta-spec) | specs/7y195PPTxQ-iOS-Award-Best-Manager/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Best Manager card — requires DEMO append) | Same as canonical Award Detail — pure data swap, no new Q-numbers (quantity = 1 renders as "01", prizeValue 10.000.000 VNĐ is new value but still pre-formatted per Q5) |
 | 8 | [iOS] Award_MVP | b2BuS8HYIt | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=b2BuS8HYIt | spec_shipped (delta-spec) | specs/b2BuS8HYIt-iOS-Award-MVP/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on MVP card — requires DEMO append) | Same parametric Award Detail with **Q-MVP-1** (custom prize caption "cho giải cá nhân" — extends AwardDetail model + AwardInfoBlock composable, backward-compatible) |
 | 9 | [iOS] Award_Signature 2025 - Creator | O98TwiHaJe | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=O98TwiHaJe | spec_shipped (delta-spec) | specs/O98TwiHaJe-iOS-Award-Signature-2025-Creator/spec.md | Award_Top talent (dropdown select), Home (Chi tiết carousel tap on Signature 2025 card — requires DEMO append) | Same parametric Award Detail with **Q-SIG-1** (dual prize-value rows — cá nhân + tập thể — and **Q-MVP-1** custom caption. Extends AwardDetail with `prizeValueTeam` + `prizeCaptionTeam`; AwardInfoBlock conditionally renders second PrizeValueRow) |
+| 10 | [iOS] Sun*Kudos | fO0Kt19sZZ | https://www.figma.com/design/9ypp4enmFmdK3YAFJLIu6C?node-id=fO0Kt19sZZ | spec_shipped (full spec) | specs/fO0Kt19sZZ-iOS-Sun-Kudos/spec.md | Home (Sun*Kudos Chi tiết / bottom-nav Kudos tab), Award Detail (Sun*Kudos Chi tiết) | New authenticated hub screen with 14 user stories — Highlight carousel (top-5 by hearts), Hashtag+Department filter (AND), All Kudos feed, Spotlight Board (pan/zoom + Sunner search), personal stats with x2 fire bonus badge, Open Secret Box CTA, Top 10 latest gift recipients, Copy Link, Send Kudos shortcut. 5 open questions (Q-K-1..Q-K-5) for plan phase. |
 
 ---
 
@@ -128,6 +129,7 @@ flowchart TD
 | 2026-05-11 | Delta-spec authored | [iOS] Award_Top project leader (QQvsfK3yaK) | Lightweight delta-spec referencing canonical c-QM3_zjkG (no commit yet — spec only). Data shape identical to Top Talent (quantity=3 "Cá nhân", prize 7.000.000 VNĐ); no new Q-numbers introduced since shipped Q-TP-2 `"%02d"` formatter renders "03" automatically. Description text deliberately not inlined — pulled from Figma node `6885:10542` at impl time. Pending DEMO_AWARDS + DEMO_DETAILS append + badge composite bundle (Slice A equivalent). |
 | 2026-05-11 | Delta-spec authored | [iOS] Award_Best Manager (7y195PPTxQ) | Third delta-spec following the now-validated pattern. Pure data append — `quantity=1` (renders "01"), `unit="Cá nhân"`, `prizeValue="10.000.000 VNĐ"` (new value, still pre-formatted). No new Q-numbers. Description full Figma copy at node `6885:10616`. Pending DEMO append + badge bundle. |
 | 2026-05-11 | Delta-specs + impl shipped | [iOS] Award_MVP (b2BuS8HYIt) + [iOS] Award_Signature 2025 - Creator (O98TwiHaJe) | Two delta-specs break the pure-data-append pattern by introducing **Q-MVP-1** (custom prize caption per award) and **Q-SIG-1** (dual prize-value rows — cá nhân + tập thể). AwardDetail model extended with 3 new optional fields: `prizeCaption`, `prizeValueTeam`, `prizeCaptionTeam` (all backward-compatible defaults). AwardInfoBlock composable extended to accept the caption override and conditionally render a second PrizeValueRow. After this lands, all five future Award fields are absorbable by data-only deltas. |
+| 2026-05-12 | Spec authored | [iOS] Sun*Kudos (fO0Kt19sZZ) | New main hub spec — 14 user stories, 30+ components mapped with Node IDs. Establishes Kudos recognition flow: Highlight carousel (top-5 by hearts) + Hashtag/Department filter (AND) + All Kudos feed + Spotlight Board (pan/zoom + live Sunner search) + personal stats with x2 fire bonus + Open Secret Box CTA + Top 10 gift recipients + Copy Link + Send Kudos shortcut + auth gate. 5 open product questions (Q-K-1 special day source, Q-K-2 realtime vs poll, Q-K-3 anonymous-to-recipient flag, Q-K-4 copy link URL, Q-K-5 like-own-received). |
 
 ---
 
