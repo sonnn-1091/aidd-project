@@ -113,6 +113,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    // Sun*Kudos feature — extended material icon set
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Login feature: Supabase SDK (T003)
     implementation(platform(libs.supabase.bom))

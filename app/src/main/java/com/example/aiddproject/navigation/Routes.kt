@@ -25,6 +25,11 @@ object Routes {
     const val SEARCH: String = "route_search"
     const val PROFILE: String = "route_profile"
 
+    // Sun*Kudos US11 — Open Secret Box flow. Delta-spec `kQk65hSYF2` (open
+    // animation) is out of scope for the hub work; the placeholder destination
+    // lands here and the real screen lands when that spec ships.
+    const val SECRET_BOX_OPEN: String = "route_secret_box_open"
+
     /**
      * Award Detail destination is parameterized by `awardId`. Wired
      * to the real `AwardDetailScreen` since the Award_Top talent spec

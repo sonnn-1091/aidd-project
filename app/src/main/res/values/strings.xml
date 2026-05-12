@@ -109,4 +109,59 @@
     <string name="a11y_award_detail_screen">Màn hình chi tiết giải thưởng</string>
     <string name="a11y_award_category_dropdown">Chọn hạng mục giải thưởng, %1$s, danh sách thả xuống</string>
     <string name="a11y_award_badge_image">Huy hiệu giải thưởng %1$s</string>
+
+    <!-- ====================================================================== -->
+    <!-- Sun*Kudos hub feature — Spec fO0Kt19sZZ                                 -->
+    <!-- Brand-fixed (translatable=false)                                        -->
+    <!-- ====================================================================== -->
+    <string name="kudos_hero_brand" translatable="false">KUDOS</string>
+    <string name="kudos_section_highlight_title" translatable="false">HIGHLIGHT KUDOS</string>
+    <string name="kudos_section_all_title" translatable="false">ALL KUDOS</string>
+    <string name="kudos_section_spotlight_title" translatable="false">SPOTLIGHT BOARD</string>
+    <string name="kudos_copy_link_url_template" translatable="false">https://saa.sun-asterisk.com/kudos/%1$s</string>
+
+    <!-- ====================================================================== -->
+    <!-- Sun*Kudos — Localized display strings (VN authoritative)                -->
+    <!-- ====================================================================== -->
+    <string name="kudos_hero_subtitle">Hệ thống ghi nhận và cảm ơn</string>
+    <string name="kudos_send_placeholder">Hôm nay, bạn muốn gửi kudos đến ai?</string>
+    <string name="kudos_filter_hashtag_label">Hashtag</string>
+    <string name="kudos_filter_department_label">Phòng ban</string>
+    <string name="kudos_view_all_label">Xem tất cả Kudos</string>
+    <string name="kudos_card_view_detail_label">Xem chi tiết</string>
+    <string name="kudos_anonymous_nickname_fallback">Ẩn danh</string>
+    <string name="kudos_loading">Đang tải…</string>
+    <string name="kudos_empty">Hiện tại chưa có Kudos nào.</string>
+    <string name="kudos_section_empty_generic">Chưa có dữ liệu</string>
+    <string name="kudos_error">Không thể tải. Vui lòng thử lại.</string>
+    <string name="kudos_action_retry">Thử lại</string>
+    <string name="kudos_copy_link_snackbar">Link copied — ready to share!</string>
+    <string name="kudos_reaction_failed_snackbar">Không thể cập nhật cảm xúc. Vui lòng thử lại.</string>
+    <string name="kudos_stats_received">Kudos nhận</string>
+    <string name="kudos_stats_sent">Kudos gửi</string>
+    <string name="kudos_stats_hearts">Hearts</string>
+    <string name="kudos_stats_boxes_opened">Box đã mở</string>
+    <string name="kudos_stats_boxes_unopened">Box chưa mở</string>
+    <string name="kudos_secret_box_open">Mở Secret Box</string>
+    <string name="kudos_top_ten_title">Top 10 người nhận quà gần nhất</string>
+    <string name="kudos_spotlight_total_label">Tổng Kudos đã trao</string>
+    <string name="kudos_spotlight_search_placeholder">Tìm kiếm</string>
+    <string name="kudos_spotlight_no_results">Không tìm thấy kết quả</string>
+
+    <!-- ====================================================================== -->
+    <!-- Sun*Kudos — Accessibility labels                                        -->
+    <!-- ====================================================================== -->
+    <string name="a11y_kudos_screen">Màn hình Sun Kudos</string>
+    <string name="a11y_kudos_send_pill">Gửi Kudos mới, nút</string>
+    <string name="a11y_kudos_hashtag_filter">Lọc theo hashtag, %1$s, danh sách thả xuống</string>
+    <string name="a11y_kudos_department_filter">Lọc theo phòng ban, %1$s, danh sách thả xuống</string>
+    <string name="a11y_kudos_heart_liked">Đã thích, %1$d heart, bỏ thích</string>
+    <string name="a11y_kudos_heart_unliked">Thả tim, %1$d heart</string>
+    <string name="a11y_kudos_heart_disabled">Bạn không thể thả tim cho Kudos này</string>
+    <string name="a11y_kudos_copy_link">Sao chép link</string>
+    <string name="a11y_kudos_view_detail">Xem chi tiết Kudos</string>
+    <string name="a11y_kudos_view_all">Xem toàn bộ Kudos</string>
+    <string name="a11y_kudos_carousel_page_indicator">Thẻ %1$d trên %2$d</string>
+    <string name="a11y_kudos_secret_box_open">Mở Secret Box, nút</string>
+    <string name="a11y_kudos_open_profile">Mở hồ sơ %1$s</string>
 </resources>
