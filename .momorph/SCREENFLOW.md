@@ -51,33 +51,61 @@ flowchart TD
         Home["[iOS] Home\n(OuH1BUTYT0)"]
         AwardTopTalent["[iOS] Award_Top talent\n(c-QM3_zjkG)"]
         AwardTopProject["[iOS] Award_Top project\n(FQoJZLkG_d)"]
+        SunKudos["[iOS] Sun*Kudos\n(fO0Kt19sZZ)"]
     end
 
     subgraph SubFlows["Sub-flows / Overlays"]
         LangDropdown["[iOS] Language dropdown\n(uUvW6Qm1ve)"]
+        HashtagDropdown["Hashtag dropdown\n(V5GRjAdJyb)"]
+        DeptDropdown["Phòng ban dropdown\n(76k69LQPfj)"]
+    end
+
+    subgraph Discovered["Discovered, spec pending"]
+        SendKudos["[iOS] Send Kudos compose\n(PV7jBVZU1N)"]
+        KudoDetail["[iOS] View Kudo\n(T0TR16k0vH / 5C2BL6GYXL)"]
+        AllKudos["[iOS] All Kudos paginated\n(j_a2GQWKDJ)"]
+        OpenSecretBox["[iOS] Open Secret Box\n(kQk65hSYF2)"]
+        ProfileSelf["[iOS] Profile bản thân\n(hSH7L8doXB)"]
+        ProfileOther["[iOS] Profile người khác\n(bEpdheM0yU)"]
     end
 
     Login -- "auth success" --> Home
     Home -- "logout / 401" --> Login
     AwardTopTalent -- "logout / 401" --> Login
+    SunKudos -- "logout / 401" --> Login
 
     Home -- "Awards tab tap (default = first by sort_order = Top Talent)" --> AwardTopTalent
     Home -- "Chi tiết on Top Talent card" --> AwardTopTalent
     Home -- "Chi tiết on Top Project card" --> AwardTopProject
     AwardTopTalent -. "dropdown select Top Project" .-> AwardTopProject
     AwardTopProject -. "dropdown select Top Talent" .-> AwardTopTalent
-    AwardTopTalent -- "Sun*Kudos Chi tiết" --> Home
-    AwardTopProject -- "Sun*Kudos Chi tiết" --> Home
+
+    Home -- "Kudos bottom-nav tab" --> SunKudos
+    AwardTopTalent -- "Sun*Kudos Chi tiết (KudosSection)" --> SunKudos
+    AwardTopProject -- "Sun*Kudos Chi tiết (KudosSection)" --> SunKudos
+
+    SunKudos -- "Send Kudos pill (A.1) tap" --> SendKudos
+    SunKudos -- "Xem chi tiết / card body tap" --> KudoDetail
+    SunKudos -- "View all Kudos link tap" --> AllKudos
+    SunKudos -- "Open Secret Box CTA tap" --> OpenSecretBox
+    SunKudos -- "tap own avatar / name" --> ProfileSelf
+    SunKudos -- "tap other Sunner avatar / name" --> ProfileOther
+    SunKudos -. "tap Hashtag filter" .-> HashtagDropdown
+    SunKudos -. "tap Phòng ban filter" .-> DeptDropdown
+    HashtagDropdown -. "select hashtag → filter both feeds" .-> SunKudos
+    DeptDropdown -. "select department → filter both feeds" .-> SunKudos
 
     Login -. "tap language pill" .-> LangDropdown
     Home  -. "tap language pill" .-> LangDropdown
     AwardTopTalent -. "tap language pill" .-> LangDropdown
+    SunKudos -. "tap language pill" .-> LangDropdown
     LangDropdown -. "select VN/EN → persist + re-render" .-> Login
     LangDropdown -. "select VN/EN → persist + re-render" .-> Home
     LangDropdown -. "select VN/EN → persist + re-render" .-> AwardTopTalent
+    LangDropdown -. "select VN/EN → persist + re-render" .-> SunKudos
 ```
 
-> Dotted edges denote a sub-flow / overlay relationship: the dropdown does not push a new route — it anchors to the language-pill control on its parent and dismisses back to the same parent screen. The Award_Top talent ↔ Award_Top project dotted edges are sibling-state transitions — both render through the same parametric `AwardDetailScreen` composable; the dropdown swap is an in-place re-render, not a navigation transition. Awards-related language-pill edges are shown only on Top Talent (Top Project inherits the same chrome behaviour as the canonical parametric screen).
+> Dotted edges denote a sub-flow / overlay relationship: the dropdown does not push a new route — it anchors to a control on its parent and dismisses back to the same parent screen. The Award_Top talent ↔ Award_Top project dotted edges are sibling-state transitions — both render through the same parametric `AwardDetailScreen` composable; the dropdown swap is an in-place re-render, not a navigation transition. The `Discovered, spec pending` subgraph contains Sun*Kudos's outbound destinations whose own specs are still pending — Sun*Kudos's spec (`fO0Kt19sZZ`) marks them as Out of Scope. Awards-related language-pill edges are shown only on Top Talent (Top Project inherits the same chrome behaviour as the canonical parametric screen).
 
 ---
 

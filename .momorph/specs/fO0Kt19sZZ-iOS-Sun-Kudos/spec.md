@@ -546,7 +546,7 @@ adjacent labeled Node IDs).
 | `kudos.like_disabled_for_me` | server (derived, Q-K-5) | `true` when current user is sender OR recipient — drives heart icon disabled state |
 | `kudos.heart_count` | server | Display verbatim |
 | Recipient star tier | derived | 1★ at 10 received, 2★ at 20, 3★ at 50 |
-| Spotlight total | `GET /api/v1/kudos/count` (or `/spotlight/summary`) | Refreshed by mount + pull-to-refresh only (Q-K-2) |
+| Spotlight total | Returned in the `/api/v1/spotlight/graph` response payload as `total_kudos_count: number` | Refreshed by mount + pull-to-refresh only (Q-K-2) |
 | Spotlight graph | `GET /api/v1/spotlight/graph` | Pan/zoom/search payload |
 | Personal stats | `GET /api/v1/users/me/stats` | `kudos_received_count`, `kudos_sent_count`, `hearts_received`, `secret_boxes_opened`, `secret_boxes_unopened` |
 | x2 fire bonus flag | `GET /api/v1/system/flags` (or session) | Boolean — toggled by admin |
@@ -589,7 +589,7 @@ adjacent labeled Node IDs).
 | `/api/v1/kudos/{kudosId}/reactions` | DELETE | Remove heart | Heart re-tap (US5 scenario 2) |
 | `/api/v1/hashtags` | GET | Hashtag bottom-sheet list | B.1.1 tap |
 | `/api/v1/departments` | GET | Department bottom-sheet list | B.1.2 tap |
-| `/api/v1/spotlight/graph` | GET | Spotlight Sunner-graph payload | Spotlight section mount |
+| `/api/v1/spotlight/graph` | GET | Spotlight Sunner-graph payload **and** total kudos count (`total_kudos_count` field on the response — B.7.1 reads this) | Spotlight section mount + pull-to-refresh |
 | `/api/v1/spotlight/search?q&limit` | GET | Live Sunner search | B.7.3 input change (debounced) |
 | `/api/v1/users/me/stats` | GET | Personal-stats tiles | Mount |
 | `/api/v1/system/flags` | GET | x2 fire bonus flag | Mount (or hydrated from session) |
