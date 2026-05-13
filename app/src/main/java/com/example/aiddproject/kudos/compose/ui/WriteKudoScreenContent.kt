@@ -25,6 +25,8 @@ import com.example.aiddproject.kudos.compose.ui.components.CommunityStandardsLin
 import com.example.aiddproject.kudos.compose.ui.components.HashtagPickerOverlay
 import com.example.aiddproject.kudos.compose.ui.components.HashtagSection
 import com.example.aiddproject.kudos.compose.ui.components.HeaderText
+import com.example.aiddproject.kudos.compose.ui.components.LinkInsertDialog
+import com.example.aiddproject.kudos.compose.ui.components.MentionSuggestionOverlay
 import com.example.aiddproject.kudos.compose.ui.components.MessageEditor
 import com.example.aiddproject.kudos.compose.ui.components.RecipientPickerField
 import com.example.aiddproject.kudos.compose.ui.components.RecipientPickerOverlay
@@ -105,6 +107,15 @@ fun WriteKudoScreenContent(
             onDismiss = callbacks.onDismissConfirmDialog,
         )
     }
+
+    state.linkDialog?.let { linkDialog ->
+        LinkInsertDialog(
+            state = linkDialog,
+            onUrlChange = callbacks.onLinkDialogUrlChange,
+            onSubmit = callbacks.onLinkDialogSubmit,
+            onDismiss = callbacks.onLinkDialogDismiss,
+        )
+    }
 }
 
 @Composable
@@ -138,14 +149,22 @@ private fun FormColumn(
         MessageEditor(
             value = state.message,
             onValueChange = callbacks.onMessageChange,
+            onSelectionChange = callbacks.onMessageSelectionChange,
+            onMentionQueryChange = callbacks.onMentionTriggered,
+            onMentionDismiss = callbacks.onMentionDismiss,
+            onToolbarAction = callbacks.onToolbarAction,
+            onLinkTap = callbacks.onLinkButtonTap,
             errorRes = state.fieldErrors.message,
             enabled = !state.isSending,
         )
-        // Annotate the message error path to include the explicit
-        // over-1000 case (the validator reports it on Send; the
-        // counter visualises it live regardless).
-        // No additional UI — handled inside MessageEditor.
-        // The MAX_MESSAGE_LENGTH constant is re-exported for tests.
+
+        // Mention overlay rendered INLINE below the editor — not caret-
+        // anchored. Tap a row to insert `@FullName ` at the trigger
+        // offset; tap outside / type whitespace to dismiss.
+        val mention = state.mentionOverlay
+        if (mention is MentionOverlayState.Open) {
+            MentionSuggestionOverlay(state = mention, onPick = callbacks.onMentionPick)
+        }
         @Suppress("UNUSED_EXPRESSION") WriteKudoValidators.MAX_MESSAGE_LENGTH
 
         HashtagSection(
@@ -200,6 +219,7 @@ data class WriteKudoCallbacks(
     val onRecipientRetry: () -> Unit,
     val onTitleChange: (String) -> Unit,
     val onMessageChange: (RichTextValue) -> Unit,
+    val onMessageSelectionChange: (IntRange) -> Unit,
     val onHashtagPickerOpen: () -> Unit,
     val onHashtagPickerDismiss: () -> Unit,
     val onHashtagAdd: (Hashtag) -> Unit,
@@ -210,4 +230,13 @@ data class WriteKudoCallbacks(
     val onSendTap: () -> Unit,
     val onConfirmDiscard: () -> Unit,
     val onDismissConfirmDialog: () -> Unit,
+    // Phase 6 — rich-text + @mentions + link
+    val onToolbarAction: (ToolbarAction) -> Unit,
+    val onLinkButtonTap: () -> Unit,
+    val onLinkDialogUrlChange: (String) -> Unit,
+    val onLinkDialogSubmit: () -> Unit,
+    val onLinkDialogDismiss: () -> Unit,
+    val onMentionTriggered: (query: String, triggerOffset: Int) -> Unit,
+    val onMentionDismiss: () -> Unit,
+    val onMentionPick: (SunnerNode) -> Unit,
 )
