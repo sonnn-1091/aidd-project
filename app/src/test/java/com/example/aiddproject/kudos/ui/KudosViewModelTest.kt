@@ -305,5 +305,19 @@ class KudosViewModelTest {
         override suspend fun openSecretBox(boxId: String): Result<SecretBoxReward> = delegate.openSecretBox(boxId)
 
         override suspend fun listRecentGiftRecipients(limit: Int): Result<List<GiftRecipient>> = delegate.listRecentGiftRecipients(limit)
+
+        override suspend fun createKudo(
+            draft: com.example.aiddproject.kudos.compose.domain.WriteKudoDraft,
+        ): Result<Kudos> = delegate.createKudo(draft)
+
+        override suspend fun uploadKudoImage(
+            kudoId: String,
+            index: Int,
+            uri: android.net.Uri,
+        ): Result<com.example.aiddproject.kudos.compose.domain.UploadedImage> = delegate.uploadKudoImage(kudoId, index, uri)
+
+        override suspend fun deleteKudoImage(
+            ref: com.example.aiddproject.kudos.compose.domain.UploadedImage,
+        ): Result<Unit> = delegate.deleteKudoImage(ref)
     }
 }
