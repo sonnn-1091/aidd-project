@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -57,6 +58,7 @@ import com.example.aiddproject.kudos.domain.SunnerNode
 @Composable
 fun RecipientPickerOverlay(
     state: RecipientPickerState.Open,
+    contentWidth: androidx.compose.ui.unit.Dp,
     onPick: (SunnerNode) -> Unit,
     onDismiss: () -> Unit,
     onRetry: () -> Unit,
@@ -73,7 +75,13 @@ fun RecipientPickerOverlay(
         Box(
             modifier =
                 Modifier
-                    .widthIn(min = 220.dp, max = 320.dp)
+                    .let {
+                        if (contentWidth > 0.dp) {
+                            it.width(contentWidth)
+                        } else {
+                            it.widthIn(min = 220.dp, max = 320.dp)
+                        }
+                    }
                     .heightIn(min = 80.dp, max = 320.dp)
                     .padding(horizontal = 8.dp, vertical = 6.dp),
         ) {

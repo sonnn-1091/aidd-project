@@ -49,7 +49,6 @@ object FormFieldTokens {
     val LabelWidth = 93.dp // recipient + award label cell — wide enough for "Người nhận *"
     val HashtagLabelWidth = 70.dp
     val ImageLabelWidth = 46.dp
-    val InputColumnWidth = 210.dp
 }
 
 /**

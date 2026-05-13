@@ -10,15 +10,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -32,10 +37,10 @@ import com.example.aiddproject.kudos.domain.SunnerNode
  * B.1 + B.2 — "Người nhận *" label LEFT + dropdown trigger RIGHT
  * (Figma `6885:9293` / `6885:9297`).
  *
- * The trigger box now hosts the M3 `DropdownMenu`-backed picker
- * overlay as a child so the dropdown anchors directly beneath the
- * trigger (matches the hub's HashtagFilterDropdown chrome) — the
- * old AlertDialog modal is gone.
+ * Trigger fills horizontal width (weight 1f after the label). The
+ * dropdown anchors to the outer Box wrapping the FULL row so it spans
+ * the entire card width when open (including the label gutter on the
+ * left).
  */
 @Composable
 fun RecipientPickerField(
@@ -49,24 +54,33 @@ fun RecipientPickerField(
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
+    var rowWidthPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val rowWidth = with(density) { rowWidthPx.toDp() }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth().height(FormFieldTokens.FieldHeight),
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .onSizeChanged { rowWidthPx = it.width },
         ) {
-            KudosFieldLabel(
-                text = stringResource(R.string.write_kudo_recipient_label),
-                required = true,
-            )
-            // Anchor box — DropdownMenu auto-positions below this Box.
-            Box(modifier = Modifier.width(FormFieldTokens.InputColumnWidth)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth().height(FormFieldTokens.FieldHeight),
+            ) {
+                KudosFieldLabel(
+                    text = stringResource(R.string.write_kudo_recipient_label),
+                    required = true,
+                )
                 Box(
                     modifier =
                         Modifier
+                            .weight(1f)
                             .fillMaxWidth()
                             .kudosFieldBox()
                             .clickable(enabled = enabled, onClick = onOpenPicker)
@@ -101,14 +115,15 @@ fun RecipientPickerField(
                         )
                     }
                 }
-                if (pickerState is RecipientPickerState.Open) {
-                    RecipientPickerOverlay(
-                        state = pickerState,
-                        onPick = onPick,
-                        onDismiss = onDismissPicker,
-                        onRetry = onRetry,
-                    )
-                }
+            }
+            if (pickerState is RecipientPickerState.Open) {
+                RecipientPickerOverlay(
+                    state = pickerState,
+                    contentWidth = rowWidth,
+                    onPick = onPick,
+                    onDismiss = onDismissPicker,
+                    onRetry = onRetry,
+                )
             }
         }
         if (errorRes != null) {
