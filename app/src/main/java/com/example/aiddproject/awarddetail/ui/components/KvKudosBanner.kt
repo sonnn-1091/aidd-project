@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,13 +28,14 @@ import com.example.aiddproject.ui.theme.SaaCream
  * Vertical column, **left-aligned**, anchored 20dp from the screen
  * left edge. Per Figma styles:
  * - Subtitle text "Hệ thống ghi nhận và cảm ơn" — 14sp Montserrat 500,
- *   color `#FFEA9E` (SaaCream), left-aligned. Width 212dp.
- * - Logo lockup row — 221×39dp; SAA flame logo (49×38dp) +
- *   "KUDOS" wordmark side-by-side, vertically centered.
+ *   color `#FFEA9E` (SaaCream), left-aligned.
+ * - Logo lockup row — 39dp tall, 9dp gap:
+ *   - 49×38dp `kudos_hero_icon` (Sun* "S" mark in red).
+ *   - 163×39dp `kudos_hero_wordmark` ("KUDOS" outline wordmark in
+ *     SaaCream).
  *
- * Per Resolved Q5 + design fidelity, the "KUDOS" wordmark renders as
- * a Text composable in the same SaaCream colour; the flame uses the
- * existing `ic_logo_saa` drawable shared with Login + Home.
+ * Shares the same Figma exports as the Sun*Kudos hub hero so both
+ * surfaces render the brand lockup identically.
  */
 @Composable
 fun KvKudosBanner(modifier: Modifier = Modifier) {
@@ -57,28 +58,27 @@ fun KvKudosBanner(modifier: Modifier = Modifier) {
                 ),
         )
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.height(39.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_logo_saa),
+                painter = painterResource(R.drawable.kudos_hero_icon),
                 contentDescription = null,
+                contentScale = ContentScale.Fit,
                 modifier =
                     Modifier
                         .width(49.dp)
                         .height(38.dp),
             )
-            Spacer(Modifier.width(9.dp))
-            Text(
-                text = "KUDOS",
-                color = SaaCream,
-                style =
-                    MaterialTheme.typography.headlineLarge.copy(
-                        fontSize = 32.sp,
-                        lineHeight = 39.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp,
-                    ),
+            Image(
+                painter = painterResource(R.drawable.kudos_hero_wordmark),
+                contentDescription = stringResource(R.string.kudos_hero_brand),
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier
+                        .width(163.dp)
+                        .height(39.dp),
             )
         }
     }
