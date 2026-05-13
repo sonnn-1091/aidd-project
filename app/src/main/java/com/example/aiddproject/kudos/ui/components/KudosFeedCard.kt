@@ -172,27 +172,22 @@ private fun ProfileBlock(
                 ),
             maxLines = 1,
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = departmentCode,
-                color = CardMuted,
-                style =
-                    MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 8.sp,
-                        lineHeight = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.05.sp,
-                    ),
-            )
-            if (starTier > 0) {
-                Box(
-                    modifier = Modifier.size(2.dp).clip(CircleShape).background(CardMuted.copy(alpha = 0.4f)),
-                )
-                TierBadge(tier = starTier)
-            }
+        // Stack dept code + tier badge vertically (see HighlightCard
+        // for the reasoning — narrow profile column overflows when
+        // these two share a Row).
+        Text(
+            text = departmentCode,
+            color = CardMuted,
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 0.05.sp,
+                ),
+        )
+        if (starTier > 0) {
+            TierBadge(tier = starTier)
         }
     }
 }

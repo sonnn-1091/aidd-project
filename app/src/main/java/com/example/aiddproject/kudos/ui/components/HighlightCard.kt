@@ -176,27 +176,24 @@ private fun ProfileBlock(
                 ),
             maxLines = 1,
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = departmentCode,
-                color = CardMuted,
-                style =
-                    MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 8.sp,
-                        lineHeight = 10.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.05.sp,
-                    ),
-            )
-            if (starTier > 0) {
-                Box(
-                    modifier = Modifier.size(2.dp).clip(CircleShape).background(CardMuted.copy(alpha = 0.4f)),
-                )
-                TierBadge(tier = starTier)
-            }
+        // Stack dept code + tier badge vertically — the carousel
+        // column width (~107dp per profile after the 32dp side peek
+        // and middle arrow) can't fit "CECU01 · Rising Hero" on one
+        // line, so the labels were overlapping. Vertical layout gives
+        // each its own line.
+        Text(
+            text = departmentCode,
+            color = CardMuted,
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 0.05.sp,
+                ),
+        )
+        if (starTier > 0) {
+            TierBadge(tier = starTier)
         }
     }
 }
