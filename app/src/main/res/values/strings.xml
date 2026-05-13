@@ -137,11 +137,11 @@
     <string name="kudos_action_retry">Thử lại</string>
     <string name="kudos_copy_link_snackbar">Link copied — ready to share!</string>
     <string name="kudos_reaction_failed_snackbar">Không thể cập nhật cảm xúc. Vui lòng thử lại.</string>
-    <string name="kudos_stats_received">Kudos nhận</string>
-    <string name="kudos_stats_sent">Kudos gửi</string>
-    <string name="kudos_stats_hearts">Hearts</string>
-    <string name="kudos_stats_boxes_opened">Box đã mở</string>
-    <string name="kudos_stats_boxes_unopened">Box chưa mở</string>
+    <string name="kudos_stats_received">Số Kudos bạn nhận được</string>
+    <string name="kudos_stats_sent">Số Kudos bạn đã gửi</string>
+    <string name="kudos_stats_hearts">Số tim bạn nhận được</string>
+    <string name="kudos_stats_boxes_opened">Số Secret Box bạn đã mở</string>
+    <string name="kudos_stats_boxes_unopened">Số Secret Box chưa mở</string>
     <string name="kudos_secret_box_open">Mở Secret Box</string>
     <string name="kudos_top_ten_title">Top 10 người nhận quà gần nhất</string>
     <string name="kudos_spotlight_total_label">Tổng Kudos đã trao</string>

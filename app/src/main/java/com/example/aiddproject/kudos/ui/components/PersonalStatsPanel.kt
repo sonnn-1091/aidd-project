@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -153,22 +154,43 @@ private fun StatDivider() {
     )
 }
 
+/**
+ * x2 fire badge — Figma `mms_S_Group 435` (`6885:9239`). The
+ * source asset is a textured fire glyph with the "x2" label baked
+ * over it; we replicate the visual with a tinted Material fire
+ * icon as the backdrop + a centered bold "x2" Text with a dark
+ * outline so the white label still reads against the orange flame.
+ */
 @Composable
 private fun X2Badge() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    Box(
+        modifier = Modifier.size(width = 24.dp, height = 28.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Filled.LocalFireDepartment,
             contentDescription = null,
             tint = X2BadgeColor,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.fillMaxSize(),
         )
         Text(
             text = "x2",
             color = Color.White,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    lineHeight = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.03.sp,
+                    shadow =
+                        androidx.compose.ui.graphics.Shadow(
+                            color = Color.Black,
+                            offset =
+                                androidx.compose.ui.geometry
+                                    .Offset(0f, 0.5f),
+                            blurRadius = 1f,
+                        ),
+                ),
         )
     }
 }
