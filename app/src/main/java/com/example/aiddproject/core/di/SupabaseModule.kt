@@ -13,6 +13,8 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Singleton
 
@@ -34,6 +36,7 @@ object SupabaseModule {
         ) {
             install(Auth)
             install(Postgrest)
+            install(Storage)
             httpConfig {
                 authErrorInterceptor.installInto(this)
             }
@@ -41,4 +44,8 @@ object SupabaseModule {
 
     @Provides
     fun provideSessionStatusFlow(client: SupabaseClient): Flow<SessionStatus> = client.auth.sessionStatus
+
+    @Provides
+    @Singleton
+    fun provideStorage(client: SupabaseClient): Storage = client.storage
 }
