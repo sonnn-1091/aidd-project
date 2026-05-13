@@ -2,16 +2,13 @@ package com.example.aiddproject.kudos.compose.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
@@ -31,12 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,13 +45,10 @@ import com.example.aiddproject.kudos.domain.SunnerNode
  * HashtagFilterDropdown / DepartmentFilterDropdown chrome:
  * surface `#00070C`, 1dp `#998C5F` border, 8dp radius, 6dp inset).
  *
- * Layout per Figma:
- *   - First row: white search input (BasicTextField on white bg,
- *     0.5dp gold border, 3.5dp radius) — same chrome as the field
- *     trigger above.
- *   - Below: list of result rows. Each row is 56dp tall:
- *     `Avatar 32dp` + 12dp gap + `Column { fullName (white SemiBold
- *     14sp), department (gray 12sp) }`.
+ * Layout per Figma — list of result rows only, no in-dropdown search
+ * input. Each row is 56dp tall:
+ *   `Avatar 32dp` + 12dp gap + `Column { fullName (white SemiBold
+ *   14sp), department (gray 12sp) }`.
  *
  * The anchor is the parent Box around the trigger in
  * [RecipientPickerField]. DropdownMenu auto-positions itself below
@@ -66,7 +57,6 @@ import com.example.aiddproject.kudos.domain.SunnerNode
 @Composable
 fun RecipientPickerOverlay(
     state: RecipientPickerState.Open,
-    onQueryChange: (String) -> Unit,
     onPick: (SunnerNode) -> Unit,
     onDismiss: () -> Unit,
     onRetry: () -> Unit,
@@ -80,103 +70,52 @@ fun RecipientPickerOverlay(
         containerColor = MenuSurfaceColor,
         border = BorderStroke(1.dp, MenuBorderColor),
     ) {
-        Column(
+        Box(
             modifier =
                 Modifier
                     .widthIn(min = 220.dp, max = 320.dp)
-                    .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                    .heightIn(min = 80.dp, max = 320.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
         ) {
-            // Search input inside the dropdown — white pill matching
-            // the trigger's chrome.
-            SearchInput(
-                query = state.query,
-                onQueryChange = onQueryChange,
-            )
-
-            // Result body.
-            Box(modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp, max = 280.dp)) {
-                when (val r = state.results) {
-                    RecipientPickerState.ResultState.Loading -> CenteredSpinner()
-                    RecipientPickerState.ResultState.NoResults ->
-                        CenteredMessage(stringResource(R.string.write_kudo_recipient_no_results))
-                    is RecipientPickerState.ResultState.Error ->
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.align(Alignment.Center),
-                        ) {
+            when (val r = state.results) {
+                RecipientPickerState.ResultState.Loading -> CenteredSpinner()
+                RecipientPickerState.ResultState.NoResults ->
+                    CenteredMessage(stringResource(R.string.write_kudo_recipient_no_results))
+                is RecipientPickerState.ResultState.Error ->
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.align(Alignment.Center),
+                    ) {
+                        Text(
+                            text = stringResource(r.messageRes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MenuTextSecondary,
+                        )
+                        TextButton(onClick = onRetry) {
                             Text(
-                                text = stringResource(r.messageRes),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MenuTextSecondary,
+                                text = stringResource(R.string.write_kudo_recipient_retry),
+                                color = MenuGoldText,
                             )
-                            TextButton(onClick = onRetry) {
-                                Text(
-                                    text = stringResource(R.string.write_kudo_recipient_retry),
-                                    color = MenuGoldText,
-                                )
-                            }
                         }
-                    is RecipientPickerState.ResultState.Loaded ->
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            items(r.items, key = { it.id }) { node ->
-                                RecipientRow(
-                                    node = node,
-                                    onPick = {
-                                        onPick(node)
-                                        onDismiss()
-                                    },
-                                )
-                            }
+                    }
+                is RecipientPickerState.ResultState.Loaded ->
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        items(r.items, key = { it.id }) { node ->
+                            RecipientRow(
+                                node = node,
+                                onPick = {
+                                    onPick(node)
+                                    onDismiss()
+                                },
+                            )
                         }
-                }
+                    }
             }
         }
-    }
-}
-
-@Composable
-private fun SearchInput(
-    query: String,
-    onQueryChange: (String) -> Unit,
-) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(36.dp)
-                .clip(RoundedCornerShape(3.5.dp))
-                .background(FormFieldTokens.FieldFill)
-                .border(0.5.dp, FormFieldTokens.BorderGold, RoundedCornerShape(3.5.dp))
-                .padding(horizontal = 10.dp, vertical = 6.dp)
-                .testTag(WriteKudoTestTags.RECIPIENT_SEARCH_INPUT),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        if (query.isEmpty()) {
-            Text(
-                text = stringResource(R.string.write_kudo_recipient_placeholder),
-                color = FormFieldTokens.PlaceholderColor,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-            )
-        }
-        BasicTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            singleLine = true,
-            textStyle =
-                TextStyle(
-                    color = FormFieldTokens.LabelColor,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
-                ),
-            cursorBrush = SolidColor(FormFieldTokens.LabelColor),
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 

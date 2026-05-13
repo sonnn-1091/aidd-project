@@ -43,7 +43,6 @@ fun RecipientPickerField(
     pickerState: RecipientPickerState,
     onOpenPicker: () -> Unit,
     onDismissPicker: () -> Unit,
-    onQueryChange: (String) -> Unit,
     onPick: (SunnerNode) -> Unit,
     onRetry: () -> Unit,
     @StringRes errorRes: Int?,
@@ -105,7 +104,6 @@ fun RecipientPickerField(
                 if (pickerState is RecipientPickerState.Open) {
                     RecipientPickerOverlay(
                         state = pickerState,
-                        onQueryChange = onQueryChange,
                         onPick = onPick,
                         onDismiss = onDismissPicker,
                         onRetry = onRetry,

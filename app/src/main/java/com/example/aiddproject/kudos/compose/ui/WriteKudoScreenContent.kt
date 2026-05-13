@@ -225,7 +225,6 @@ private fun FormCard(
                     pickerState = state.recipientPicker,
                     onOpenPicker = callbacks.onRecipientPickerOpen,
                     onDismissPicker = callbacks.onRecipientPickerDismiss,
-                    onQueryChange = callbacks.onRecipientQueryChange,
                     onPick = callbacks.onRecipientChosen,
                     onRetry = callbacks.onRecipientRetry,
                     errorRes = state.fieldErrors.recipient,
