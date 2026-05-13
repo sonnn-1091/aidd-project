@@ -114,6 +114,9 @@ private fun SenderRecipientRow(
             }
         ProfileBlock(
             name = senderName,
+            avatarRes = R.drawable.kudos_avatar_sender,
+            departmentCode = departmentCodeFor(kudos.sender),
+            starTier = kudos.sender.starTier,
             onTap = onSenderTap,
             modifier = Modifier.weight(1f),
         )
@@ -124,8 +127,10 @@ private fun SenderRecipientRow(
         )
         ProfileBlock(
             name = kudos.recipient.fullName,
-            onTap = onRecipientTap,
+            avatarRes = R.drawable.kudos_avatar_recipient,
+            departmentCode = departmentCodeFor(kudos.recipient),
             starTier = kudos.recipient.starTier,
+            onTap = onRecipientTap,
             modifier = Modifier.weight(1f),
         )
     }
@@ -134,9 +139,11 @@ private fun SenderRecipientRow(
 @Composable
 private fun ProfileBlock(
     name: String,
+    @androidx.annotation.DrawableRes avatarRes: Int,
+    departmentCode: String,
+    starTier: Int,
     onTap: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    starTier: Int = 0,
 ) {
     val tappable = if (onTap != null) modifier.clickable(onClick = onTap) else modifier
     Column(
@@ -144,24 +151,76 @@ private fun ProfileBlock(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(
+        Image(
+            painter = painterResource(avatarRes),
+            contentDescription = null,
             modifier =
                 Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(SaaCream),
+                    .border(width = 1.dp, color = Color.White, shape = CircleShape),
         )
         Text(
             text = name,
             color = CardDarkText,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 10.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                ),
             maxLines = 1,
         )
-        if (starTier > 0) {
-            StarTierBadge(tier = starTier)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = departmentCode,
+                color = CardMuted,
+                style =
+                    MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 8.sp,
+                        lineHeight = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.05.sp,
+                    ),
+            )
+            if (starTier > 0) {
+                Box(
+                    modifier = Modifier.size(2.dp).clip(CircleShape).background(CardMuted.copy(alpha = 0.4f)),
+                )
+                TierBadge(tier = starTier)
+            }
         }
     }
 }
+
+@Composable
+private fun TierBadge(tier: Int) {
+    val label =
+        when (tier) {
+            1 -> "Rising Hero"
+            2 -> "Champion"
+            3 -> "Legend"
+            else -> return
+        }
+    Box {
+        Image(
+            painter = painterResource(R.drawable.kudos_tier_badge),
+            contentDescription = null,
+            modifier = Modifier.size(width = 45.dp, height = 9.dp),
+        )
+        Text(
+            text = label,
+            color = Color.White,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 6.sp, lineHeight = 8.sp, fontWeight = FontWeight.Bold),
+            modifier = Modifier.align(Alignment.Center),
+        )
+    }
+}
+
+private fun departmentCodeFor(sunner: com.example.aiddproject.kudos.domain.SunnerNode): String = "CEC" + sunner.id.takeLast(2).uppercase()
 
 @Composable
 private fun ContentBlock(
