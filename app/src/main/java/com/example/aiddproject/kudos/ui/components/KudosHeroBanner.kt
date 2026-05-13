@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,10 +27,19 @@ import com.example.aiddproject.ui.theme.SaaCream
 /**
  * Hub hero banner — Figma frame `mms_A_KV Kudos` (`6885:9066`).
  *
- * Renders ONLY the subtitle + SAA logo + KUDOS wordmark. The
- * colorful keyvisual artwork now lives at the screen level (Home-
- * style full-bleed `bg_home` painted by `KudosScreenContent`), so
- * this section is transparent and lets that artwork show through.
+ * Layout per Figma:
+ *  - 14sp Montserrat Medium SaaCream subtitle "Hệ thống ghi nhận và
+ *    cảm ơn".
+ *  - 8dp gap.
+ *  - 39dp-tall row with 9dp gap between:
+ *    - 49×38dp `kudos_hero_icon` (Figma node `6885:9071`, the Sun*
+ *      "S" mark in red).
+ *    - 163×39dp `kudos_hero_wordmark` (Figma node `6885:9077`, the
+ *      "KUDOS" outline wordmark in SaaCream).
+ *
+ * The colorful keyvisual artwork is painted at the screen level
+ * (`KudosScreenContent` paints `bg_home`), so this hero is
+ * transparent and lets the wave artwork show through.
  */
 @Composable
 fun KudosHeroBanner(modifier: Modifier = Modifier) {
@@ -56,20 +67,22 @@ fun KudosHeroBanner(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_logo_saa),
+                painter = painterResource(R.drawable.kudos_hero_icon),
                 contentDescription = null,
-                modifier = Modifier.height(38.dp),
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier
+                        .width(49.dp)
+                        .height(38.dp),
             )
-            Text(
-                text = stringResource(R.string.kudos_hero_brand),
-                color = SaaCream,
-                style =
-                    MaterialTheme.typography.displaySmall.copy(
-                        fontSize = 36.sp,
-                        lineHeight = 40.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 4.sp,
-                    ),
+            Image(
+                painter = painterResource(R.drawable.kudos_hero_wordmark),
+                contentDescription = stringResource(R.string.kudos_hero_brand),
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier
+                        .width(163.dp)
+                        .height(39.dp),
             )
         }
     }
