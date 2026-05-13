@@ -61,4 +61,7 @@ object WriteKudoValidators {
     const val MAX_TITLE_LENGTH: Int = 100
     const val MAX_MESSAGE_LENGTH: Int = 1000
     const val MAX_HASHTAGS: Int = 5
+    const val MAX_IMAGES: Int = 5
+    const val MAX_IMAGE_BYTES: Long = 10L * 1024L * 1024L // 10 MiB (FR-008)
+    val ALLOWED_IMAGE_MIMES: Set<String> = setOf("image/jpeg", "image/png", "image/webp")
 }

@@ -25,6 +25,7 @@ import com.example.aiddproject.kudos.compose.ui.components.CommunityStandardsLin
 import com.example.aiddproject.kudos.compose.ui.components.HashtagPickerOverlay
 import com.example.aiddproject.kudos.compose.ui.components.HashtagSection
 import com.example.aiddproject.kudos.compose.ui.components.HeaderText
+import com.example.aiddproject.kudos.compose.ui.components.ImageSection
 import com.example.aiddproject.kudos.compose.ui.components.LinkInsertDialog
 import com.example.aiddproject.kudos.compose.ui.components.MentionSuggestionOverlay
 import com.example.aiddproject.kudos.compose.ui.components.MessageEditor
@@ -173,6 +174,12 @@ private fun FormColumn(
             onRemoveTag = { callbacks.onHashtagRemove(it.id) },
             errorRes = state.fieldErrors.hashtags,
         )
+        ImageSection(
+            images = state.images,
+            onAddTap = callbacks.onImageAddTap,
+            onRemoveImage = callbacks.onImageRemove,
+            errorRes = state.fieldErrors.images,
+        )
         AnonymousToggle(
             checked = state.isAnonymous,
             onCheckedChange = callbacks.onAnonymousToggle,
@@ -239,4 +246,7 @@ data class WriteKudoCallbacks(
     val onMentionTriggered: (query: String, triggerOffset: Int) -> Unit,
     val onMentionDismiss: () -> Unit,
     val onMentionPick: (SunnerNode) -> Unit,
+    // Phase 7 — image attachments (Q-W-2 — VM handles validation + upload-on-submit)
+    val onImageAddTap: () -> Unit,
+    val onImageRemove: (clientId: String) -> Unit,
 )

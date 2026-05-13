@@ -1,5 +1,6 @@
 package com.example.aiddproject.kudos.compose.ui
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +10,7 @@ import com.example.aiddproject.core.richtext.MessageMarkdown
 import com.example.aiddproject.core.richtext.UrlValidator
 import com.example.aiddproject.kudos.compose.data.WriteKudoErrorMapper
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
+import com.example.aiddproject.kudos.compose.domain.UploadedImage
 import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
 import com.example.aiddproject.kudos.compose.domain.WriteKudoFieldErrors
 import com.example.aiddproject.kudos.compose.domain.WriteKudoValidators
@@ -272,6 +274,59 @@ class WriteKudoViewModel
             _state.update { it.copy(isAnonymous = checked, formDirty = true) }
         }
 
+        // ── Image attachments (Q-W-2 — T092/T093) ────────────────────
+
+        /**
+         * Append a picked image to the local list AFTER validating mime
+         * + size. NO Storage upload happens here — that's deferred to
+         * [onSendTap] (FR-008 + Q-W-2). Rejected files surface the
+         * inline error and do NOT add a thumbnail.
+         */
+        fun onImagePicked(
+            uri: Uri,
+            mime: String,
+            sizeBytes: Long,
+        ) {
+            if (mime !in WriteKudoValidators.ALLOWED_IMAGE_MIMES) {
+                _state.update { it.copy(fieldErrors = it.fieldErrors.copy(images = R.string.write_kudo_error_image_type)) }
+                return
+            }
+            if (sizeBytes > WriteKudoValidators.MAX_IMAGE_BYTES) {
+                _state.update { it.copy(fieldErrors = it.fieldErrors.copy(images = R.string.write_kudo_error_image_size)) }
+                return
+            }
+            _state.update { current ->
+                if (current.images.size >= WriteKudoValidators.MAX_IMAGES) {
+                    current
+                } else {
+                    current.copy(
+                        images =
+                            current.images +
+                                UploadedImage(
+                                    clientId = UUID.randomUUID().toString(),
+                                    localUri = uri,
+                                    sizeBytes = sizeBytes,
+                                    mime = mime,
+                                    storagePath = null,
+                                ),
+                        formDirty = true,
+                        fieldErrors = current.fieldErrors.copy(images = null),
+                    )
+                }
+            }
+        }
+
+        /** Remove a picked image — pure local-list mutation per Q-W-2. */
+        fun onImageRemove(clientId: String) {
+            _state.update { current ->
+                current.copy(
+                    images = current.images.filterNot { it.clientId == clientId },
+                    formDirty = true,
+                    fieldErrors = current.fieldErrors.copy(images = null),
+                )
+            }
+        }
+
         // ── Recipient picker (T038) ──────────────────────────────────
 
         fun onRecipientPickerOpen() {
@@ -339,6 +394,12 @@ class WriteKudoViewModel
 
         // ── Send / Cancel (T037) ─────────────────────────────────────
 
+        /**
+         * Q-W-2 submit flow — uploads each image sequentially under
+         * `kudos-attachments/{auth.uid()}/{kudoId}/...`, INSERTs the
+         * kudos row with the resolved image_ids, and on any failure
+         * rolls back by deleting every successfully-uploaded object.
+         */
         fun onSendTap() {
             val current = _state.value
             if (!current.isSubmitEnabled) {
@@ -351,6 +412,33 @@ class WriteKudoViewModel
                 viewModelScope.launch {
                     _state.update { it.copy(isSending = true, fieldErrors = WriteKudoFieldErrors.None) }
                     val kudoId = UUID.randomUUID().toString()
+                    val uploaded = mutableListOf<UploadedImage>()
+
+                    // ── Step 1: upload images sequentially (Q-W-2) ──
+                    var imageFailure: Throwable? = null
+                    for ((index, picked) in current.images.withIndex()) {
+                        val uploadResult = kudosRepository.uploadKudoImage(kudoId, index, picked.localUri)
+                        if (uploadResult.isSuccess) {
+                            uploaded += uploadResult.getOrNull()!!
+                        } else {
+                            imageFailure = uploadResult.exceptionOrNull()
+                            break
+                        }
+                    }
+
+                    if (imageFailure != null) {
+                        // Rollback: delete every successful upload before exit.
+                        uploaded.forEach { kudosRepository.deleteKudoImage(it) }
+                        _state.update {
+                            it.copy(
+                                isSending = false,
+                                fieldErrors = it.fieldErrors.copy(images = R.string.write_kudo_error_image_upload),
+                            )
+                        }
+                        return@launch
+                    }
+
+                    // ── Step 2: INSERT the kudos row ────────────────
                     val draft =
                         WriteKudoDraft(
                             id = kudoId,
@@ -358,7 +446,7 @@ class WriteKudoViewModel
                             title = current.title,
                             message = current.message.markdown,
                             tags = current.tags.map { it.id },
-                            imageIds = emptyList(), // Phase 7 / T094 wires submit-time image upload
+                            imageIds = uploaded.mapNotNull { it.storagePath },
                             isAnonymous = current.isAnonymous,
                         )
                     val result = kudosRepository.createKudo(draft)
@@ -368,6 +456,8 @@ class WriteKudoViewModel
                             _events.tryEmit(WriteKudoEvent.Submitted)
                         },
                         onFailure = { throwable ->
+                            // Rollback the uploaded images too.
+                            uploaded.forEach { kudosRepository.deleteKudoImage(it) }
                             val mapped = WriteKudoErrorMapper.map(throwable)
                             if (mapped.hasAny) {
                                 _state.update { it.copy(isSending = false, fieldErrors = mapped) }

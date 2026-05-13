@@ -157,6 +157,10 @@
     <string name="write_kudo_error_hashtags_required">Please add at least one hashtag.</string>
     <string name="write_kudo_error_hashtags_max">Maximum 5 hashtags allowed.</string>
     <string name="write_kudo_error_submit_generic">Couldn\'t send Kudo. Please try again.</string>
+    <string name="write_kudo_error_image_type">Unsupported file type. JPG, PNG, or WEBP only.</string>
+    <string name="write_kudo_error_image_size">File too large (max 10 MB).</string>
+    <string name="write_kudo_error_image_upload">Couldn\'t upload image. Please try again.</string>
+    <string name="a11y_write_kudo_remove_image">Remove image %1$d</string>
 
     <!-- A11y -->
     <string name="a11y_write_kudo_screen">Sun Kudos compose screen</string>

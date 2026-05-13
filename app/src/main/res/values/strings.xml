@@ -223,6 +223,10 @@
     <string name="write_kudo_error_hashtags_required">Vui lòng thêm ít nhất một hashtag.</string>
     <string name="write_kudo_error_hashtags_max">Tối đa 5 hashtag.</string>
     <string name="write_kudo_error_submit_generic">Không thể gửi Kudo. Vui lòng thử lại.</string>
+    <string name="write_kudo_error_image_type">Định dạng file không hỗ trợ. Chỉ chấp nhận JPG, PNG, WEBP.</string>
+    <string name="write_kudo_error_image_size">File quá lớn (tối đa 10 MB).</string>
+    <string name="write_kudo_error_image_upload">Không thể tải ảnh lên. Vui lòng thử lại.</string>
+    <string name="a11y_write_kudo_remove_image">Xoá ảnh số %1$d</string>
 
     <!-- A11y -->
     <string name="a11y_write_kudo_screen">Màn soạn Sun Kudo</string>
