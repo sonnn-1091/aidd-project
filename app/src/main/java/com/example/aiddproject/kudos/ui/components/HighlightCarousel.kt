@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -27,10 +28,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -40,6 +44,7 @@ import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.Kudos
 import com.example.aiddproject.kudos.domain.states.KudosHighlightState
 import com.example.aiddproject.kudos.ui.KudosTestTags
+import com.example.aiddproject.ui.theme.SaaCream
 import kotlinx.coroutines.launch
 
 /**
@@ -171,27 +176,39 @@ private fun LoopingPager(
 
     HorizontalPager(
         state = pagerState,
-        // Full-width slider with 24dp peek on each side so the
-        // adjacent (blurred) cards bleed visible from the screen
-        // edges instead of being clipped by a parent padding.
         modifier = Modifier.fillMaxWidth().testTag(KudosTestTags.HIGHLIGHT_PAGER),
         contentPadding = PaddingValues(horizontal = 24.dp),
         pageSpacing = 8.dp,
     ) { page ->
         val active = pagerState.currentPage == page
-        HighlightCard(
-            kudos = items[page.mod(size)],
-            onHeartTap = onHeartTap,
-            onCopyLink = onCopyLink,
-            onCardTap = onCardTap,
-            onHashtagChipTap = onHashtagChipTap,
-            onProfileTap = onProfileTap,
-            modifier =
-                Modifier
-                    .then(if (active) Modifier else Modifier.blur(radius = 6.dp))
-                    .alpha(if (active) 1f else 0.6f)
-                    .testTag("${KudosTestTags.HIGHLIGHT_CARD}_${page.mod(size)}"),
-        )
+        Box {
+            HighlightCard(
+                kudos = items[page.mod(size)],
+                onHeartTap = onHeartTap,
+                onCopyLink = onCopyLink,
+                onCardTap = onCardTap,
+                onHashtagChipTap = onHashtagChipTap,
+                onProfileTap = onProfileTap,
+                modifier =
+                    Modifier
+                        .heightIn(min = CarouselCardMinHeight)
+                        .then(if (active) Modifier else Modifier.blur(radius = 10.dp))
+                        .alpha(if (active) 1f else 0.4f)
+                        .testTag("${KudosTestTags.HIGHLIGHT_CARD}_${page.mod(size)}"),
+            )
+            // Dim overlay on inactive cards adds the "darker blur"
+            // feel on top of the gaussian blur — the prev/next cards
+            // recede further behind the centered active card.
+            if (!active) {
+                Box(
+                    modifier =
+                        Modifier
+                            .matchParentSize()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.Black.copy(alpha = 0.35f)),
+                )
+            }
+        }
     }
     CarouselNavRow(
         currentLogicalPage = currentLogicalPage,
@@ -217,24 +234,38 @@ private fun CarouselNavRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        NavChevron(direction = NavDirection.Prev, onTap = onPrev)
+        NavChevron(iconRes = R.drawable.ic_kudos_carousel_prev, onTap = onPrev)
         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // Tint current page in SaaCream per Figma's
+            // `mms_B.5_slide` treatment; the "/N" suffix stays white
+            // so the active page reads as the focal point.
             Text(
-                text = "${currentLogicalPage + 1}/$pageCount",
-                color = Color.White.copy(alpha = 0.85f),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                text =
+                    buildAnnotatedString {
+                        withStyle(SpanStyle(color = SaaCream)) {
+                            append("${currentLogicalPage + 1}")
+                        }
+                        withStyle(SpanStyle(color = Color.White.copy(alpha = 0.85f))) {
+                            append("/$pageCount")
+                        }
+                    },
+                style =
+                    MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.25.sp,
+                    ),
                 modifier = Modifier.testTag(KudosTestTags.PAGE_INDICATOR),
             )
         }
-        NavChevron(direction = NavDirection.Next, onTap = onNext)
+        NavChevron(iconRes = R.drawable.ic_kudos_carousel_next, onTap = onNext)
     }
 }
 
-private enum class NavDirection { Prev, Next }
-
 @Composable
 private fun NavChevron(
-    direction: NavDirection,
+    @androidx.annotation.DrawableRes iconRes: Int,
     onTap: () -> Unit,
 ) {
     val click = rememberSingleClickHandler { onTap() }
@@ -248,12 +279,9 @@ private fun NavChevron(
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_kudos_carousel_next),
+            painter = painterResource(iconRes),
             contentDescription = null,
-            modifier =
-                Modifier
-                    .size(20.dp)
-                    .graphicsLayer(scaleX = if (direction == NavDirection.Prev) -1f else 1f),
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -276,3 +304,7 @@ internal fun SectionPlaceholder(text: String) {
         )
     }
 }
+
+// Cards share a fixed minimum height so they line up even when one
+// has a shorter message body — keeps the swipe rhythm consistent.
+private val CarouselCardMinHeight: androidx.compose.ui.unit.Dp = 220.dp
