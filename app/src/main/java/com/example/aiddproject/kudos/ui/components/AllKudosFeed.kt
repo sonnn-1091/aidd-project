@@ -37,7 +37,11 @@ fun AllKudosFeed(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                // Feed cards are centered with wider side padding per
+                // Figma `Danh sách Kudo` (cards 273dp inside a 375dp
+                // frame ≈ ~50dp per side). 48dp is the closest match
+                // that still reads cleanly across Android widths.
+                .padding(horizontal = 48.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.FEED),
     ) {
         when (state) {

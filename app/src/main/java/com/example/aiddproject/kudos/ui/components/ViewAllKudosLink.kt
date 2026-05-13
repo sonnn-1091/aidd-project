@@ -2,6 +2,7 @@ package com.example.aiddproject.kudos.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -26,9 +28,13 @@ import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.core.ui.rememberSingleClickHandler
 import com.example.aiddproject.kudos.ui.KudosTestTags
-import com.example.aiddproject.ui.theme.SaaCream
 
-/** "Xem tất cả Kudos" link at the bottom of AllKudosFeed (spec § US14). */
+/**
+ * "View all Kudos" link — Figma `Button` (`6891:15987`) at the
+ * tail of `Danh sách Kudo` (`6891:15986`). Centered horizontally
+ * inside the feed column, 14sp Montserrat Medium WHITE label +
+ * 24dp arrow icon.
+ */
 @Composable
 fun ViewAllKudosLink(
     onViewAllKudos: () -> Unit,
@@ -36,29 +42,40 @@ fun ViewAllKudosLink(
 ) {
     val click = rememberSingleClickHandler { onViewAllKudos() }
     val a11y = stringResource(R.string.a11y_kudos_view_all)
-    Row(
+    Box(
         modifier =
             modifier
                 .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .clickable(onClick = click)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-                .semantics {
-                    role = Role.Button
-                    contentDescription = a11y
-                }.testTag(KudosTestTags.VIEW_ALL_KUDOS_LINK),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .heightIn(min = 48.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = stringResource(R.string.kudos_view_all_label),
-            color = SaaCream,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
-        )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            tint = SaaCream,
-        )
+        Row(
+            modifier =
+                Modifier
+                    .clickable(onClick = click)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = a11y
+                    }.testTag(KudosTestTags.VIEW_ALL_KUDOS_LINK),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.kudos_view_all_label),
+                color = Color.White,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = Color.White,
+            )
+        }
     }
 }
