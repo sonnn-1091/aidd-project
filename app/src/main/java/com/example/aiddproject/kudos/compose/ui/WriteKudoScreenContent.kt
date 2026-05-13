@@ -51,7 +51,6 @@ import com.example.aiddproject.kudos.compose.ui.components.LinkInsertDialog
 import com.example.aiddproject.kudos.compose.ui.components.MentionSuggestionOverlay
 import com.example.aiddproject.kudos.compose.ui.components.MessageEditor
 import com.example.aiddproject.kudos.compose.ui.components.RecipientPickerField
-import com.example.aiddproject.kudos.compose.ui.components.RecipientPickerOverlay
 import com.example.aiddproject.kudos.compose.ui.components.TitleField
 import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.SunnerNode
@@ -146,18 +145,8 @@ fun WriteKudoScreenContent(
         }
     }
 
-    // ── Overlays (top-level so they stack over the Scaffold) ────────
-    val picker = state.recipientPicker
-    if (picker is RecipientPickerState.Open) {
-        RecipientPickerOverlay(
-            state = picker,
-            onQueryChange = callbacks.onRecipientQueryChange,
-            onPick = callbacks.onRecipientChosen,
-            onDismiss = callbacks.onRecipientPickerDismiss,
-            onRetry = callbacks.onRecipientRetry,
-        )
-    }
-
+    // ── Top-level overlays (the recipient picker now anchors INSIDE
+    // the trigger via DropdownMenu, so it's no longer rendered here). ──
     val hashtagPicker = state.hashtagPicker
     if (hashtagPicker is HashtagPickerState.Open) {
         HashtagPickerOverlay(
@@ -233,7 +222,12 @@ private fun FormCard(
 
                 RecipientPickerField(
                     recipientName = state.recipientName ?: state.recipientId,
+                    pickerState = state.recipientPicker,
                     onOpenPicker = callbacks.onRecipientPickerOpen,
+                    onDismissPicker = callbacks.onRecipientPickerDismiss,
+                    onQueryChange = callbacks.onRecipientQueryChange,
+                    onPick = callbacks.onRecipientChosen,
+                    onRetry = callbacks.onRecipientRetry,
                     errorRes = state.fieldErrors.recipient,
                     enabled = !state.isSending,
                 )
