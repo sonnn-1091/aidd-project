@@ -1,5 +1,8 @@
 package com.example.aiddproject.kudos.data
 
+import android.net.Uri
+import com.example.aiddproject.kudos.compose.domain.UploadedImage
+import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
 import com.example.aiddproject.kudos.domain.Department
 import com.example.aiddproject.kudos.domain.GiftRecipient
 import com.example.aiddproject.kudos.domain.Hashtag
@@ -74,4 +77,19 @@ class SupabaseKudosRepository
 
         override suspend fun listRecentGiftRecipients(limit: Int): Result<List<GiftRecipient>> =
             TODO("Supabase impl — Postgrest read `reward_recipients` order by awarded_at DESC limit :limit")
+
+        // ────────────── Viết Kudo composer (7fFAb-K35a) ─────────────
+
+        override suspend fun createKudo(draft: WriteKudoDraft): Result<Kudos> =
+            TODO("Supabase impl — Postgrest INSERT into `kudos` with client-supplied id; map server exceptions via WriteKudoErrorMapper")
+
+        override suspend fun uploadKudoImage(
+            kudoId: String,
+            index: Int,
+            uri: Uri,
+        ): Result<UploadedImage> =
+            TODO("Supabase impl — Storage upload to `kudos-attachments/{auth.uid()}/{kudoId}/{index}_{filename}` via supabaseClient.storage.from(\"kudos-attachments\").upload(...)")
+
+        override suspend fun deleteKudoImage(ref: UploadedImage): Result<Unit> =
+            TODO("Supabase impl — Storage delete via supabaseClient.storage.from(\"kudos-attachments\").delete(ref.storagePath)")
     }

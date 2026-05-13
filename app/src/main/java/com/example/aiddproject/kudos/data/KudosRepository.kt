@@ -1,5 +1,8 @@
 package com.example.aiddproject.kudos.data
 
+import android.net.Uri
+import com.example.aiddproject.kudos.compose.domain.UploadedImage
+import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
 import com.example.aiddproject.kudos.domain.Department
 import com.example.aiddproject.kudos.domain.GiftRecipient
 import com.example.aiddproject.kudos.domain.Hashtag
@@ -68,4 +71,37 @@ interface KudosRepository {
 
     // Top 10 (US12)
     suspend fun listRecentGiftRecipients(limit: Int = 10): Result<List<GiftRecipient>>
+
+    // ────────────────────────────────────────────────────────────────────
+    // Viết Kudo composer (7fFAb-K35a) — US1 / FR-001, US5 / FR-008..011
+    // ────────────────────────────────────────────────────────────────────
+
+    /**
+     * US1 / FR-001 — INSERT a new `kudos` row with the client-supplied
+     * primary-key UUID in [WriteKudoDraft.id]. Returns the server-derived
+     * row including `sender_id` (auto-set to `auth.uid()` by the column
+     * default) and `created_at`. Server enforces RLS (self-send
+     * rejection, tag-whitelist, length checks) — exceptions surface as
+     * `Result.failure` and are mapped to inline field errors by
+     * `WriteKudoErrorMapper`.
+     */
+    suspend fun createKudo(draft: WriteKudoDraft): Result<Kudos>
+
+    /**
+     * US5 / Q-W-2 submit-time upload — POSTs the local file at [uri] to
+     * `kudos-attachments/{auth.uid()}/{kudoId}/{index}_{filename}` and
+     * returns the storage path on success. The client validates mime +
+     * size (FR-008) BEFORE calling; this method does not re-validate.
+     */
+    suspend fun uploadKudoImage(
+        kudoId: String,
+        index: Int,
+        uri: Uri,
+    ): Result<UploadedImage>
+
+    /**
+     * US5 / Q-W-2 rollback — DELETE a previously-uploaded image when a
+     * partial-failure submit needs to clean up so no orphans accumulate.
+     */
+    suspend fun deleteKudoImage(ref: UploadedImage): Result<Unit>
 }

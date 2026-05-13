@@ -1,5 +1,8 @@
 package com.example.aiddproject.kudos.data
 
+import android.net.Uri
+import com.example.aiddproject.kudos.compose.domain.UploadedImage
+import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
 import com.example.aiddproject.kudos.domain.Department
 import com.example.aiddproject.kudos.domain.GiftRecipient
 import com.example.aiddproject.kudos.domain.Hashtag
@@ -35,6 +38,27 @@ class DemoKudosRepository
     @Inject
     constructor() : KudosRepository {
         private val secretBoxPending = AtomicBoolean(true)
+
+        /**
+         * Q-W-2 partial-failure hook for the Viết Kudo composer
+         * tests (T030). When set to a positive Int, the Nth call to
+         * [uploadKudoImage] (1-indexed across the lifetime of this
+         * instance) returns a failed Result so the test can exercise
+         * the rollback path. Reset to `null` to restore the
+         * always-succeeds default.
+         */
+        @Volatile
+        var failOnNthUpload: Int? = null
+        private var uploadCallCounter: Int = 0
+
+        /** In-memory store of submitted draft IDs — used to assert no double-submit. */
+        private val createdKudoIds: MutableSet<String> = mutableSetOf()
+
+        /** In-memory record of "uploaded" storage paths for assertion in rollback tests. */
+        private val uploadedPaths: MutableSet<String> = mutableSetOf()
+
+        /** True when the test cares about whether [deleteKudoImage] was called. */
+        val deletedPaths: MutableList<String> = mutableListOf()
 
         override suspend fun listHighlight(filter: KudosFilter): Result<List<Kudos>> {
             val filtered = applyFilter(DEMO_KUDOS, filter)
@@ -121,6 +145,70 @@ class DemoKudosRepository
         }
 
         override suspend fun listRecentGiftRecipients(limit: Int): Result<List<GiftRecipient>> = Result.success(DEMO_RECIPIENTS.take(limit))
+
+        // ────────────── Viết Kudo composer (7fFAb-K35a) ─────────────
+
+        override suspend fun createKudo(draft: WriteKudoDraft): Result<Kudos> {
+            if (!createdKudoIds.add(draft.id)) {
+                return Result.failure(IllegalStateException("Duplicate kudoId — single-flight submit broken: ${draft.id}"))
+            }
+            // Synthesise sender + recipient SunnerNodes from the seed fixture
+            // so the returned Kudos is shaped exactly like a real Postgrest
+            // read. Recipient lookup falls back to the first non-self demo
+            // user if the id doesn't match a known seed.
+            val recipient =
+                DEMO_KUDOS.map { it.recipient }
+                    .firstOrNull { it.id == draft.recipientId }
+                    ?: DEMO_KUDOS.first().recipient
+            val sender = DEMO_KUDOS.first().sender
+            val row =
+                Kudos(
+                    id = draft.id,
+                    sender = sender,
+                    recipient = recipient,
+                    message = draft.message,
+                    title = draft.title,
+                    hashtags = draft.tags.map { com.example.aiddproject.kudos.domain.Hashtag(id = it, tagName = it) },
+                    photos = draft.imageIds,
+                    createdAt = java.time.Instant.now().toString(),
+                    heartCount = 0,
+                    likedByCurrentUser = false,
+                    senderVisibleToMe = !draft.isAnonymous,
+                    likeDisabledForMe = false,
+                    isAnonymous = draft.isAnonymous,
+                )
+            return Result.success(row)
+        }
+
+        override suspend fun uploadKudoImage(
+            kudoId: String,
+            index: Int,
+            uri: Uri,
+        ): Result<UploadedImage> {
+            uploadCallCounter += 1
+            val nthToFail = failOnNthUpload
+            if (nthToFail != null && uploadCallCounter == nthToFail) {
+                return Result.failure(java.io.IOException("DEMO partial-failure: forced fail on upload #$uploadCallCounter"))
+            }
+            val path = "kudos-attachments/demo/$kudoId/${index}_${uri.lastPathSegment ?: "image"}"
+            uploadedPaths += path
+            return Result.success(
+                UploadedImage(
+                    clientId = "$kudoId-$index",
+                    localUri = uri,
+                    sizeBytes = 0L,
+                    mime = "image/jpeg",
+                    storagePath = path,
+                ),
+            )
+        }
+
+        override suspend fun deleteKudoImage(ref: UploadedImage): Result<Unit> {
+            val path = ref.storagePath ?: return Result.success(Unit)
+            uploadedPaths.remove(path)
+            deletedPaths += path
+            return Result.success(Unit)
+        }
 
         private fun applyFilter(
             source: List<Kudos>,
