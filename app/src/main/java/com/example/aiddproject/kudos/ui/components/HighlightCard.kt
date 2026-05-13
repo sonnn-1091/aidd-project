@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -209,17 +210,30 @@ private fun TierBadge(tier: Int) {
             3 -> "Legend"
             else -> return
         }
-    Box {
+    // Badge is enlarged to 64×14dp + 8sp label so the text breathes
+    // inside the pill (Figma's 45×9 / 6sp was too cramped at Android
+    // density and clipped descenders).
+    Box(
+        modifier = Modifier.size(width = 64.dp, height = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
         Image(
             painter = painterResource(R.drawable.kudos_tier_badge),
             contentDescription = null,
-            modifier = Modifier.size(width = 45.dp, height = 9.dp),
+            contentScale = androidx.compose.ui.layout.ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
         )
         Text(
             text = label,
             color = Color.White,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 6.sp, lineHeight = 8.sp, fontWeight = FontWeight.Bold),
-            modifier = Modifier.align(Alignment.Center),
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.05.sp,
+                ),
+            maxLines = 1,
         )
     }
 }
@@ -238,7 +252,7 @@ private fun ContentBlock(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = kudos.createdAt,
+            text = formatKudosTimestamp(kudos.createdAt),
             color = CardMuted,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.23.sp),
         )
@@ -339,10 +353,8 @@ private fun TinyPillButton(
     Row(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(2.dp))
-                .background(CardDarkText.copy(alpha = 0.06f))
                 .clickable(onClick = onTap)
-                .padding(horizontal = 6.dp, vertical = 4.dp)
+                .padding(horizontal = 4.dp, vertical = 4.dp)
                 .testTag(KudosTestTags.HIGHLIGHT_CARD),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -376,3 +388,26 @@ private val CardSurface: Color = Color(0xFFFFF8E1)
 private val CardDarkText: Color = Color(0xFF00101A)
 private val CardMuted: Color = Color(0xFF999999)
 private val CardRed: Color = Color(0xFFD4271D)
+
+/**
+ * Format the kudos creation ISO-8601 timestamp into Figma's
+ * card-row format "HH:mm - dd/MM/yyyy" (e.g. "10:00 - 12/05/2026").
+ * Falls back to the raw input if parsing fails so a bad payload
+ * never crashes the card.
+ */
+internal fun formatKudosTimestamp(iso: String): String =
+    runCatching {
+        val instant = java.time.Instant.parse(iso)
+        val zoned = instant.atZone(java.time.ZoneId.systemDefault())
+        val time =
+            zoned.format(
+                java.time.format.DateTimeFormatter
+                    .ofPattern("HH:mm"),
+            )
+        val date =
+            zoned.format(
+                java.time.format.DateTimeFormatter
+                    .ofPattern("dd/MM/yyyy"),
+            )
+        "$time - $date"
+    }.getOrDefault(iso)

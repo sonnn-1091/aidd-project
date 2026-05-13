@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -205,17 +206,27 @@ private fun TierBadge(tier: Int) {
             3 -> "Legend"
             else -> return
         }
-    Box {
+    Box(
+        modifier = Modifier.size(width = 64.dp, height = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
         Image(
             painter = painterResource(R.drawable.kudos_tier_badge),
             contentDescription = null,
-            modifier = Modifier.size(width = 45.dp, height = 9.dp),
+            contentScale = androidx.compose.ui.layout.ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
         )
         Text(
             text = label,
             color = Color.White,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 6.sp, lineHeight = 8.sp, fontWeight = FontWeight.Bold),
-            modifier = Modifier.align(Alignment.Center),
+            style =
+                MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.05.sp,
+                ),
+            maxLines = 1,
         )
     }
 }
@@ -230,7 +241,7 @@ private fun ContentBlock(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = kudos.createdAt,
+            text = formatKudosTimestamp(kudos.createdAt),
             color = CardMuted,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Medium),
         )
@@ -330,10 +341,8 @@ private fun TinyPillButton(
     Row(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(2.dp))
-                .background(CardDarkText.copy(alpha = 0.06f))
                 .clickable(onClick = onTap)
-                .padding(horizontal = 6.dp, vertical = 4.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
