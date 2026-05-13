@@ -21,7 +21,16 @@ object Routes {
     const val KUDOS_OVERVIEW: String = "route_kudos_overview"
     const val KUDOS_FEED: String = "route_kudos_feed"
     const val KUDOS_DETAIL: String = "route_kudos_detail"
-    const val WRITE_KUDO: String = "route_write_kudo"
+
+    /**
+     * Viết Kudo composer (`7fFAb-K35a` spec) — accepts an optional
+     * `recipientUserId` query argument so the future Search Sunner
+     * entry can prefill the recipient field without dirtying the form.
+     * Use [writeKudo] to construct a concrete route value.
+     */
+    const val WRITE_KUDO_PATTERN: String = "route_write_kudo?recipientUserId={recipientUserId}"
+    const val WRITE_KUDO_ARG_RECIPIENT: String = "recipientUserId"
+
     const val SEARCH: String = "route_search"
     const val PROFILE: String = "route_profile"
 
@@ -38,4 +47,16 @@ object Routes {
     const val AWARD_DETAIL_PATTERN: String = "route_award_detail/{awardId}"
 
     fun awardDetail(awardId: String): String = "route_award_detail/$awardId"
+
+    /**
+     * Constructs a concrete `WRITE_KUDO` route value. Pass [recipientUserId]
+     * from the Search Sunner flow to prefill the composer's recipient field;
+     * leave `null` for the canonical hub Send-pill / Home FAB entries.
+     */
+    fun writeKudo(recipientUserId: String? = null): String =
+        if (recipientUserId == null) {
+            "route_write_kudo"
+        } else {
+            "route_write_kudo?recipientUserId=$recipientUserId"
+        }
 }

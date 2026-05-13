@@ -101,7 +101,7 @@ fun AppNavigation(
                 onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
                 onNavigateToKudosFeed = { navController.navigate(Routes.KUDOS_FEED) },
                 onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
-                onNavigateToWriteKudo = { navController.navigate(Routes.WRITE_KUDO) },
+                onNavigateToWriteKudo = { navController.navigate(Routes.writeKudo()) },
                 onNavigateToAwardDetail = { award ->
                     navController.navigate(Routes.awardDetail(award.id))
                 },
@@ -136,7 +136,7 @@ fun AppNavigation(
                 onNavigateToAwardsOverview = { navController.navigate(Routes.AWARDS_OVERVIEW) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
-                onNavigateToSendKudos = { navController.navigate(Routes.WRITE_KUDO) },
+                onNavigateToSendKudos = { navController.navigate(Routes.writeKudo()) },
                 onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
                 onNavigateToAllKudos = { navController.navigate(Routes.KUDOS_FEED) },
                 onNavigateToSecretBoxOpen = { navController.navigate(Routes.SECRET_BOX_OPEN) },
@@ -144,7 +144,17 @@ fun AppNavigation(
         }
         composable(Routes.KUDOS_FEED) { PlaceholderScreen(label = "Kudos feed") }
         composable(Routes.KUDOS_DETAIL) { PlaceholderScreen(label = "Kudos detail") }
-        composable(Routes.WRITE_KUDO) { PlaceholderScreen(label = "Write a Kudo") }
+        composable(
+            route = Routes.WRITE_KUDO_PATTERN,
+            arguments =
+                listOf(
+                    navArgument(Routes.WRITE_KUDO_ARG_RECIPIENT) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+        ) { PlaceholderScreen(label = "Write a Kudo") }
         composable(Routes.SECRET_BOX_OPEN) { PlaceholderScreen(label = "Open Secret Box") }
         composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
         composable(Routes.PROFILE) { PlaceholderScreen(label = "Profile") }
