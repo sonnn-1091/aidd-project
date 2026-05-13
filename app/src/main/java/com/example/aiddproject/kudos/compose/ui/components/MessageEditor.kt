@@ -47,6 +47,7 @@ fun MessageEditor(
     onMentionDismiss: () -> Unit,
     onToolbarAction: (ToolbarAction) -> Unit,
     onLinkTap: () -> Unit,
+    onCommunityStandardsTap: () -> Unit,
     @StringRes errorRes: Int?,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
@@ -67,6 +68,7 @@ fun MessageEditor(
         FormattingToolbar(
             onAction = onToolbarAction,
             onLinkTap = onLinkTap,
+            onCommunityStandardsTap = onCommunityStandardsTap,
             enabled = enabled,
         )
         OutlinedTextField(

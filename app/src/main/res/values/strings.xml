@@ -170,7 +170,9 @@
     <!-- Viết Kudo composer (7fFAb-K35a) — form-level + a11y strings (T009).     -->
     <!-- Rich-text + image-error strings ship in later phases.                  -->
     <!-- ====================================================================== -->
+    <string name="write_kudo_top_bar_title">Kudo mới</string>
     <string name="write_kudo_header">Gửi lời cám ơn và ghi nhận đến đồng đội</string>
+    <string name="write_kudo_title_helper">Ví dụ: Người truyền động lực cho tôi.\nDanh hiệu sẽ hiển thị làm tiêu đề Kudos của bạn.</string>
     <string name="write_kudo_recipient_label">Người nhận</string>
     <string name="write_kudo_recipient_placeholder">Tìm kiếm</string>
     <string name="write_kudo_title_label">Danh hiệu</string>

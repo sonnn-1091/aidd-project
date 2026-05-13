@@ -105,7 +105,9 @@
     <string name="a11y_kudos_open_profile">Open %1$s\'s profile</string>
 
     <!-- Viết Kudo composer — EN translations (T010). Brand-fixed `KUDOS` stays in values/. -->
+    <string name="write_kudo_top_bar_title">New Kudo</string>
     <string name="write_kudo_header">Send recognition and thanks to your teammate</string>
+    <string name="write_kudo_title_helper">Example: My personal motivator.\nThe title appears as the Kudos heading.</string>
     <string name="write_kudo_recipient_label">Recipient</string>
     <string name="write_kudo_recipient_placeholder">Search</string>
     <string name="write_kudo_title_label">Award title</string>

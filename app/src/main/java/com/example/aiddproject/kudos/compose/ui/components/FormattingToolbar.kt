@@ -1,5 +1,6 @@
 package com.example.aiddproject.kudos.compose.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,14 +14,20 @@ import androidx.compose.material.icons.filled.FormatStrikethrough
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.aiddproject.R
+import com.example.aiddproject.core.ui.rememberSingleClickHandler
 import com.example.aiddproject.kudos.compose.ui.ToolbarAction
 import com.example.aiddproject.kudos.compose.ui.WriteKudoTestTags
 
@@ -40,16 +47,19 @@ import com.example.aiddproject.kudos.compose.ui.WriteKudoTestTags
 fun FormattingToolbar(
     onAction: (ToolbarAction) -> Unit,
     onLinkTap: () -> Unit,
+    onCommunityStandardsTap: () -> Unit,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
+    val standardsClick = rememberSingleClickHandler(onClick = onCommunityStandardsTap)
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 4.dp)
                 .testTag(WriteKudoTestTags.FORMATTING_TOOLBAR),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         ToolbarButton(
             icon = Icons.Filled.FormatBold,
@@ -93,8 +103,23 @@ fun FormattingToolbar(
             enabled = enabled,
             onClick = { onAction(ToolbarAction.Quote) },
         )
+        // Community Standards link — Figma puts it inline at the right
+        // end of the toolbar row, red + underlined.
+        Text(
+            text = stringResource(R.string.write_kudo_community_standards_link),
+            color = CommunityStandardsRed,
+            style = MaterialTheme.typography.bodySmall.copy(textDecoration = TextDecoration.Underline),
+            modifier =
+                Modifier
+                    .padding(start = 4.dp, end = 4.dp)
+                    .clickable(enabled = enabled, onClick = standardsClick)
+                    .testTag(WriteKudoTestTags.COMMUNITY_STANDARDS_LINK),
+        )
     }
 }
+
+// Figma `7fFAb-K35a` — Tiêu chuẩn cộng đồng red.
+private val CommunityStandardsRed: Color = Color(0xFFCF1322)
 
 @Composable
 private fun ToolbarButton(

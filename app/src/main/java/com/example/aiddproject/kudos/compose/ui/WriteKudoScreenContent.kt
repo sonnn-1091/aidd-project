@@ -1,30 +1,51 @@
 package com.example.aiddproject.kudos.compose.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
 import com.example.aiddproject.kudos.compose.domain.WriteKudoValidators
 import com.example.aiddproject.kudos.compose.ui.components.AnonymousToggle
 import com.example.aiddproject.kudos.compose.ui.components.BottomActionBar
-import com.example.aiddproject.kudos.compose.ui.components.CommunityStandardsLink
 import com.example.aiddproject.kudos.compose.ui.components.HashtagPickerOverlay
 import com.example.aiddproject.kudos.compose.ui.components.HashtagSection
-import com.example.aiddproject.kudos.compose.ui.components.HeaderText
 import com.example.aiddproject.kudos.compose.ui.components.ImageSection
 import com.example.aiddproject.kudos.compose.ui.components.LinkInsertDialog
 import com.example.aiddproject.kudos.compose.ui.components.MentionSuggestionOverlay
@@ -36,50 +57,96 @@ import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.SunnerNode
 
 /**
- * Stateless content composable for the Viết Kudo composer (T052).
- *
- * Drives the entire screen from a single [state] + callback bag —
- * Compose UI tests target this directly without instantiating the
- * Hilt VM (Constitution V).
+ * Stateless content composable for the Viết Kudo composer (T052) +
+ * `momorph.implement-ui` polish pass against Figma `7fFAb-K35a`.
  *
  * Layout (Figma top-to-bottom):
- *   Scaffold
- *     ├── content (scrollable column)
- *     │     ├── HeaderText (A)
- *     │     ├── RecipientPickerField (B.1 + B.2)
- *     │     ├── TitleField (B.3 + B.4)
- *     │     ├── CommunityStandardsLink (B.5)
- *     │     ├── MessageEditor (D — plain-text MVP)
- *     │     ├── HashtagSection (E)
- *     │     └── AnonymousToggle (G)
- *     └── bottomBar = BottomActionBar (H + I) — sticky
- *   + overlays (RecipientPickerOverlay, HashtagPickerOverlay,
- *               UnsavedChangesDialog)
+ *   Box (full-bleed `bg_home` + 140dp top gradient — matches hub chrome)
+ *     ├── TopAppBar: ← + "New Kudo" title (transparent, over the
+ *     │              keyvisual background)
+ *     ├── Form card (cream #FFF8E1, 11dp radius, 18/12dp padding) —
+ *     │   the scrollable Column of A → recipient row → title row →
+ *     │   helper text → message editor → hashtag → image → anonymous.
+ *     └── BottomActionBar (sticky H + I).
+ *   + overlays: RecipientPickerOverlay / HashtagPickerOverlay /
+ *               UnsavedChangesDialog / LinkInsertDialog /
+ *               MentionSuggestionOverlay.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteKudoScreenContent(
     state: WriteKudoUiState,
     callbacks: WriteKudoCallbacks,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    Box(
         modifier =
             modifier
                 .fillMaxSize()
+                .background(KvBaseBackground)
                 .testTag(WriteKudoTestTags.SCREEN),
-        bottomBar = {
-            BottomActionBar(
-                isSubmitEnabled = state.isSubmitEnabled,
-                isSending = state.isSending,
-                onCancel = callbacks.onCancelTap,
-                onSend = callbacks.onSendTap,
-            )
-        },
-    ) { padding ->
-        FormColumn(padding = padding, state = state, callbacks = callbacks)
+    ) {
+        // Keyvisual artwork behind everything — same as Sun*Kudos hub.
+        Image(
+            painter = painterResource(R.drawable.bg_home),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        // 140dp top gradient so the TopAppBar title reads against the
+        // dark band even with the busy keyvisual underneath.
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(HeaderGradient),
+        )
+
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.write_kudo_top_bar_title),
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = callbacks.onCancelTap) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.a11y_write_kudo_cancel),
+                                tint = Color.White,
+                            )
+                        }
+                    },
+                    colors =
+                        TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = Color.Transparent,
+                            navigationIconContentColor = Color.White,
+                            titleContentColor = Color.White,
+                        ),
+                    modifier = Modifier.statusBarsPadding(),
+                )
+            },
+            bottomBar = {
+                BottomActionBar(
+                    isSubmitEnabled = state.isSubmitEnabled,
+                    isSending = state.isSending,
+                    onCancel = callbacks.onCancelTap,
+                    onSend = callbacks.onSendTap,
+                )
+            },
+        ) { padding ->
+            FormCard(padding = padding, state = state, callbacks = callbacks)
+        }
     }
 
-    // ── Overlays ────────────────────────────────────────────────────
+    // ── Overlays (top-level so they stack over the Scaffold) ────────
     val picker = state.recipientPicker
     if (picker is RecipientPickerState.Open) {
         RecipientPickerOverlay(
@@ -119,71 +186,111 @@ fun WriteKudoScreenContent(
     }
 }
 
+/**
+ * Cream form card per Figma `Viết KUDO` (6885:9291). Hosts the
+ * scrollable Column of form fields + the bottom mention overlay.
+ */
 @Composable
-private fun FormColumn(
+private fun FormCard(
     padding: PaddingValues,
     state: WriteKudoUiState,
     callbacks: WriteKudoCallbacks,
 ) {
-    Column(
+    Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        HeaderText()
-        RecipientPickerField(
-            recipientName = state.recipientName ?: state.recipientId, // fall back to id until resolved
-            onOpenPicker = callbacks.onRecipientPickerOpen,
-            errorRes = state.fieldErrors.recipient,
-            enabled = !state.isSending,
-        )
-        TitleField(
-            value = state.title,
-            onValueChange = callbacks.onTitleChange,
-            errorRes = state.fieldErrors.title,
-        )
-        CommunityStandardsLink(onTap = callbacks.onCommunityStandardsTap)
-        MessageEditor(
-            value = state.message,
-            onValueChange = callbacks.onMessageChange,
-            onSelectionChange = callbacks.onMessageSelectionChange,
-            onMentionQueryChange = callbacks.onMentionTriggered,
-            onMentionDismiss = callbacks.onMentionDismiss,
-            onToolbarAction = callbacks.onToolbarAction,
-            onLinkTap = callbacks.onLinkButtonTap,
-            errorRes = state.fieldErrors.message,
-            enabled = !state.isSending,
-        )
+        Surface(
+            color = FormCardBackground,
+            shape = RoundedCornerShape(11.dp),
+            tonalElevation = 0.dp,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp, vertical = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                // A — instructional header
+                Text(
+                    text = stringResource(R.string.write_kudo_header),
+                    color = FormCardTextPrimary,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .testTag(WriteKudoTestTags.HEADER),
+                )
 
-        // Mention overlay rendered INLINE below the editor — not caret-
-        // anchored. Tap a row to insert `@FullName ` at the trigger
-        // offset; tap outside / type whitespace to dismiss.
-        val mention = state.mentionOverlay
-        if (mention is MentionOverlayState.Open) {
-            MentionSuggestionOverlay(state = mention, onPick = callbacks.onMentionPick)
+                RecipientPickerField(
+                    recipientName = state.recipientName ?: state.recipientId,
+                    onOpenPicker = callbacks.onRecipientPickerOpen,
+                    errorRes = state.fieldErrors.recipient,
+                    enabled = !state.isSending,
+                )
+                TitleField(
+                    value = state.title,
+                    onValueChange = callbacks.onTitleChange,
+                    errorRes = state.fieldErrors.title,
+                )
+
+                // B.5 helper text — descriptive (NOT the Community
+                // Standards link, which lives inside the toolbar row).
+                Text(
+                    text = stringResource(R.string.write_kudo_title_helper),
+                    color = FormCardTextSecondary,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                MessageEditor(
+                    value = state.message,
+                    onValueChange = callbacks.onMessageChange,
+                    onSelectionChange = callbacks.onMessageSelectionChange,
+                    onMentionQueryChange = callbacks.onMentionTriggered,
+                    onMentionDismiss = callbacks.onMentionDismiss,
+                    onToolbarAction = callbacks.onToolbarAction,
+                    onLinkTap = callbacks.onLinkButtonTap,
+                    onCommunityStandardsTap = callbacks.onCommunityStandardsTap,
+                    errorRes = state.fieldErrors.message,
+                    enabled = !state.isSending,
+                )
+
+                val mention = state.mentionOverlay
+                if (mention is MentionOverlayState.Open) {
+                    MentionSuggestionOverlay(state = mention, onPick = callbacks.onMentionPick)
+                }
+                @Suppress("UNUSED_EXPRESSION") WriteKudoValidators.MAX_MESSAGE_LENGTH
+
+                HashtagSection(
+                    tags = state.tags,
+                    onAddTap = callbacks.onHashtagPickerOpen,
+                    onRemoveTag = { callbacks.onHashtagRemove(it.id) },
+                    errorRes = state.fieldErrors.hashtags,
+                )
+                ImageSection(
+                    images = state.images,
+                    onAddTap = callbacks.onImageAddTap,
+                    onRemoveImage = callbacks.onImageRemove,
+                    errorRes = state.fieldErrors.images,
+                )
+                AnonymousToggle(
+                    checked = state.isAnonymous,
+                    onCheckedChange = callbacks.onAnonymousToggle,
+                )
+            }
         }
-        @Suppress("UNUSED_EXPRESSION") WriteKudoValidators.MAX_MESSAGE_LENGTH
-
-        HashtagSection(
-            tags = state.tags,
-            onAddTap = callbacks.onHashtagPickerOpen,
-            onRemoveTag = { callbacks.onHashtagRemove(it.id) },
-            errorRes = state.fieldErrors.hashtags,
-        )
-        ImageSection(
-            images = state.images,
-            onAddTap = callbacks.onImageAddTap,
-            onRemoveImage = callbacks.onImageRemove,
-            errorRes = state.fieldErrors.images,
-        )
-        AnonymousToggle(
-            checked = state.isAnonymous,
-            onCheckedChange = callbacks.onAnonymousToggle,
-        )
     }
 }
 
@@ -212,12 +319,6 @@ private fun UnsavedChangesDialog(
     )
 }
 
-/**
- * Callback bag for [WriteKudoScreenContent]. Grouping the ~15 handlers
- * into one class keeps the stateless API readable AND makes Compose UI
- * tests easier to drive (pass a single `WriteKudoCallbacks(mock(),
- * mock(), ...)` instance with the captures you care about).
- */
 data class WriteKudoCallbacks(
     val onRecipientPickerOpen: () -> Unit,
     val onRecipientPickerDismiss: () -> Unit,
@@ -237,7 +338,6 @@ data class WriteKudoCallbacks(
     val onSendTap: () -> Unit,
     val onConfirmDiscard: () -> Unit,
     val onDismissConfirmDialog: () -> Unit,
-    // Phase 6 — rich-text + @mentions + link
     val onToolbarAction: (ToolbarAction) -> Unit,
     val onLinkButtonTap: () -> Unit,
     val onLinkDialogUrlChange: (String) -> Unit,
@@ -246,7 +346,23 @@ data class WriteKudoCallbacks(
     val onMentionTriggered: (query: String, triggerOffset: Int) -> Unit,
     val onMentionDismiss: () -> Unit,
     val onMentionPick: (SunnerNode) -> Unit,
-    // Phase 7 — image attachments (Q-W-2 — VM handles validation + upload-on-submit)
     val onImageAddTap: () -> Unit,
     val onImageRemove: (clientId: String) -> Unit,
 )
+
+// ── Figma tokens (queried 2026-05-13 from frame 7fFAb-K35a) ─────────
+
+private val KvBaseBackground: Color = Color(0xFF00070C)
+private val FormCardBackground: Color = Color(0xFFFFF8E1)
+private val FormCardTextPrimary: Color = Color(0xFF00101A)
+private val FormCardTextSecondary: Color = Color(0xFF999999)
+
+private val HeaderGradient: Brush =
+    Brush.verticalGradient(
+        colors =
+            listOf(
+                Color(0xE6001019),
+                Color(0x4D00101A),
+                Color(0x00001019),
+            ),
+    )
