@@ -1,79 +1,145 @@
 package com.example.aiddproject.kudos.compose.domain
 
-import org.junit.Assert.fail
-import org.junit.Ignore
+import com.example.aiddproject.R
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
- * Failing-stub test class for `WriteKudoValidators` (T014).
+ * Unit tests for [WriteKudoValidators] (T024 / spec § Data Requirements).
  *
- * Each test placeholder pins down a validator contract from spec § Data
- * Requirements. They are [@Ignore]-annotated until Phase 2 lands the real
- * `WriteKudoValidators` implementation (T024), at which point each
- * `@Ignore` is removed AND the `fail("not implemented")` body is replaced
- * with real assertions. The Constitution V intent is honoured: the tests
- * exist BEFORE the implementation and are the contract the impl is
- * written against.
+ * Boundary cases per spec edge case "Exactly-boundary inputs": title=1
+ * char, title=100 chars, message=1 char, message=1000 chars, hashtags=1,
+ * hashtags=5.
  */
-@Ignore("Phase 2 / T024 wires the real validators + replaces these bodies.")
 class WriteKudoValidatorsTest {
+    // ─────────────────────────── validateTitle ──────────────────────────
+
     @Test
     fun validateTitle_emptyReturnsRequiredError() {
-        fail("not implemented — T024")
+        assertEquals(R.string.write_kudo_error_title_required, WriteKudoValidators.validateTitle(""))
+    }
+
+    @Test
+    fun validateTitle_whitespaceOnlyReturnsRequiredError() {
+        assertEquals(R.string.write_kudo_error_title_required, WriteKudoValidators.validateTitle("   "))
+    }
+
+    @Test
+    fun validateTitle_oneCharAccepted() {
+        assertNull(WriteKudoValidators.validateTitle("A"))
     }
 
     @Test
     fun validateTitle_exactly100CharsAccepted() {
-        fail("not implemented — T024")
+        assertNull(WriteKudoValidators.validateTitle("A".repeat(100)))
     }
 
     @Test
     fun validateTitle_over100CharsReturnsTooLongError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_title_too_long,
+            WriteKudoValidators.validateTitle("A".repeat(101)),
+        )
     }
+
+    // ────────────────────────── validateMessage ─────────────────────────
 
     @Test
     fun validateMessage_emptyReturnsRequiredError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_message_required,
+            WriteKudoValidators.validateMessage(RichTextValue.Empty),
+        )
     }
 
     @Test
     fun validateMessage_onlyWhitespaceReturnsBlankError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_message_blank,
+            WriteKudoValidators.validateMessage(RichTextValue.ofPlainText("   \n  \t")),
+        )
+    }
+
+    @Test
+    fun validateMessage_oneCharAccepted() {
+        assertNull(WriteKudoValidators.validateMessage(RichTextValue.ofPlainText("A")))
     }
 
     @Test
     fun validateMessage_exactly1000CharsAccepted() {
-        fail("not implemented — T024")
+        assertNull(WriteKudoValidators.validateMessage(RichTextValue.ofPlainText("A".repeat(1000))))
     }
 
     @Test
     fun validateMessage_over1000CharsReturnsTooLongError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_message_too_long,
+            WriteKudoValidators.validateMessage(RichTextValue.ofPlainText("A".repeat(1001))),
+        )
     }
+
+    // ────────────────────────── validateHashtags ────────────────────────
 
     @Test
     fun validateHashtags_emptyReturnsRequiredError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_hashtags_required,
+            WriteKudoValidators.validateHashtags(emptyList()),
+        )
     }
 
     @Test
     fun validateHashtags_oneAccepted() {
-        fail("not implemented — T024")
+        assertNull(WriteKudoValidators.validateHashtags(listOf("teamwork")))
     }
 
     @Test
     fun validateHashtags_fiveAccepted() {
-        fail("not implemented — T024")
+        assertNull(WriteKudoValidators.validateHashtags(listOf("a", "b", "c", "d", "e")))
     }
 
     @Test
+    fun validateHashtags_sixReturnsMaxError() {
+        assertEquals(
+            R.string.write_kudo_error_hashtags_max,
+            WriteKudoValidators.validateHashtags(listOf("a", "b", "c", "d", "e", "f")),
+        )
+    }
+
+    // ────────────────────────── validateRecipient ───────────────────────
+
+    @Test
     fun validateRecipient_nullReturnsRequiredError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_recipient_required,
+            WriteKudoValidators.validateRecipient(null, currentUserId = "u-self"),
+        )
+    }
+
+    @Test
+    fun validateRecipient_emptyReturnsRequiredError() {
+        assertEquals(
+            R.string.write_kudo_error_recipient_required,
+            WriteKudoValidators.validateRecipient("", currentUserId = "u-self"),
+        )
     }
 
     @Test
     fun validateRecipient_currentUserReturnsSelfSendError() {
-        fail("not implemented — T024")
+        assertEquals(
+            R.string.write_kudo_error_recipient_self,
+            WriteKudoValidators.validateRecipient("u-self", currentUserId = "u-self"),
+        )
+    }
+
+    @Test
+    fun validateRecipient_otherUserAccepted() {
+        assertNull(WriteKudoValidators.validateRecipient("u-other", currentUserId = "u-self"))
+    }
+
+    @Test
+    fun validateRecipient_nullCurrentUser_skipsSelfSendCheck() {
+        assertNull(WriteKudoValidators.validateRecipient("u-anyone", currentUserId = null))
     }
 }
