@@ -21,6 +21,7 @@ import com.example.aiddproject.awarddetail.ui.AwardDetailScreen
 import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
+import com.example.aiddproject.kudos.compose.ui.WriteKudoScreen
 import com.example.aiddproject.kudos.ui.KudosScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -128,7 +129,7 @@ fun AppNavigation(
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
             )
         }
-        composable(Routes.KUDOS_OVERVIEW) {
+        composable(Routes.KUDOS_OVERVIEW) { entry ->
             KudosScreen(
                 onNavigateToHome = {
                     navController.popBackStack(Routes.HOME, inclusive = false)
@@ -140,6 +141,7 @@ fun AppNavigation(
                 onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
                 onNavigateToAllKudos = { navController.navigate(Routes.KUDOS_FEED) },
                 onNavigateToSecretBoxOpen = { navController.navigate(Routes.SECRET_BOX_OPEN) },
+                submitSignalSavedStateHandle = entry.savedStateHandle,
             )
         }
         composable(Routes.KUDOS_FEED) { PlaceholderScreen(label = "Kudos feed") }
@@ -154,7 +156,26 @@ fun AppNavigation(
                         defaultValue = null
                     },
                 ),
-        ) { PlaceholderScreen(label = "Write a Kudo") }
+        ) {
+            WriteKudoScreen(
+                onSubmitted = {
+                    // Cross-screen submit signal — see KudosScreen for the
+                    // observer side. Sets the flag on the PREVIOUS entry's
+                    // savedStateHandle (the hub) then pops.
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(KUDO_SUBMITTED_FLAG, true)
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCommunityStandards = {
+                    navController.navigate(Routes.COMMUNITY_STANDARDS)
+                },
+            )
+        }
+        composable(Routes.COMMUNITY_STANDARDS) {
+            PlaceholderScreen(label = "Community Standards")
+        }
         composable(Routes.SECRET_BOX_OPEN) { PlaceholderScreen(label = "Open Secret Box") }
         composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
         composable(Routes.PROFILE) { PlaceholderScreen(label = "Profile") }
@@ -176,6 +197,14 @@ fun AppNavigation(
         }
     }
 }
+
+/**
+ * Cross-screen submit signal — the Viết Kudo composer sets this flag
+ * on the previous back-stack entry's savedStateHandle on success, and
+ * KudosScreen observes it to trigger a hub refresh. First cross-screen
+ * savedStateHandle use in the codebase — see plan § Notes.
+ */
+const val KUDO_SUBMITTED_FLAG: String = "kudoSubmitted"
 
 /**
  * Clears the splash gate from the back-stack so a system back press from Home/Login

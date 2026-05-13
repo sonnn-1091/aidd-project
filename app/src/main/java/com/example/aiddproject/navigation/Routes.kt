@@ -40,6 +40,12 @@ object Routes {
     const val SECRET_BOX_OPEN: String = "route_secret_box_open"
 
     /**
+     * Viết Kudo US7 — Community Standards page. Currently a placeholder
+     * destination; the real screen ships in a separate spec.
+     */
+    const val COMMUNITY_STANDARDS: String = "route_community_standards"
+
+    /**
      * Award Detail destination is parameterized by `awardId`. Wired
      * to the real `AwardDetailScreen` since the Award_Top talent spec
      * (`c-QM3_zjkG`) shipped — see `awarddetail/ui/AwardDetailScreen.kt`.
