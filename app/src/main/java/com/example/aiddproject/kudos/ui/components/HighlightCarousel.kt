@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -76,33 +77,53 @@ fun HighlightCarousel(
     onProfileTap: (userId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Section uses a vertical Column with no horizontal padding —
+    // the header / filter row pad themselves to 20dp so they align
+    // with the rest of the screen, but the HorizontalPager runs
+    // edge-to-edge so the side-card peek shows from the screen edge.
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(vertical = 8.dp)
                 .testTag(KudosTestTags.HIGHLIGHT),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        KudosSectionHeader(title = stringResource(R.string.kudos_section_highlight_title))
-        HighlightFilterRow(
-            selectedHashtagLabel = selectedHashtagLabel,
-            selectedDepartmentLabel = selectedDepartmentLabel,
-            hashtags = hashtags,
-            departments = departments,
-            activeHashtagId = activeHashtagId,
-            activeDepartmentId = activeDepartmentId,
-            onSelectHashtag = onSelectHashtag,
-            onSelectDepartment = onSelectDepartment,
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            KudosSectionHeader(title = stringResource(R.string.kudos_section_highlight_title))
+            HighlightFilterRow(
+                selectedHashtagLabel = selectedHashtagLabel,
+                selectedDepartmentLabel = selectedDepartmentLabel,
+                hashtags = hashtags,
+                departments = departments,
+                activeHashtagId = activeHashtagId,
+                activeDepartmentId = activeDepartmentId,
+                onSelectHashtag = onSelectHashtag,
+                onSelectDepartment = onSelectDepartment,
+            )
+        }
         when (state) {
-            KudosHighlightState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
-            KudosHighlightState.Empty -> SectionPlaceholder(text = stringResource(R.string.kudos_empty))
-            is KudosHighlightState.Error -> SectionPlaceholder(text = stringResource(state.messageRes))
+            KudosHighlightState.Loading ->
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    SectionPlaceholder(text = stringResource(R.string.kudos_loading))
+                }
+            KudosHighlightState.Empty ->
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    SectionPlaceholder(text = stringResource(R.string.kudos_empty))
+                }
+            is KudosHighlightState.Error ->
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    SectionPlaceholder(text = stringResource(state.messageRes))
+                }
             is KudosHighlightState.Loaded -> {
                 val items = state.items
                 if (items.isEmpty()) {
-                    SectionPlaceholder(text = stringResource(R.string.kudos_empty))
+                    Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                        SectionPlaceholder(text = stringResource(R.string.kudos_empty))
+                    }
                     return@Column
                 }
                 LoopingPager(
@@ -150,8 +171,11 @@ private fun LoopingPager(
 
     HorizontalPager(
         state = pagerState,
+        // Full-width slider with 24dp peek on each side so the
+        // adjacent (blurred) cards bleed visible from the screen
+        // edges instead of being clipped by a parent padding.
         modifier = Modifier.fillMaxWidth().testTag(KudosTestTags.HIGHLIGHT_PAGER),
-        contentPadding = PaddingValues(horizontal = 32.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp),
         pageSpacing = 8.dp,
     ) { page ->
         val active = pagerState.currentPage == page
@@ -164,7 +188,8 @@ private fun LoopingPager(
             onProfileTap = onProfileTap,
             modifier =
                 Modifier
-                    .alpha(if (active) 1f else 0.5f)
+                    .then(if (active) Modifier else Modifier.blur(radius = 6.dp))
+                    .alpha(if (active) 1f else 0.6f)
                     .testTag("${KudosTestTags.HIGHLIGHT_CARD}_${page.mod(size)}"),
         )
     }
