@@ -111,13 +111,26 @@ class DemoKudosRepository
             query: String,
             limit: Int,
         ): Result<List<SunnerMatch>> {
-            if (query.isBlank()) return Result.success(emptyList())
-            val q = query.trim().lowercase()
+            // Q-W-5: when query is blank, seed the picker with the first
+            // N colleagues alphabetically so users see something on open.
+            // Once they type, narrow to fuzzy matches over fullName +
+            // department code. Reads the full DEMO_SUNNERS pool (16
+            // entries) rather than the 8-node spotlight subset.
+            val pool = DEMO_SUNNERS
             val matches =
-                DEMO_SPOTLIGHT.nodes
-                    .filter { it.fullName.lowercase().contains(q) }
-                    .take(limit)
-                    .map { SunnerMatch(node = it, matchScore = 1.0) }
+                if (query.isBlank()) {
+                    pool.sortedBy { it.fullName }
+                        .take(limit)
+                        .map { SunnerMatch(node = it, matchScore = 1.0) }
+                } else {
+                    val q = query.trim().lowercase()
+                    pool.filter {
+                        it.fullName.lowercase().contains(q) ||
+                            (it.department?.name?.lowercase()?.contains(q) == true)
+                    }
+                        .take(limit)
+                        .map { SunnerMatch(node = it, matchScore = 1.0) }
+                }
             return Result.success(matches)
         }
 
@@ -228,13 +241,17 @@ class DemoKudosRepository
         }
 
         private companion object {
+            // Sun* dept codes for the DEMO build — match the format in
+            // Figma's Viết Kudo dropdown (e.g. "CECV1", "CECU01"). Each
+            // entry's `name` is the short code rendered under the
+            // colleague name in the recipient picker rows.
             val DEMO_DEPARTMENTS: List<Department> =
                 listOf(
-                    Department(id = "d01", name = "Division A"),
-                    Department(id = "d02", name = "Division B"),
-                    Department(id = "d03", name = "Division C"),
-                    Department(id = "d04", name = "Studio X"),
-                    Department(id = "d05", name = "Operations"),
+                    Department(id = "d01", name = "CECV1"),
+                    Department(id = "d02", name = "CECU01"),
+                    Department(id = "d03", name = "CESC1"),
+                    Department(id = "d04", name = "CESC2"),
+                    Department(id = "d05", name = "CTEX"),
                 )
 
             val DEMO_HASHTAGS: List<Hashtag> =
@@ -256,6 +273,16 @@ class DemoKudosRepository
                     SunnerNode(id = "u06", fullName = "Đỗ Phong", starTier = 1, department = DEMO_DEPARTMENTS[2]),
                     SunnerNode(id = "u07", fullName = "Bùi Giang", starTier = 0, department = DEMO_DEPARTMENTS[3]),
                     SunnerNode(id = "u08", fullName = "Vũ Hà", starTier = 1, department = DEMO_DEPARTMENTS[4]),
+                    // Q-W-5 seed expansion — extra colleagues so the
+                    // recipient dropdown shows a fuller list on open.
+                    SunnerNode(id = "u09", fullName = "Dương Huỳnh Xuân Nhật", starTier = 2, department = DEMO_DEPARTMENTS[1]),
+                    SunnerNode(id = "u10", fullName = "Dương Huỳnh Xuân Nhân", starTier = 1, department = DEMO_DEPARTMENTS[1]),
+                    SunnerNode(id = "u11", fullName = "Nguyễn Ngọc Sơn", starTier = 2, department = DEMO_DEPARTMENTS[0]),
+                    SunnerNode(id = "u12", fullName = "Trần Quang Minh", starTier = 0, department = DEMO_DEPARTMENTS[2]),
+                    SunnerNode(id = "u13", fullName = "Phạm Thị Hồng", starTier = 1, department = DEMO_DEPARTMENTS[3]),
+                    SunnerNode(id = "u14", fullName = "Lê Hoài Nam", starTier = 0, department = DEMO_DEPARTMENTS[4]),
+                    SunnerNode(id = "u15", fullName = "Võ Thị Lan", starTier = 1, department = DEMO_DEPARTMENTS[0]),
+                    SunnerNode(id = "u16", fullName = "Hoàng Văn Đức", starTier = 2, department = DEMO_DEPARTMENTS[2]),
                 )
 
             val DEMO_KUDOS: List<Kudos> =
@@ -274,7 +301,11 @@ class DemoKudosRepository
 
             val DEMO_SPOTLIGHT: SpotlightGraph =
                 SpotlightGraph(
-                    nodes = DEMO_SUNNERS,
+                    // Spotlight Board renders the 8 canonical seed
+                    // colleagues — the extra recipient-picker entries
+                    // (u09..u16) are NOT graph members so the existing
+                    // spotlight UX stays unchanged.
+                    nodes = DEMO_SUNNERS.take(8),
                     edges =
                         listOf(
                             KudosEdge(senderId = "u01", recipientId = "u02", weight = 4),
