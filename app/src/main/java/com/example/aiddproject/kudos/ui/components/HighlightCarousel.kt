@@ -269,19 +269,21 @@ private fun NavChevron(
     onTap: () -> Unit,
 ) {
     val click = rememberSingleClickHandler { onTap() }
+    // Figma `mms_B.5_slide` renders the chevrons as bare 24×24
+    // transparent glyphs — no button surface, no background. The
+    // outer Box provides a 32dp tap target without painting any
+    // chrome (matches the iOS-style page indicator treatment).
     Box(
         modifier =
             Modifier
                 .size(32.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.08f))
                 .clickable(onClick = click),
         contentAlignment = Alignment.Center,
     ) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(24.dp),
         )
     }
 }
