@@ -126,7 +126,10 @@ private fun RecipientRow(
                     .clip(CircleShape)
                     .border(width = 1.dp, color = Color.White, shape = CircleShape),
         )
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             Text(
                 text = recipient.fullName,
                 color = SaaCream,
@@ -147,8 +150,6 @@ private fun RecipientRow(
                         lineHeight = 16.sp,
                         fontWeight = FontWeight.Normal,
                     ),
-                textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth(),
                 maxLines = 1,
             )
         }
