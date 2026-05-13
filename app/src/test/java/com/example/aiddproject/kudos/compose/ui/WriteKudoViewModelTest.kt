@@ -1,7 +1,10 @@
 package com.example.aiddproject.kudos.compose.ui
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.mockk.every
+import io.mockk.mockk
 import com.example.aiddproject.R
 import com.example.aiddproject.auth.login.data.AuthRepository
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
@@ -246,7 +249,85 @@ class WriteKudoViewModelTest {
             assertEquals(1, vm.state.value.tags.size)
         }
 
+    // ── Image attachments (US5 / Q-W-2) ─────────────────────────────
+
+    @Test
+    fun onImagePicked_invalidMime_setsImagesError_andSkipsAdd() =
+        testScope.runTest {
+            val vm = newVm()
+            val fakeUri = fakeUri("content://test/1")
+            vm.onImagePicked(fakeUri, mime = "application/pdf", sizeBytes = 1024L)
+            assertEquals(R.string.write_kudo_error_image_type, vm.state.value.fieldErrors.images)
+            assertEquals(0, vm.state.value.images.size)
+        }
+
+    @Test
+    fun onImagePicked_oversize_setsImagesError_andSkipsAdd() =
+        testScope.runTest {
+            val vm = newVm()
+            val fakeUri = fakeUri("content://test/1")
+            vm.onImagePicked(fakeUri, mime = "image/jpeg", sizeBytes = 11L * 1024L * 1024L)
+            assertEquals(R.string.write_kudo_error_image_size, vm.state.value.fieldErrors.images)
+            assertEquals(0, vm.state.value.images.size)
+        }
+
+    @Test
+    fun onImagePicked_validJpg_addsThumbnail() =
+        testScope.runTest {
+            val vm = newVm()
+            val fakeUri = fakeUri("content://test/1")
+            vm.onImagePicked(fakeUri, mime = "image/jpeg", sizeBytes = 1024L)
+            assertEquals(1, vm.state.value.images.size)
+            assertNull(vm.state.value.fieldErrors.images)
+            assertTrue(vm.state.value.formDirty)
+        }
+
+    @Test
+    fun onImageRemove_isLocalOnly_noStorageCall() =
+        testScope.runTest {
+            val vm = newVm()
+            val fakeUri = fakeUri("content://test/1")
+            vm.onImagePicked(fakeUri, mime = "image/jpeg", sizeBytes = 1024L)
+            val clientId = vm.state.value.images.first().clientId
+            vm.onImageRemove(clientId)
+            assertEquals(0, vm.state.value.images.size)
+            assertTrue(repo.deletedPaths.isEmpty()) // Q-W-2: nothing uploaded → nothing to delete
+        }
+
+    @Test
+    fun onSendTap_partialUploadFailure_rollsBackSuccessfulUploads() =
+        testScope.runTest {
+            val vm = newVm()
+            // Fill required fields.
+            vm.onRecipientChosen(SunnerNode(id = "u-other", fullName = "X"))
+            vm.onTitleChange("T")
+            vm.onMessageChange(RichTextValue.ofPlainText("M"))
+            vm.onHashtagAdd(Hashtag(id = "h1", tagName = "teamwork"))
+            // Add 3 images.
+            repeat(3) { i ->
+                vm.onImagePicked(fakeUri("content://test/$i"), mime = "image/jpeg", sizeBytes = 1024L)
+            }
+            // Force the 2nd upload to fail.
+            repo.failOnNthUpload = 2
+
+            vm.onSendTap()
+            advanceUntilIdle()
+
+            // Submit failed; form remains editable.
+            assertFalse(vm.state.value.isSending)
+            assertEquals(R.string.write_kudo_error_image_upload, vm.state.value.fieldErrors.images)
+            // Rollback: the first successful upload was deleted.
+            assertEquals(1, repo.deletedPaths.size)
+        }
+
     // ── Fakes ───────────────────────────────────────────────────────
+
+    private fun fakeUri(path: String): Uri {
+        val u = mockk<Uri>(relaxed = true)
+        every { u.lastPathSegment } returns path.substringAfterLast('/')
+        every { u.toString() } returns path
+        return u
+    }
 
     private class FakeAuthRepository(private val currentUserId: String?) : AuthRepository {
         override suspend fun signInWithIdToken(token: String): Result<Unit> = Result.success(Unit)
