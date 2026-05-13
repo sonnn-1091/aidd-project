@@ -2,6 +2,7 @@ package com.example.aiddproject.kudos.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -82,14 +84,29 @@ internal fun FilterMenuItem(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
         modifier =
             Modifier
+                .padding(vertical = 4.dp)
                 .widthIn(min = 160.dp)
                 .heightIn(min = 48.dp)
                 .then(
                     if (isActive) {
-                        Modifier.background(
-                            color = MenuSelectedRowColor,
-                            shape = RoundedCornerShape(2.dp),
-                        )
+                        // SaaCream-tinted elevation shadow renders a soft
+                        // glow halo around the row; the higher-opacity
+                        // background + thin border gives it the brighter
+                        // inner fill.
+                        Modifier
+                            .shadow(
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(6.dp),
+                                ambientColor = MenuGlowColor,
+                                spotColor = MenuGlowColor,
+                            ).background(
+                                color = MenuSelectedRowActiveColor,
+                                shape = RoundedCornerShape(6.dp),
+                            ).border(
+                                width = 1.dp,
+                                color = MenuGlowColor,
+                                shape = RoundedCornerShape(6.dp),
+                            )
                     } else {
                         Modifier
                     },
@@ -120,3 +137,10 @@ internal fun FilterMenuItem(
 internal val MenuSurfaceColor: Color = Color(0xFF00070C)
 internal val MenuBorderColor: Color = Color(0xFF998C5F)
 internal val MenuSelectedRowColor: Color = Color(0x33FFEA9E)
+
+// Active-row chrome — brighter SaaCream fill + glow shadow for the
+// "phát sáng" effect: 60% SaaCream fill so the dark menu surface
+// reads through cleanly; the shadow + 1dp SaaCream border carry the
+// halo.
+private val MenuSelectedRowActiveColor: Color = Color(0x99FFEA9E)
+private val MenuGlowColor: Color = Color(0xFFFFEA9E)

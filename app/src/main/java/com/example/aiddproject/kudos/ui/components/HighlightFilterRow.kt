@@ -52,6 +52,9 @@ fun HighlightFilterRow(
     onSelectDepartment: (Department?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var hashtagOpen by remember { mutableStateOf(false) }
+    var departmentOpen by remember { mutableStateOf(false) }
+
     Row(
         modifier =
             modifier
@@ -60,78 +63,68 @@ fun HighlightFilterRow(
                 .testTag(KudosTestTags.FILTER_ROW),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        var hashtagOpen by remember { mutableStateOf(false) }
-        var departmentOpen by remember { mutableStateOf(false) }
-        FilterTrigger(
-            label = selectedHashtagLabel ?: stringResource(R.string.kudos_filter_hashtag_label),
-            onTap = { hashtagOpen = true },
-            modifier = Modifier.testTag(KudosTestTags.FILTER_HASHTAG_TRIGGER),
-            dropdown = {
-                HashtagFilterDropdown(
-                    expanded = hashtagOpen,
-                    hashtags = hashtags,
-                    activeHashtagId = activeHashtagId,
-                    onSelect = onSelectHashtag,
-                    onDismiss = { hashtagOpen = false },
-                )
-            },
-        )
-        FilterTrigger(
-            label = selectedDepartmentLabel ?: stringResource(R.string.kudos_filter_department_label),
-            onTap = { departmentOpen = true },
-            modifier = Modifier.testTag(KudosTestTags.FILTER_DEPARTMENT_TRIGGER),
-            dropdown = {
-                DepartmentFilterDropdown(
-                    expanded = departmentOpen,
-                    departments = departments,
-                    activeDepartmentId = activeDepartmentId,
-                    onSelect = onSelectDepartment,
-                    onDismiss = { departmentOpen = false },
-                )
-            },
-        )
+        Box(modifier = Modifier.testTag(KudosTestTags.FILTER_HASHTAG_TRIGGER)) {
+            FilterTriggerPill(
+                label = selectedHashtagLabel ?: stringResource(R.string.kudos_filter_hashtag_label),
+                onTap = { hashtagOpen = !hashtagOpen },
+            )
+            HashtagFilterDropdown(
+                expanded = hashtagOpen,
+                hashtags = hashtags,
+                activeHashtagId = activeHashtagId,
+                onSelect = onSelectHashtag,
+                onDismiss = { hashtagOpen = false },
+            )
+        }
+        Box(modifier = Modifier.testTag(KudosTestTags.FILTER_DEPARTMENT_TRIGGER)) {
+            FilterTriggerPill(
+                label = selectedDepartmentLabel ?: stringResource(R.string.kudos_filter_department_label),
+                onTap = { departmentOpen = !departmentOpen },
+            )
+            DepartmentFilterDropdown(
+                expanded = departmentOpen,
+                departments = departments,
+                activeDepartmentId = activeDepartmentId,
+                onSelect = onSelectDepartment,
+                onDismiss = { departmentOpen = false },
+            )
+        }
     }
 }
 
 @Composable
-private fun FilterTrigger(
+private fun FilterTriggerPill(
     label: String,
     onTap: () -> Unit,
-    modifier: Modifier = Modifier,
-    dropdown: @Composable () -> Unit,
 ) {
     val click = rememberSingleClickHandler { onTap() }
-    Box(modifier = modifier) {
-        Row(
-            modifier =
-                Modifier
-                    .heightIn(min = 40.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(SaaCream.copy(alpha = 0.10f))
-                    .border(width = 1.dp, color = FilterBorderColor, shape = RoundedCornerShape(4.dp))
-                    .clickable(onClick = click)
-                    .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = label,
-                color = Color.White,
-                style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        letterSpacing = 0.25.sp,
-                    ),
-            )
-            Image(
-                painter = painterResource(R.drawable.ic_kudos_filter_chevron),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        // Anchor the menu beneath the trigger.
-        dropdown()
+    Row(
+        modifier =
+            Modifier
+                .heightIn(min = 40.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(SaaCream.copy(alpha = 0.10f))
+                .border(width = 1.dp, color = FilterBorderColor, shape = RoundedCornerShape(4.dp))
+                .clickable(onClick = click)
+                .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = label,
+            color = Color.White,
+            style =
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.25.sp,
+                ),
+        )
+        Image(
+            painter = painterResource(R.drawable.ic_kudos_filter_chevron),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+        )
     }
 }
 
