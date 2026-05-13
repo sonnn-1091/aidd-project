@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -100,11 +100,19 @@ fun RecipientPickerOverlay(
                         }
                     }
                 is RecipientPickerState.ResultState.Loaded ->
-                    LazyColumn(
+                    // DropdownMenu wraps its content in SubcomposeLayout
+                    // which doesn't support intrinsic measurements — so
+                    // LazyColumn crashes. Use a plain Column with
+                    // verticalScroll instead (same pattern as the hub's
+                    // HashtagFilterDropdown).
+                    Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState()),
                     ) {
-                        items(r.items, key = { it.id }) { node ->
+                        r.items.forEach { node ->
                             RecipientRow(
                                 node = node,
                                 onPick = {
