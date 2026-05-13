@@ -143,7 +143,7 @@
     <string name="kudos_stats_boxes_opened">Số Secret Box bạn đã mở</string>
     <string name="kudos_stats_boxes_unopened">Số Secret Box chưa mở</string>
     <string name="kudos_secret_box_open">Mở Secret Box</string>
-    <string name="kudos_top_ten_title">Top 10 người nhận quà mới nhất</string>
+    <string name="kudos_top_ten_title" translatable="false">10 SUNNER NHẬN QUÀ MỚI NHẤT</string>
     <string name="kudos_top_ten_reward_prefix">Nhận được %1$s</string>
     <string name="kudos_spotlight_total_label">Tổng Kudos đã trao</string>
     <string name="kudos_spotlight_search_placeholder">Tìm kiếm</string>

@@ -70,7 +70,7 @@ fun TopTenRecipients(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = stringResource(R.string.kudos_top_ten_title).uppercase(),
+                text = stringResource(R.string.kudos_top_ten_title),
                 color = SaaCream,
                 style =
                     MaterialTheme.typography.bodyMedium.copy(
