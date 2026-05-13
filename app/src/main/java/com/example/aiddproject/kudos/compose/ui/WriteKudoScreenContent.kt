@@ -207,7 +207,7 @@ private fun FormCard(
             color = FormCardBackground,
             shape = RoundedCornerShape(11.dp),
             tonalElevation = 0.dp,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier =
