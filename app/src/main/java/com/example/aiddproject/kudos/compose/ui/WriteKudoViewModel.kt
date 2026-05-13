@@ -19,7 +19,6 @@ import com.example.aiddproject.kudos.domain.Hashtag
 import com.example.aiddproject.kudos.domain.SunnerNode
 import com.example.aiddproject.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,9 +27,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -47,7 +43,6 @@ import javax.inject.Inject
  * intercept always fires this handler; the handler forks on
  * [WriteKudoUiState.isSubmitEnabled].
  */
-@OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class WriteKudoViewModel
     @Inject
@@ -70,13 +65,6 @@ class WriteKudoViewModel
 
         // Single-flight submit (FR-009/012).
         private var submitJob: Job? = null
-
-        // Debounced recipient search input.
-        private val recipientQueryFlow = MutableStateFlow("")
-
-        init {
-            wireRecipientSearchFlow()
-        }
 
         // ── Field-update intents (T036) ──────────────────────────────
 
@@ -337,31 +325,55 @@ class WriteKudoViewModel
                     it.copy(recipientPicker = RecipientPickerState.Open())
                 }
             }
-            // Seed initial list.
-            recipientQueryFlow.value = ""
+            loadRecipientList()
         }
 
         fun onRecipientPickerDismiss() {
             _state.update { it.copy(recipientPicker = RecipientPickerState.Closed) }
         }
 
-        fun onRecipientQueryChange(query: String) {
-            _state.update { current ->
-                val picker = current.recipientPicker
-                if (picker !is RecipientPickerState.Open) {
-                    current
-                } else {
-                    current.copy(
-                        recipientPicker = picker.copy(query = query, results = RecipientPickerState.ResultState.Loading),
-                    )
-                }
-            }
-            recipientQueryFlow.value = query
-        }
+        /**
+         * Kept on the surface for the @mention overlay's debounced
+         * search flow; the recipient picker itself no longer renders a
+         * search input (per Figma sub-flow `5MU728Tjck`).
+         */
+        @Suppress("unused")
+        fun onRecipientQueryChange(
+            @Suppress("UNUSED_PARAMETER") query: String,
+        ) = Unit
 
         fun onRecipientRetry() {
-            // Trigger the search flow to re-emit by nudging the query.
-            recipientQueryFlow.value = recipientQueryFlow.value
+            loadRecipientList()
+        }
+
+        /**
+         * Run the directory query once and populate the picker results
+         * — no debounce since there's no search input to debounce
+         * against. Filters out the current authenticated user as a UX
+         * hint; server RLS is the authoritative self-send gate.
+         */
+        private fun loadRecipientList() {
+            viewModelScope.launch {
+                val callResult = kudosRepository.searchSunner(query = "")
+                val selfId = authRepository.currentUserId()
+                _state.update { current ->
+                    val picker = current.recipientPicker
+                    if (picker !is RecipientPickerState.Open) return@update current
+                    val next =
+                        callResult.fold(
+                            onSuccess = { matches ->
+                                val filtered = matches.map { it.node }.filter { it.id != selfId }
+                                if (filtered.isEmpty()) {
+                                    RecipientPickerState.ResultState.NoResults
+                                } else {
+                                    RecipientPickerState.ResultState.Loaded(filtered)
+                                }
+                            },
+                            onFailure = { RecipientPickerState.ResultState.Error(R.string.write_kudo_recipient_load_error) },
+                        )
+                    current.copy(recipientPicker = picker.copy(results = next))
+                }
+            }
         }
 
         // ── Hashtag picker (T039) ────────────────────────────────────
@@ -529,49 +541,6 @@ class WriteKudoViewModel
                     formDirty = false, // prefill does NOT dirty (US1 Sc4)
                 )
             }
-        }
-
-        @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-        private fun wireRecipientSearchFlow() {
-            viewModelScope.launch {
-                recipientQueryFlow
-                    .debounce(RECIPIENT_DEBOUNCE_MS)
-                    .distinctUntilChanged()
-                    .flatMapLatest { query ->
-                        runRecipientSearch(query)
-                    }
-                    .collect { result ->
-                        _state.update { current ->
-                            val picker = current.recipientPicker
-                            if (picker !is RecipientPickerState.Open) return@update current
-                            current.copy(recipientPicker = picker.copy(results = result))
-                        }
-                    }
-            }
-        }
-
-        private fun runRecipientSearch(query: String): kotlinx.coroutines.flow.Flow<RecipientPickerState.ResultState> =
-            kotlinx.coroutines.flow.flow {
-                emit(RecipientPickerState.ResultState.Loading)
-                val callResult = kudosRepository.searchSunner(query)
-                val selfId = authRepository.currentUserId()
-                emit(
-                    callResult.fold(
-                        onSuccess = { matches ->
-                            val filtered = matches.map { it.node }.filter { it.id != selfId }
-                            if (filtered.isEmpty()) {
-                                RecipientPickerState.ResultState.NoResults
-                            } else {
-                                RecipientPickerState.ResultState.Loaded(filtered)
-                            }
-                        },
-                        onFailure = { RecipientPickerState.ResultState.Error(R.string.write_kudo_recipient_load_error) },
-                    ),
-                )
-            }
-
-        companion object {
-            private const val RECIPIENT_DEBOUNCE_MS: Long = 200
         }
     }
 
