@@ -1,5 +1,6 @@
 package com.example.aiddproject.kudos.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,11 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -120,10 +117,10 @@ private fun SenderRecipientRow(
             onTap = onSenderTap,
             modifier = Modifier.weight(1f),
         )
-        Text(
-            text = "→",
-            color = CardDarkText,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+        Image(
+            painter = painterResource(R.drawable.ic_kudos_card_arrow),
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
         )
         ProfileBlock(
             name = kudos.recipient.fullName,
@@ -244,24 +241,31 @@ private fun ActionRow(
                 color = CardDarkText,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
             )
-            Icon(
-                imageVector = if (kudos.likedByCurrentUser) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            Image(
+                painter = painterResource(R.drawable.ic_kudos_heart),
                 contentDescription = null,
-                tint = if (kudos.likeDisabledForMe) CardMuted else CardRed,
                 modifier = Modifier.size(16.dp),
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        TinyPillButton(label = stringResource(R.string.a11y_kudos_copy_link), icon = Icons.Filled.ContentCopy, onTap = onCopyLink)
+        TinyPillButton(
+            label = stringResource(R.string.a11y_kudos_copy_link),
+            iconRes = R.drawable.ic_kudos_copy,
+            onTap = onCopyLink,
+        )
         Spacer(modifier = Modifier.size(4.dp))
-        TinyPillButton(label = stringResource(R.string.kudos_card_view_detail_label), icon = null, onTap = onViewDetail)
+        TinyPillButton(
+            label = stringResource(R.string.kudos_card_view_detail_label),
+            iconRes = R.drawable.ic_kudos_view_detail_arrow,
+            onTap = onViewDetail,
+        )
     }
 }
 
 @Composable
 private fun TinyPillButton(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector?,
+    @androidx.annotation.DrawableRes iconRes: Int,
     onTap: () -> Unit,
 ) {
     Row(
@@ -274,19 +278,16 @@ private fun TinyPillButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = CardDarkText,
-                modifier = Modifier.size(12.dp),
-            )
-        }
         Text(
             text = label,
             color = CardDarkText,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
             maxLines = 1,
+        )
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
         )
     }
 }
