@@ -35,7 +35,11 @@ data class WriteKudoUiState(
     // ── Overlay state ───────────────────────────────────────────────
     val recipientPicker: RecipientPickerState = RecipientPickerState.Closed,
     val hashtagPicker: HashtagPickerState = HashtagPickerState.Closed,
+    val mentionOverlay: MentionOverlayState = MentionOverlayState.Closed,
+    val linkDialog: LinkDialogState? = null,
     val confirmDialog: ConfirmDialogState? = null,
+    // ── Caret / selection — used by toolbar transforms ──────────────
+    val messageSelection: IntRange = IntRange.EMPTY,
     // ── Submit-time feedback ────────────────────────────────────────
     val snackbar: SnackbarMessage? = null,
 ) {
@@ -100,6 +104,34 @@ sealed interface HashtagPickerState {
 sealed interface ConfirmDialogState {
     data object UnsavedChanges : ConfirmDialogState
 }
+
+/** @mention suggestion overlay state (US4). */
+sealed interface MentionOverlayState {
+    data object Closed : MentionOverlayState
+
+    /**
+     * Overlay open with the typed query (text after the `@` trigger).
+     * The result list reuses [RecipientPickerState.ResultState] so the
+     * overlay composable can share rendering code.
+     */
+    data class Open(
+        val query: String,
+        val triggerOffset: Int,
+        val results: RecipientPickerState.ResultState = RecipientPickerState.ResultState.Loading,
+    ) : MentionOverlayState
+}
+
+/**
+ * C.5 link-insert dialog state. Holds the user-typed URL,
+ * the optional "invalid URL" inline error flag, AND the textarea
+ * selection captured at the moment the dialog opened so the
+ * `applyLink` transform can wrap the right range.
+ */
+data class LinkDialogState(
+    val url: String = "",
+    val capturedSelection: IntRange = IntRange.EMPTY,
+    val showInvalidError: Boolean = false,
+)
 
 /** One-shot snackbar feedback (generic submit / upload errors). */
 data class SnackbarMessage(val messageRes: Int)

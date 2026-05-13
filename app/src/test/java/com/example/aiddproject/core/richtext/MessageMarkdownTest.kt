@@ -2,8 +2,7 @@ package com.example.aiddproject.core.richtext
 
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
 import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
-import org.junit.Ignore
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -96,38 +95,64 @@ class MessageMarkdownTest {
     // ────────── Toolbar transforms — Phase 6 / US4 (T078 → T086) ─────────
 
     @Test
-    @Ignore("Phase 6 / T078 wires `applyBold` + replaces this body.")
     fun applyBold_wrapsSelectionWithDoubleStar() {
-        fail("not implemented — T078")
+        val src = RichTextValue.ofPlainText("hello world")
+        val out = MessageMarkdown.applyBold(src, selection = 6..10) // "world"
+        assertEquals("hello **world**", out.markdown)
+        assertEquals("hello world", out.plainText)
     }
 
     @Test
-    @Ignore("Phase 6 / T078 wires `applyItalic` + replaces this body.")
     fun applyItalic_wrapsSelectionWithSingleStar() {
-        fail("not implemented — T078")
+        val src = RichTextValue.ofPlainText("hello world")
+        val out = MessageMarkdown.applyItalic(src, selection = 6..10)
+        assertEquals("hello *world*", out.markdown)
+        assertEquals("hello world", out.plainText)
     }
 
     @Test
-    @Ignore("Phase 6 / T078 wires `applyStrikethrough` + replaces this body.")
     fun applyStrikethrough_wrapsSelectionWithTilde() {
-        fail("not implemented — T078")
+        val src = RichTextValue.ofPlainText("hello world")
+        val out = MessageMarkdown.applyStrikethrough(src, selection = 6..10)
+        assertEquals("hello ~~world~~", out.markdown)
+        assertEquals("hello world", out.plainText)
     }
 
     @Test
-    @Ignore("Phase 6 / T078 wires `applyNumberedList` + replaces this body.")
-    fun applyNumberedList_toggles_listMode() {
-        fail("not implemented — T078")
+    fun applyNumberedList_prefixesLines() {
+        val src = RichTextValue.ofPlainText("first\nsecond")
+        val out = MessageMarkdown.applyNumberedList(src, selection = 0..11)
+        assertEquals("1. first\n2. second", out.markdown)
+        assertEquals("first\nsecond", out.plainText)
     }
 
     @Test
-    @Ignore("Phase 6 / T078 wires `applyQuote` + replaces this body.")
-    fun applyQuote_toggles_blockquote() {
-        fail("not implemented — T078")
+    fun applyQuote_prefixesLineWithChevron() {
+        val src = RichTextValue.ofPlainText("hello")
+        val out = MessageMarkdown.applyQuote(src, selection = 0..4)
+        assertEquals("> hello", out.markdown)
+        assertEquals("hello", out.plainText)
     }
 
     @Test
-    @Ignore("Phase 6 / T079 wires `applyLink` + replaces this body.")
     fun applyLink_validUrl_wrapsSelection() {
-        fail("not implemented — T079")
+        val src = RichTextValue.ofPlainText("see docs for more")
+        val out = MessageMarkdown.applyLink(src, selection = 4..7, url = "https://example.com")
+        assertEquals("see [docs](https://example.com) for more", out.markdown)
+        assertEquals("see docs for more", out.plainText)
+    }
+
+    @Test
+    fun applyLink_emptySelection_insertsUrlAsLabel() {
+        val src = RichTextValue.ofPlainText("see  for more")
+        val out = MessageMarkdown.applyLink(src, selection = 4..3, url = "https://example.com")
+        assertTrue(out.markdown.contains("[https://example.com](https://example.com)"))
+    }
+
+    @Test
+    fun applyBold_emptySelection_insertsEmptyBoldMarkers() {
+        val src = RichTextValue.Empty
+        val out = MessageMarkdown.applyBold(src, selection = 0..-1)
+        assertEquals("****", out.markdown)
     }
 }
