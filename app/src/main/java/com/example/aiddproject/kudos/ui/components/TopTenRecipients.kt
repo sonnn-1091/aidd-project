@@ -1,6 +1,8 @@
 package com.example.aiddproject.kudos.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -32,10 +36,15 @@ import com.example.aiddproject.kudos.ui.KudosTestTags
 import com.example.aiddproject.ui.theme.SaaCream
 
 /**
- * Top 10 recent gift recipients stub (Figma `D.3`).
+ * Top 10 latest gift recipients — Figma `mms_D.3_10 SUNNER nhận quà`
+ * (`6885:9255`).
  *
- * Phase 3 MVP renders 10 rows when Loaded; placeholder otherwise.
- * Row tap → onProfileTap wired in Phase 9 (US8 + US12).
+ * Single dark container (#00070C + 0.794dp #998C5F border, 8dp radius,
+ * 12dp padding) with the title centered at top in SaaCream + rows
+ * stacked vertically below. Each row:
+ *  - 32×32dp circular avatar (1.483dp white border).
+ *  - Text column: Name 14sp Bold SaaCream + reward 12sp Regular white
+ *    right-aligned.
  */
 @Composable
 fun TopTenRecipients(
@@ -43,25 +52,48 @@ fun TopTenRecipients(
     onProfileTap: (userId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .testTag(KudosTestTags.TOP_TEN),
     ) {
-        KudosSectionHeader(
-            title = stringResource(R.string.kudos_top_ten_title),
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        when (state) {
-            TopTenState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
-            TopTenState.Empty -> SectionPlaceholder(text = stringResource(R.string.kudos_section_empty_generic))
-            is TopTenState.Error -> SectionPlaceholder(text = stringResource(state.messageRes))
-            is TopTenState.Loaded -> {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    state.items.forEach { recipient ->
-                        RecipientRow(recipient = recipient, onProfileTap = onProfileTap)
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(ContainerColor)
+                    .border(width = 1.dp, color = BorderColor, shape = RoundedCornerShape(8.dp))
+                    .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.kudos_top_ten_title).uppercase(),
+                color = SaaCream,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            when (state) {
+                TopTenState.Loading -> SectionPlaceholder(text = stringResource(R.string.kudos_loading))
+                TopTenState.Empty -> SectionPlaceholder(text = stringResource(R.string.kudos_section_empty_generic))
+                is TopTenState.Error -> SectionPlaceholder(text = stringResource(state.messageRes))
+                is TopTenState.Loaded -> {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        state.items.forEachIndexed { index, recipient ->
+                            RecipientRow(
+                                recipient = recipient,
+                                avatarRes = avatarForIndex(index),
+                                onProfileTap = onProfileTap,
+                            )
+                        }
                     }
                 }
             }
@@ -72,6 +104,7 @@ fun TopTenRecipients(
 @Composable
 private fun RecipientRow(
     recipient: GiftRecipient,
+    @androidx.annotation.DrawableRes avatarRes: Int,
     onProfileTap: (userId: String) -> Unit,
 ) {
     val click = rememberSingleClickHandler { onProfileTap(recipient.userId) }
@@ -80,31 +113,60 @@ private fun RecipientRow(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .clickable(onClick = click)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .clickable(onClick = click),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Box(
+        Image(
+            painter = painterResource(avatarRes),
+            contentDescription = null,
             modifier =
                 Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(SaaCream.copy(alpha = 0.2f)),
+                    .border(width = 1.dp, color = Color.White, shape = CircleShape),
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = recipient.fullName,
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+                color = SaaCream,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                maxLines = 1,
             )
             Text(
-                text = recipient.rewardName,
-                color = Color.White.copy(alpha = 0.7f),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                text = stringResource(R.string.kudos_top_ten_reward_prefix, recipient.rewardName),
+                color = Color.White,
+                style =
+                    MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                    ),
+                textAlign = TextAlign.Right,
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 1,
             )
         }
     }
 }
+
+/**
+ * Alternate the two Figma sample portraits across rows so the list
+ * has visible avatar variation in demo mode. Production should
+ * replace this with `recipient.avatarUrl` rendered via Coil.
+ */
+@androidx.annotation.DrawableRes
+private fun avatarForIndex(index: Int): Int =
+    if (index % 2 == 0) {
+        R.drawable.kudos_avatar_sender
+    } else {
+        R.drawable.kudos_avatar_recipient
+    }
+
+private val ContainerColor: Color = Color(0xFF00070C)
+private val BorderColor: Color = Color(0xFF998C5F)

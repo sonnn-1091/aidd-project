@@ -85,7 +85,8 @@
     <string name="kudos_stats_boxes_opened">Secret Boxes you opened</string>
     <string name="kudos_stats_boxes_unopened">Secret Boxes unopened</string>
     <string name="kudos_secret_box_open">Open Secret Box</string>
-    <string name="kudos_top_ten_title">Top 10 recent gift recipients</string>
+    <string name="kudos_top_ten_title">Top 10 latest gift recipients</string>
+    <string name="kudos_top_ten_reward_prefix">Received %1$s</string>
     <string name="kudos_spotlight_total_label">Total Kudos sent</string>
     <string name="kudos_spotlight_search_placeholder">Search</string>
     <string name="kudos_spotlight_no_results">No results</string>
