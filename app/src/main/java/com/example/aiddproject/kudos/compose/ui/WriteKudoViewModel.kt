@@ -1,0 +1,370 @@
+package com.example.aiddproject.kudos.compose.ui
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.aiddproject.R
+import com.example.aiddproject.auth.login.data.AuthRepository
+import com.example.aiddproject.kudos.compose.data.WriteKudoErrorMapper
+import com.example.aiddproject.kudos.compose.domain.RichTextValue
+import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
+import com.example.aiddproject.kudos.compose.domain.WriteKudoFieldErrors
+import com.example.aiddproject.kudos.compose.domain.WriteKudoValidators
+import com.example.aiddproject.kudos.data.KudosRepository
+import com.example.aiddproject.kudos.domain.Hashtag
+import com.example.aiddproject.kudos.domain.SunnerNode
+import com.example.aiddproject.navigation.Routes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.UUID
+import javax.inject.Inject
+
+/**
+ * Hilt ViewModel for the Viết Kudo composer (T035–T039 / FR-001..012,
+ * TR-001..005). Owns the entire form state, the recipient + hashtag
+ * picker overlays, the @mention overlay (Phase 6), and the
+ * single-flight submit job slot.
+ *
+ * The novel "tap-on-disabled-Send reveals errors" pattern (plan §
+ * Notes) is implemented by [onSendTap]: the outer Box gesture
+ * intercept always fires this handler; the handler forks on
+ * [WriteKudoUiState.isSubmitEnabled].
+ */
+@OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@HiltViewModel
+class WriteKudoViewModel
+    @Inject
+    constructor(
+        private val savedStateHandle: SavedStateHandle,
+        private val kudosRepository: KudosRepository,
+        private val authRepository: AuthRepository,
+    ) : ViewModel() {
+        private val _state = MutableStateFlow(initialState())
+        val state: StateFlow<WriteKudoUiState> = _state.asStateFlow()
+
+        // One-shot events to the UI (navigation, snackbars).
+        private val _events =
+            MutableSharedFlow<WriteKudoEvent>(
+                replay = 0,
+                extraBufferCapacity = 4,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
+        val events: SharedFlow<WriteKudoEvent> = _events.asSharedFlow()
+
+        // Single-flight submit (FR-009/012).
+        private var submitJob: Job? = null
+
+        // Debounced recipient search input.
+        private val recipientQueryFlow = MutableStateFlow("")
+
+        init {
+            wireRecipientSearchFlow()
+        }
+
+        // ── Field-update intents (T036) ──────────────────────────────
+
+        fun onRecipientChosen(node: SunnerNode) {
+            _state.update {
+                it.copy(
+                    recipientId = node.id,
+                    recipientName = node.fullName,
+                    recipientPicker = RecipientPickerState.Closed,
+                    formDirty = true,
+                    fieldErrors = it.fieldErrors.copy(recipient = null),
+                )
+            }
+        }
+
+        fun onTitleChange(value: String) {
+            // Cap input length to MAX_TITLE_LENGTH to make the
+            // "too long" error path purely server-side; the field
+            // simply refuses additional characters at the input gate.
+            val clipped =
+                if (value.length > WriteKudoValidators.MAX_TITLE_LENGTH) {
+                    value.take(WriteKudoValidators.MAX_TITLE_LENGTH)
+                } else {
+                    value
+                }
+            _state.update {
+                it.copy(
+                    title = clipped,
+                    formDirty = true,
+                    fieldErrors = it.fieldErrors.copy(title = null),
+                )
+            }
+        }
+
+        fun onMessageChange(value: RichTextValue) {
+            _state.update {
+                it.copy(
+                    message = value,
+                    formDirty = true,
+                    fieldErrors = it.fieldErrors.copy(message = null),
+                )
+            }
+        }
+
+        fun onHashtagAdd(tag: Hashtag) {
+            _state.update { current ->
+                if (current.tags.any { it.id == tag.id }) {
+                    current
+                } else if (current.tags.size >= WriteKudoValidators.MAX_HASHTAGS) {
+                    current.copy(
+                        fieldErrors = current.fieldErrors.copy(hashtags = R.string.write_kudo_error_hashtags_max),
+                    )
+                } else {
+                    current.copy(
+                        tags = current.tags + tag,
+                        formDirty = true,
+                        fieldErrors = current.fieldErrors.copy(hashtags = null),
+                    )
+                }
+            }
+        }
+
+        fun onHashtagRemove(tagId: String) {
+            _state.update { current ->
+                current.copy(
+                    tags = current.tags.filterNot { it.id == tagId },
+                    formDirty = true,
+                    fieldErrors = current.fieldErrors.copy(hashtags = null),
+                )
+            }
+        }
+
+        fun onAnonymousToggle(checked: Boolean) {
+            _state.update { it.copy(isAnonymous = checked, formDirty = true) }
+        }
+
+        // ── Recipient picker (T038) ──────────────────────────────────
+
+        fun onRecipientPickerOpen() {
+            _state.update {
+                if (it.recipientPicker is RecipientPickerState.Open) {
+                    it
+                } else {
+                    it.copy(recipientPicker = RecipientPickerState.Open())
+                }
+            }
+            // Seed initial list.
+            recipientQueryFlow.value = ""
+        }
+
+        fun onRecipientPickerDismiss() {
+            _state.update { it.copy(recipientPicker = RecipientPickerState.Closed) }
+        }
+
+        fun onRecipientQueryChange(query: String) {
+            _state.update { current ->
+                val picker = current.recipientPicker
+                if (picker !is RecipientPickerState.Open) {
+                    current
+                } else {
+                    current.copy(
+                        recipientPicker = picker.copy(query = query, results = RecipientPickerState.ResultState.Loading),
+                    )
+                }
+            }
+            recipientQueryFlow.value = query
+        }
+
+        fun onRecipientRetry() {
+            // Trigger the search flow to re-emit by nudging the query.
+            recipientQueryFlow.value = recipientQueryFlow.value
+        }
+
+        // ── Hashtag picker (T039) ────────────────────────────────────
+
+        fun onHashtagPickerOpen() {
+            _state.update { it.copy(hashtagPicker = HashtagPickerState.Open()) }
+            viewModelScope.launch {
+                val result = kudosRepository.listHashtags()
+                _state.update { current ->
+                    if (current.hashtagPicker !is HashtagPickerState.Open) return@update current
+                    val next =
+                        result.fold(
+                            onSuccess = { list ->
+                                if (list.isEmpty()) {
+                                    HashtagPickerState.ResultState.Empty
+                                } else {
+                                    HashtagPickerState.ResultState.Loaded(list)
+                                }
+                            },
+                            onFailure = { HashtagPickerState.ResultState.Error(R.string.write_kudo_hashtag_load_error) },
+                        )
+                    current.copy(hashtagPicker = HashtagPickerState.Open(results = next))
+                }
+            }
+        }
+
+        fun onHashtagPickerDismiss() {
+            _state.update { it.copy(hashtagPicker = HashtagPickerState.Closed) }
+        }
+
+        // ── Send / Cancel (T037) ─────────────────────────────────────
+
+        fun onSendTap() {
+            val current = _state.value
+            if (!current.isSubmitEnabled) {
+                revealErrors()
+                return
+            }
+            if (current.isSending) return // single-flight (FR-009)
+
+            submitJob =
+                viewModelScope.launch {
+                    _state.update { it.copy(isSending = true, fieldErrors = WriteKudoFieldErrors.None) }
+                    val kudoId = UUID.randomUUID().toString()
+                    val draft =
+                        WriteKudoDraft(
+                            id = kudoId,
+                            recipientId = current.recipientId!!,
+                            title = current.title,
+                            message = current.message.markdown,
+                            tags = current.tags.map { it.id },
+                            imageIds = emptyList(), // Phase 7 / T094 wires submit-time image upload
+                            isAnonymous = current.isAnonymous,
+                        )
+                    val result = kudosRepository.createKudo(draft)
+                    result.fold(
+                        onSuccess = {
+                            _state.update { it.copy(isSending = false) }
+                            _events.tryEmit(WriteKudoEvent.Submitted)
+                        },
+                        onFailure = { throwable ->
+                            val mapped = WriteKudoErrorMapper.map(throwable)
+                            if (mapped.hasAny) {
+                                _state.update { it.copy(isSending = false, fieldErrors = mapped) }
+                            } else {
+                                _state.update {
+                                    it.copy(
+                                        isSending = false,
+                                        snackbar = SnackbarMessage(R.string.write_kudo_error_submit_generic),
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+        }
+
+        fun revealErrors() {
+            val s = _state.value
+            val errors =
+                WriteKudoFieldErrors(
+                    recipient = WriteKudoValidators.validateRecipient(s.recipientId, authRepository.currentUserId()),
+                    title = WriteKudoValidators.validateTitle(s.title),
+                    message = WriteKudoValidators.validateMessage(s.message),
+                    hashtags = WriteKudoValidators.validateHashtags(s.tags.map { it.id }),
+                    images = s.fieldErrors.images,
+                )
+            _state.update { it.copy(fieldErrors = errors) }
+        }
+
+        fun onCancelTap() {
+            val current = _state.value
+            if (current.isSending) {
+                // Cancel the in-flight submit; stay on screen.
+                submitJob?.cancel()
+                submitJob = null
+                _state.update { it.copy(isSending = false) }
+                return
+            }
+            if (current.formDirty) {
+                _state.update { it.copy(confirmDialog = ConfirmDialogState.UnsavedChanges) }
+            } else {
+                _events.tryEmit(WriteKudoEvent.NavigateBack)
+            }
+        }
+
+        fun onConfirmDiscard() {
+            _state.update { it.copy(confirmDialog = null) }
+            _events.tryEmit(WriteKudoEvent.NavigateBack)
+        }
+
+        fun onDismissConfirmDialog() {
+            _state.update { it.copy(confirmDialog = null) }
+        }
+
+        fun onSnackbarShown() {
+            _state.update { it.copy(snackbar = null) }
+        }
+
+        // ── Internals ────────────────────────────────────────────────
+
+        private fun initialState(): WriteKudoUiState {
+            val prefilledId: String? = savedStateHandle[Routes.WRITE_KUDO_ARG_RECIPIENT]
+            return if (prefilledId.isNullOrBlank()) {
+                WriteKudoUiState()
+            } else {
+                WriteKudoUiState(
+                    recipientId = prefilledId,
+                    recipientName = null, // resolved by the picker / repo when needed
+                    formDirty = false, // prefill does NOT dirty (US1 Sc4)
+                )
+            }
+        }
+
+        @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+        private fun wireRecipientSearchFlow() {
+            viewModelScope.launch {
+                recipientQueryFlow
+                    .debounce(RECIPIENT_DEBOUNCE_MS)
+                    .distinctUntilChanged()
+                    .flatMapLatest { query ->
+                        runRecipientSearch(query)
+                    }
+                    .collect { result ->
+                        _state.update { current ->
+                            val picker = current.recipientPicker
+                            if (picker !is RecipientPickerState.Open) return@update current
+                            current.copy(recipientPicker = picker.copy(results = result))
+                        }
+                    }
+            }
+        }
+
+        private fun runRecipientSearch(query: String): kotlinx.coroutines.flow.Flow<RecipientPickerState.ResultState> =
+            kotlinx.coroutines.flow.flow {
+                emit(RecipientPickerState.ResultState.Loading)
+                val callResult = kudosRepository.searchSunner(query)
+                val selfId = authRepository.currentUserId()
+                emit(
+                    callResult.fold(
+                        onSuccess = { matches ->
+                            val filtered = matches.map { it.node }.filter { it.id != selfId }
+                            if (filtered.isEmpty()) {
+                                RecipientPickerState.ResultState.NoResults
+                            } else {
+                                RecipientPickerState.ResultState.Loaded(filtered)
+                            }
+                        },
+                        onFailure = { RecipientPickerState.ResultState.Error(R.string.write_kudo_recipient_load_error) },
+                    ),
+                )
+            }
+
+        companion object {
+            private const val RECIPIENT_DEBOUNCE_MS: Long = 200
+        }
+    }
+
+/** One-shot events emitted by the VM to the UI layer. */
+sealed interface WriteKudoEvent {
+    data object Submitted : WriteKudoEvent
+
+    data object NavigateBack : WriteKudoEvent
+}
