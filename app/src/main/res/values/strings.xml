@@ -165,4 +165,63 @@
     <string name="a11y_kudos_carousel_page_indicator">Thẻ %1$d trên %2$d</string>
     <string name="a11y_kudos_secret_box_open">Mở Secret Box, nút</string>
     <string name="a11y_kudos_open_profile">Mở hồ sơ %1$s</string>
+
+    <!-- ====================================================================== -->
+    <!-- Viết Kudo composer (7fFAb-K35a) — form-level + a11y strings (T009).     -->
+    <!-- Rich-text + image-error strings ship in later phases.                  -->
+    <!-- ====================================================================== -->
+    <string name="write_kudo_header">Gửi lời cám ơn và ghi nhận đến đồng đội</string>
+    <string name="write_kudo_recipient_label">Người nhận</string>
+    <string name="write_kudo_recipient_placeholder">Tìm kiếm</string>
+    <string name="write_kudo_title_label">Danh hiệu</string>
+    <string name="write_kudo_title_placeholder">Danh tặng một danh hiệu cho…</string>
+    <string name="write_kudo_community_standards_link">Tiêu chuẩn cộng đồng</string>
+    <string name="write_kudo_message_placeholder">Hãy gửi gắm lời cám ơn và ghi nhận đến đồng đội tại đây nhé!</string>
+    <string name="write_kudo_message_hint">Bạn có thể "@ + tên" để nhắc tới đồng nghiệp khác</string>
+    <string name="write_kudo_character_counter">%1$d/%2$d</string>
+    <string name="write_kudo_hashtag_label">Hashtag</string>
+    <string name="write_kudo_hashtag_add">+ Hashtag</string>
+    <string name="write_kudo_hashtag_limit_note">Tối đa 5</string>
+    <string name="write_kudo_image_label">Image</string>
+    <string name="write_kudo_image_add">+ Image</string>
+    <string name="write_kudo_image_limit_note">Tối đa 5</string>
+    <string name="write_kudo_anonymous_label">Gửi lời cám ơn và ghi nhận ẩn danh</string>
+    <string name="write_kudo_cancel">Hủy</string>
+    <string name="write_kudo_send">Gửi đi</string>
+    <string name="write_kudo_required_marker" translatable="false">*</string>
+    <string name="write_kudo_confirm_discard_title">Bạn có chắc muốn hủy không?</string>
+    <string name="write_kudo_confirm_discard_body">Dữ liệu đã nhập sẽ bị mất.</string>
+    <string name="write_kudo_confirm_discard_confirm">Hủy</string>
+    <string name="write_kudo_confirm_discard_dismiss">Tiếp tục soạn</string>
+    <string name="write_kudo_recipient_loading">Đang tải…</string>
+    <string name="write_kudo_recipient_no_results">Không tìm thấy đồng nghiệp phù hợp.</string>
+    <string name="write_kudo_recipient_load_error">Không thể tải danh sách đồng nghiệp.</string>
+    <string name="write_kudo_recipient_retry">Thử lại</string>
+    <string name="write_kudo_hashtag_loading">Đang tải hashtag…</string>
+    <string name="write_kudo_hashtag_empty">Chưa có hashtag.</string>
+    <string name="write_kudo_hashtag_load_error">Không thể tải hashtag.</string>
+
+    <!-- Field errors (US3 / 0le8xKnFE_) -->
+    <string name="write_kudo_error_recipient_required">Vui lòng chọn người nhận.</string>
+    <string name="write_kudo_error_recipient_self">Bạn không thể gửi Kudo cho chính mình.</string>
+    <string name="write_kudo_error_title_required">Vui lòng nhập danh hiệu cho lời ghi nhận này.</string>
+    <string name="write_kudo_error_title_too_long">Danh hiệu quá dài (tối đa 100 ký tự).</string>
+    <string name="write_kudo_error_message_required">Vui lòng viết nội dung ghi nhận.</string>
+    <string name="write_kudo_error_message_blank">Nội dung không được để trống.</string>
+    <string name="write_kudo_error_message_too_long">Đã đạt giới hạn ký tự. Vui lòng rút gọn nội dung.</string>
+    <string name="write_kudo_error_hashtags_required">Vui lòng thêm ít nhất một hashtag.</string>
+    <string name="write_kudo_error_hashtags_max">Tối đa 5 hashtag.</string>
+    <string name="write_kudo_error_submit_generic">Không thể gửi Kudo. Vui lòng thử lại.</string>
+
+    <!-- A11y -->
+    <string name="a11y_write_kudo_screen">Màn soạn Sun Kudo</string>
+    <string name="a11y_write_kudo_required_field">bắt buộc</string>
+    <string name="a11y_write_kudo_remove_hashtag">Xoá hashtag %1$s</string>
+    <string name="a11y_write_kudo_anonymous_checked">Gửi ẩn danh, đang bật</string>
+    <string name="a11y_write_kudo_anonymous_unchecked">Gửi ẩn danh, đang tắt</string>
+    <string name="a11y_write_kudo_send_disabled_hint">Nút gửi bị tắt — vui lòng điền đầy đủ các trường bắt buộc</string>
+    <string name="a11y_write_kudo_send_enabled">Gửi Kudo, nút</string>
+    <string name="a11y_write_kudo_send_sending">Đang gửi Kudo</string>
+    <string name="a11y_write_kudo_cancel">Huỷ</string>
+    <string name="a11y_write_kudo_character_counter">%1$d trên %2$d ký tự</string>
 </resources>

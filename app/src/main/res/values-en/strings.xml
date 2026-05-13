@@ -103,4 +103,59 @@
     <string name="a11y_kudos_carousel_page_indicator">Card %1$d of %2$d</string>
     <string name="a11y_kudos_secret_box_open">Open Secret Box, button</string>
     <string name="a11y_kudos_open_profile">Open %1$s\'s profile</string>
+
+    <!-- Viết Kudo composer — EN translations (T010). Brand-fixed `KUDOS` stays in values/. -->
+    <string name="write_kudo_header">Send recognition and thanks to your teammate</string>
+    <string name="write_kudo_recipient_label">Recipient</string>
+    <string name="write_kudo_recipient_placeholder">Search</string>
+    <string name="write_kudo_title_label">Award title</string>
+    <string name="write_kudo_title_placeholder">Give an award title to…</string>
+    <string name="write_kudo_community_standards_link">Community standards</string>
+    <string name="write_kudo_message_placeholder">Share your recognition and thanks for your teammate here!</string>
+    <string name="write_kudo_message_hint">Use "@ + name" to mention a colleague</string>
+    <string name="write_kudo_hashtag_label">Hashtag</string>
+    <string name="write_kudo_hashtag_add">+ Hashtag</string>
+    <string name="write_kudo_hashtag_limit_note">Max 5</string>
+    <string name="write_kudo_image_label">Image</string>
+    <string name="write_kudo_image_add">+ Image</string>
+    <string name="write_kudo_image_limit_note">Max 5</string>
+    <string name="write_kudo_character_counter">%1$d/%2$d</string>
+    <string name="write_kudo_anonymous_label">Send this recognition anonymously</string>
+    <string name="write_kudo_cancel">Cancel</string>
+    <string name="write_kudo_send">Send</string>
+    <string name="write_kudo_confirm_discard_title">Discard this Kudo?</string>
+    <string name="write_kudo_confirm_discard_body">You\'ll lose what you\'ve typed so far.</string>
+    <string name="write_kudo_confirm_discard_confirm">Discard</string>
+    <string name="write_kudo_confirm_discard_dismiss">Keep writing</string>
+    <string name="write_kudo_recipient_loading">Loading…</string>
+    <string name="write_kudo_recipient_no_results">No matching colleagues.</string>
+    <string name="write_kudo_recipient_load_error">Couldn\'t load colleagues.</string>
+    <string name="write_kudo_recipient_retry">Retry</string>
+    <string name="write_kudo_hashtag_loading">Loading hashtags…</string>
+    <string name="write_kudo_hashtag_empty">No hashtags yet.</string>
+    <string name="write_kudo_hashtag_load_error">Couldn\'t load hashtags.</string>
+
+    <!-- Field errors -->
+    <string name="write_kudo_error_recipient_required">Please select a recipient.</string>
+    <string name="write_kudo_error_recipient_self">You cannot send a kudo to yourself.</string>
+    <string name="write_kudo_error_title_required">Please enter a title for this recognition.</string>
+    <string name="write_kudo_error_title_too_long">Title is too long (max 100 characters).</string>
+    <string name="write_kudo_error_message_required">Please write your recognition message.</string>
+    <string name="write_kudo_error_message_blank">Message cannot be empty.</string>
+    <string name="write_kudo_error_message_too_long">Character limit reached. Please shorten your message.</string>
+    <string name="write_kudo_error_hashtags_required">Please add at least one hashtag.</string>
+    <string name="write_kudo_error_hashtags_max">Maximum 5 hashtags allowed.</string>
+    <string name="write_kudo_error_submit_generic">Couldn\'t send Kudo. Please try again.</string>
+
+    <!-- A11y -->
+    <string name="a11y_write_kudo_screen">Sun Kudos compose screen</string>
+    <string name="a11y_write_kudo_required_field">required</string>
+    <string name="a11y_write_kudo_remove_hashtag">Remove hashtag %1$s</string>
+    <string name="a11y_write_kudo_anonymous_checked">Send anonymously, on</string>
+    <string name="a11y_write_kudo_anonymous_unchecked">Send anonymously, off</string>
+    <string name="a11y_write_kudo_send_disabled_hint">Send disabled — fill required fields</string>
+    <string name="a11y_write_kudo_send_enabled">Send Kudo, button</string>
+    <string name="a11y_write_kudo_send_sending">Sending Kudo</string>
+    <string name="a11y_write_kudo_cancel">Cancel</string>
+    <string name="a11y_write_kudo_character_counter">%1$d of %2$d characters</string>
 </resources>
