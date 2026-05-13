@@ -1,35 +1,41 @@
 package com.example.aiddproject.kudos.compose.ui.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.compose.domain.WriteKudoValidators
 import com.example.aiddproject.kudos.compose.ui.WriteKudoTestTags
 import com.example.aiddproject.kudos.domain.Hashtag
 
 /**
- * E — Hashtag section (Figma `6885:9324`).
+ * E — "Hashtag *" label LEFT + tag area RIGHT (Figma `6885:9324`).
  *
- * Layout:
- *   - Label "Hashtag *"
- *   - FlowRow of AssistChips for the picked tags; tap the chip's trailing
- *     icon to remove.
- *   - "+ Hashtag (Tối đa 5)" OutlinedButton. Disabled at MAX_HASHTAGS.
- *   - Inline error string below, when [errorRes] is non-null.
+ * Section row height: 32dp (smaller than the 40dp B.2 input rows).
+ * Label width: ~70dp. Tag area: 229dp.
+ *
+ * Tag area renders either: (a) FlowRow of `AssistChip`s for the picked
+ * tags, OR (b) the "+ Hashtag (Tối đa 5)" pill trigger when no tag
+ * is added yet (matches Figma — the Figma shows the trigger pill in
+ * its empty state).
  */
 @Composable
 fun HashtagSection(
@@ -42,66 +48,95 @@ fun HashtagSection(
     val atLimit = tags.size >= WriteKudoValidators.MAX_HASHTAGS
 
     Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .testTag(WriteKudoTestTags.HASHTAG_SECTION),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier.fillMaxWidth().testTag(WriteKudoTestTags.HASHTAG_SECTION),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(
-            text = "${stringResource(R.string.write_kudo_hashtag_label)} ${stringResource(R.string.write_kudo_required_marker)}",
-            style = MaterialTheme.typography.labelMedium,
-        )
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().height(32.dp),
         ) {
-            tags.forEach { tag ->
-                val a11yRemove = stringResource(R.string.a11y_write_kudo_remove_hashtag, tag.tagName)
-                AssistChip(
-                    onClick = { onRemoveTag(tag) },
-                    label = { Text("#${tag.tagName}") },
-                    trailingIcon = {
-                        Text(
-                            text = "✕",
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(start = 4.dp),
-                        )
-                    },
-                    colors = AssistChipDefaults.assistChipColors(),
-                    modifier =
-                        Modifier
-                            .testTag(WriteKudoTestTags.HASHTAG_CHIP_PREFIX + tag.id)
-                            .padding(0.dp),
-                )
-                // Workaround: use a11yRemove via a no-op semantics modifier.
-                // (Kept inline to avoid adding a wrapping Box per chip.)
-                @Suppress("UNUSED_EXPRESSION") a11yRemove
-            }
-            OutlinedButton(
-                onClick = onAddTap,
-                enabled = !atLimit,
-                modifier = Modifier.testTag(WriteKudoTestTags.HASHTAG_ADD_BUTTON),
-            ) {
-                Text(stringResource(R.string.write_kudo_hashtag_add))
+            KudosFieldLabel(
+                text = stringResource(R.string.write_kudo_hashtag_label),
+                required = true,
+                width = FormFieldTokens.HashtagLabelWidth,
+            )
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                if (tags.isEmpty()) {
+                    AddPill(
+                        label =
+                            "${stringResource(R.string.write_kudo_hashtag_add)} (${
+                                stringResource(R.string.write_kudo_hashtag_limit_note)
+                            })",
+                        enabled = !atLimit,
+                        onClick = onAddTap,
+                        testTag = WriteKudoTestTags.HASHTAG_ADD_BUTTON,
+                    )
+                } else {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        tags.forEach { tag ->
+                            AssistChip(
+                                onClick = { onRemoveTag(tag) },
+                                label = { Text("#${tag.tagName}") },
+                                trailingIcon = {
+                                    Text(
+                                        text = "✕",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(start = 2.dp),
+                                    )
+                                },
+                                modifier = Modifier.testTag(WriteKudoTestTags.HASHTAG_CHIP_PREFIX + tag.id),
+                            )
+                        }
+                        if (!atLimit) {
+                            AddPill(
+                                label = "+",
+                                enabled = true,
+                                onClick = onAddTap,
+                                testTag = WriteKudoTestTags.HASHTAG_ADD_BUTTON,
+                            )
+                        }
+                    }
+                }
             }
         }
+        if (errorRes != null) {
+            Text(
+                text = stringResource(errorRes),
+                style = MaterialTheme.typography.bodySmall,
+                color = FormFieldTokens.RequiredRed,
+                modifier = Modifier.padding(start = FormFieldTokens.HashtagLabelWidth + 12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddPill(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    testTag: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .height(32.dp)
+                .kudosFieldBox()
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 12.dp)
+                .testTag(testTag),
+        contentAlignment = Alignment.Center,
+    ) {
         Text(
-            text =
-                if (errorRes != null) {
-                    stringResource(errorRes)
-                } else {
-                    stringResource(R.string.write_kudo_hashtag_limit_note)
-                },
-            style = MaterialTheme.typography.bodySmall,
-            color =
-                if (errorRes != null) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+            text = label,
+            color = FormFieldTokens.PlaceholderColor,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
         )
     }
 }

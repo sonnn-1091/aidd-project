@@ -3,8 +3,10 @@ package com.example.aiddproject.kudos.compose.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
@@ -103,6 +105,7 @@ fun FormattingToolbar(
             enabled = enabled,
             onClick = { onAction(ToolbarAction.Quote) },
         )
+        Spacer(modifier = Modifier.weight(1f))
         // Community Standards link — Figma puts it inline at the right
         // end of the toolbar row, red + underlined.
         Text(
@@ -135,9 +138,10 @@ private fun ToolbarButton(
         enabled = enabled,
         modifier =
             Modifier
+                .size(28.dp)
                 .testTag(tag)
                 .semantics { contentDescription = desc },
     ) {
-        Icon(imageVector = icon, contentDescription = null)
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(18.dp))
     }
 }
