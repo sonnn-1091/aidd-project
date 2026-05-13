@@ -193,6 +193,17 @@
     <string name="write_kudo_confirm_discard_body">Dữ liệu đã nhập sẽ bị mất.</string>
     <string name="write_kudo_confirm_discard_confirm">Hủy</string>
     <string name="write_kudo_confirm_discard_dismiss">Tiếp tục soạn</string>
+    <string name="write_kudo_link_dialog_title">Chèn liên kết</string>
+    <string name="write_kudo_link_dialog_url">URL</string>
+    <string name="write_kudo_link_dialog_invalid">URL không hợp lệ</string>
+    <string name="write_kudo_link_dialog_confirm">Chèn</string>
+    <string name="a11y_write_kudo_mention_overlay">Gợi ý @mention, %1$d kết quả</string>
+    <string name="a11y_write_kudo_toolbar_bold">In đậm</string>
+    <string name="a11y_write_kudo_toolbar_italic">In nghiêng</string>
+    <string name="a11y_write_kudo_toolbar_strike">Gạch ngang</string>
+    <string name="a11y_write_kudo_toolbar_numbered_list">Danh sách đánh số</string>
+    <string name="a11y_write_kudo_toolbar_quote">Trích dẫn</string>
+    <string name="a11y_write_kudo_toolbar_link">Chèn liên kết</string>
     <string name="write_kudo_recipient_loading">Đang tải…</string>
     <string name="write_kudo_recipient_no_results">Không tìm thấy đồng nghiệp phù hợp.</string>
     <string name="write_kudo_recipient_load_error">Không thể tải danh sách đồng nghiệp.</string>

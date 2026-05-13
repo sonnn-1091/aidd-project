@@ -127,6 +127,17 @@
     <string name="write_kudo_confirm_discard_body">You\'ll lose what you\'ve typed so far.</string>
     <string name="write_kudo_confirm_discard_confirm">Discard</string>
     <string name="write_kudo_confirm_discard_dismiss">Keep writing</string>
+    <string name="write_kudo_link_dialog_title">Insert link</string>
+    <string name="write_kudo_link_dialog_url">URL</string>
+    <string name="write_kudo_link_dialog_invalid">Invalid URL</string>
+    <string name="write_kudo_link_dialog_confirm">Insert</string>
+    <string name="a11y_write_kudo_mention_overlay">Mention suggestions, %1$d results</string>
+    <string name="a11y_write_kudo_toolbar_bold">Bold</string>
+    <string name="a11y_write_kudo_toolbar_italic">Italic</string>
+    <string name="a11y_write_kudo_toolbar_strike">Strikethrough</string>
+    <string name="a11y_write_kudo_toolbar_numbered_list">Numbered list</string>
+    <string name="a11y_write_kudo_toolbar_quote">Quote</string>
+    <string name="a11y_write_kudo_toolbar_link">Insert link</string>
     <string name="write_kudo_recipient_loading">Loading…</string>
     <string name="write_kudo_recipient_no_results">No matching colleagues.</string>
     <string name="write_kudo_recipient_load_error">Couldn\'t load colleagues.</string>

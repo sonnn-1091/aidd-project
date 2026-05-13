@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aiddproject.R
 import com.example.aiddproject.auth.login.data.AuthRepository
+import com.example.aiddproject.core.richtext.MessageMarkdown
+import com.example.aiddproject.core.richtext.UrlValidator
 import com.example.aiddproject.kudos.compose.data.WriteKudoErrorMapper
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
 import com.example.aiddproject.kudos.compose.domain.WriteKudoDraft
@@ -115,6 +117,127 @@ class WriteKudoViewModel
                     fieldErrors = it.fieldErrors.copy(message = null),
                 )
             }
+        }
+
+        fun onMessageSelectionChange(range: IntRange) {
+            _state.update { it.copy(messageSelection = range) }
+        }
+
+        // ── Toolbar transforms (T082) ────────────────────────────────
+
+        fun onToolbarAction(action: ToolbarAction) {
+            val s = _state.value
+            val sel = s.messageSelection
+            val next =
+                when (action) {
+                    ToolbarAction.Bold -> MessageMarkdown.applyBold(s.message, sel)
+                    ToolbarAction.Italic -> MessageMarkdown.applyItalic(s.message, sel)
+                    ToolbarAction.Strikethrough -> MessageMarkdown.applyStrikethrough(s.message, sel)
+                    ToolbarAction.NumberedList -> MessageMarkdown.applyNumberedList(s.message, sel)
+                    ToolbarAction.Quote -> MessageMarkdown.applyQuote(s.message, sel)
+                }
+            onMessageChange(next)
+        }
+
+        // ── Link dialog (T083) ───────────────────────────────────────
+
+        fun onLinkButtonTap() {
+            _state.update {
+                it.copy(linkDialog = LinkDialogState(capturedSelection = it.messageSelection))
+            }
+        }
+
+        fun onLinkDialogUrlChange(url: String) {
+            _state.update { current ->
+                val dialog = current.linkDialog ?: return@update current
+                current.copy(linkDialog = dialog.copy(url = url, showInvalidError = false))
+            }
+        }
+
+        fun onLinkDialogSubmit() {
+            val dialog = _state.value.linkDialog ?: return
+            if (!UrlValidator.isValid(dialog.url)) {
+                _state.update { it.copy(linkDialog = dialog.copy(showInvalidError = true)) }
+                return
+            }
+            val s = _state.value
+            val next = MessageMarkdown.applyLink(s.message, dialog.capturedSelection, dialog.url.trim())
+            _state.update { it.copy(message = next, linkDialog = null, formDirty = true) }
+        }
+
+        fun onLinkDialogDismiss() {
+            _state.update { it.copy(linkDialog = null) }
+        }
+
+        // ── Mention overlay (T082 / @mention) ────────────────────────
+
+        fun onMentionTriggered(
+            query: String,
+            triggerOffset: Int,
+        ) {
+            _state.update {
+                it.copy(
+                    mentionOverlay =
+                        MentionOverlayState.Open(
+                            query = query,
+                            triggerOffset = triggerOffset,
+                            results = RecipientPickerState.ResultState.Loading,
+                        ),
+                )
+            }
+            viewModelScope.launch {
+                val result = kudosRepository.searchSunner(query)
+                val selfId = authRepository.currentUserId()
+                _state.update { current ->
+                    val overlay = current.mentionOverlay
+                    if (overlay !is MentionOverlayState.Open) return@update current
+                    val next =
+                        result.fold(
+                            onSuccess = { matches ->
+                                val filtered = matches.map { it.node }.filter { it.id != selfId }
+                                if (filtered.isEmpty()) {
+                                    RecipientPickerState.ResultState.NoResults
+                                } else {
+                                    RecipientPickerState.ResultState.Loaded(filtered)
+                                }
+                            },
+                            onFailure = { RecipientPickerState.ResultState.Error(R.string.write_kudo_recipient_load_error) },
+                        )
+                    current.copy(mentionOverlay = overlay.copy(results = next))
+                }
+            }
+        }
+
+        fun onMentionPick(node: SunnerNode) {
+            val s = _state.value
+            val overlay = s.mentionOverlay as? MentionOverlayState.Open ?: return
+            val src = s.message.plainText
+            val before = src.substring(0, overlay.triggerOffset)
+            // Skip past the existing "@..." typed run (including the @).
+            val afterAtRunStart = overlay.triggerOffset
+            val tail =
+                src.substring(afterAtRunStart).let { rest ->
+                    // Drop the leading `@xyz` token so it gets replaced by the mention.
+                    if (rest.startsWith("@")) {
+                        val end = rest.indexOfFirst { it.isWhitespace() }.takeIf { it >= 0 } ?: rest.length
+                        rest.substring(end)
+                    } else {
+                        rest
+                    }
+                }
+            val replacement = "@${node.fullName} "
+            val newPlain = before + replacement + tail
+            _state.update {
+                it.copy(
+                    message = RichTextValue.ofPlainText(newPlain),
+                    mentionOverlay = MentionOverlayState.Closed,
+                    formDirty = true,
+                )
+            }
+        }
+
+        fun onMentionDismiss() {
+            _state.update { it.copy(mentionOverlay = MentionOverlayState.Closed) }
         }
 
         fun onHashtagAdd(tag: Hashtag) {
@@ -367,4 +490,13 @@ sealed interface WriteKudoEvent {
     data object Submitted : WriteKudoEvent
 
     data object NavigateBack : WriteKudoEvent
+}
+
+/** Formatting-toolbar action taps (T082). */
+enum class ToolbarAction {
+    Bold,
+    Italic,
+    Strikethrough,
+    NumberedList,
+    Quote,
 }
