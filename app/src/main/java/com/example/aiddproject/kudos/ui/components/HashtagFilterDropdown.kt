@@ -1,6 +1,7 @@
 package com.example.aiddproject.kudos.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -84,7 +85,17 @@ internal fun FilterMenuItem(
         modifier =
             Modifier
                 .widthIn(min = 160.dp)
-                .heightIn(min = 48.dp),
+                .heightIn(min = 48.dp)
+                .then(
+                    if (isActive) {
+                        Modifier.background(
+                            color = MenuSelectedRowColor,
+                            shape = RoundedCornerShape(2.dp),
+                        )
+                    } else {
+                        Modifier
+                    },
+                ),
         text = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -128,3 +139,7 @@ internal val MenuBorderColor: Color = Color(0xFF998C5F)
 // Active-row text color + same-tinted Shadow tint produces the
 // "phát sáng" glow halo around each glyph.
 private val MenuGlowColor: Color = Color(0xFFFFEA9E)
+
+// SaaCream @ 20% alpha — selected-row background tint, shared with the
+// LanguageSelector / AwardCategory / hashtag picker dropdowns.
+private val MenuSelectedRowColor: Color = Color(0x33FFEA9E)

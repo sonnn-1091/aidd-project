@@ -28,6 +28,7 @@ data class WriteKudoUiState(
     val tags: List<Hashtag> = emptyList(),
     val images: List<UploadedImage> = emptyList(),
     val isAnonymous: Boolean = false,
+    val anonymousNickname: String = "",
     // ── Validation + lifecycle ──────────────────────────────────────
     val fieldErrors: WriteKudoFieldErrors = WriteKudoFieldErrors.None,
     val isSending: Boolean = false,
@@ -58,6 +59,7 @@ data class WriteKudoUiState(
                 message.plainText.trim().isNotEmpty() &&
                 message.plainText.length <= 1000 &&
                 tags.isNotEmpty() &&
+                (!isAnonymous || anonymousNickname.isNotBlank()) &&
                 !isSending
 }
 

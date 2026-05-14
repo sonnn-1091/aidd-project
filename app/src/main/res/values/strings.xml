@@ -188,6 +188,8 @@
     <string name="write_kudo_image_add">+ Image</string>
     <string name="write_kudo_image_limit_note">Tối đa 5</string>
     <string name="write_kudo_anonymous_label">Gửi lời cám ơn và ghi nhận ẩn danh</string>
+    <string name="write_kudo_anonymous_nickname_label">Nickname ẩn danh</string>
+    <string name="write_kudo_anonymous_nickname_placeholder">Nhập nickname ẩn danh</string>
     <string name="write_kudo_cancel">Hủy</string>
     <string name="write_kudo_send">Gửi đi</string>
     <string name="write_kudo_required_marker" translatable="false">*</string>
@@ -224,6 +226,7 @@
     <string name="write_kudo_error_message_too_long">Đã đạt giới hạn ký tự. Vui lòng rút gọn nội dung.</string>
     <string name="write_kudo_error_hashtags_required">Vui lòng thêm ít nhất một hashtag.</string>
     <string name="write_kudo_error_hashtags_max">Tối đa 5 hashtag.</string>
+    <string name="write_kudo_error_anonymous_nickname_required">Vui lòng nhập nickname ẩn danh.</string>
     <string name="write_kudo_error_submit_generic">Không thể gửi Kudo. Vui lòng thử lại.</string>
     <string name="write_kudo_error_image_type">Định dạng file không hỗ trợ. Chỉ chấp nhận JPG, PNG, WEBP.</string>
     <string name="write_kudo_error_image_size">File quá lớn (tối đa 10 MB).</string>

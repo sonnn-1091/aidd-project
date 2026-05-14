@@ -22,9 +22,16 @@ data class WriteKudoFieldErrors(
     @StringRes val message: Int? = null,
     @StringRes val hashtags: Int? = null,
     @StringRes val images: Int? = null,
+    @StringRes val anonymousNickname: Int? = null,
 ) {
     val hasAny: Boolean
-        get() = recipient != null || title != null || message != null || hashtags != null || images != null
+        get() =
+            recipient != null ||
+                title != null ||
+                message != null ||
+                hashtags != null ||
+                images != null ||
+                anonymousNickname != null
 
     companion object {
         val None: WriteKudoFieldErrors = WriteKudoFieldErrors()

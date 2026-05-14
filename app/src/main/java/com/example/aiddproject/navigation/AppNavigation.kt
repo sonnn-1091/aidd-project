@@ -171,6 +171,18 @@ fun AppNavigation(
                 onNavigateToCommunityStandards = {
                     navController.navigate(Routes.COMMUNITY_STANDARDS)
                 },
+                onSelectBottomTab = { tab ->
+                    when (tab) {
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Saa2025 ->
+                            navController.popBackStack(Routes.HOME, inclusive = false)
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Awards ->
+                            navController.navigate(Routes.AWARDS_OVERVIEW)
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Kudos ->
+                            navController.popBackStack()
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Profile ->
+                            navController.navigate(Routes.PROFILE)
+                    }
+                },
             )
         }
         composable(Routes.COMMUNITY_STANDARDS) {

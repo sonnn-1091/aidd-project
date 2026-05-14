@@ -188,6 +188,7 @@ class DemoKudosRepository
                     likedByCurrentUser = false,
                     senderVisibleToMe = !draft.isAnonymous,
                     likeDisabledForMe = false,
+                    anonymousNickname = draft.anonymousNickname,
                     isAnonymous = draft.isAnonymous,
                 )
             return Result.success(row)
@@ -256,11 +257,14 @@ class DemoKudosRepository
 
             val DEMO_HASHTAGS: List<Hashtag> =
                 listOf(
-                    Hashtag(id = "h01", tagName = "teamwork"),
-                    Hashtag(id = "h02", tagName = "ownership"),
-                    Hashtag(id = "h03", tagName = "innovation"),
-                    Hashtag(id = "h04", tagName = "collaboration"),
-                    Hashtag(id = "h05", tagName = "growth"),
+                    Hashtag(id = "h01", tagName = "High-performing"),
+                    Hashtag(id = "h02", tagName = "BE PROFESSIONAL"),
+                    Hashtag(id = "h03", tagName = "BE OPTIMISTIC"),
+                    Hashtag(id = "h04", tagName = "BE A TEAM"),
+                    Hashtag(id = "h05", tagName = "THINK OUTSIDE THE BOX"),
+                    Hashtag(id = "h06", tagName = "GET RISKY"),
+                    Hashtag(id = "h07", tagName = "GO FAST"),
+                    Hashtag(id = "h08", tagName = "WASSHOI"),
                 )
 
             val DEMO_SUNNERS: List<SunnerNode> =

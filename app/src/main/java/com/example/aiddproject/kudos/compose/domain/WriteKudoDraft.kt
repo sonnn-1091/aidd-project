@@ -24,4 +24,5 @@ data class WriteKudoDraft(
     val tags: List<String>,
     val imageIds: List<String> = emptyList(),
     val isAnonymous: Boolean = false,
+    val anonymousNickname: String? = null,
 )

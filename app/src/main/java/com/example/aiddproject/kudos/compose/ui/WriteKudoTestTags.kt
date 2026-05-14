@@ -42,6 +42,7 @@ object WriteKudoTestTags {
     const val IMAGE_REMOVE_BUTTON_PREFIX: String = "write_kudo_image_remove_" // + clientId
 
     const val ANONYMOUS_TOGGLE: String = "write_kudo_anonymous_toggle"
+    const val ANONYMOUS_NICKNAME_INPUT: String = "write_kudo_anonymous_nickname_input"
 
     const val BOTTOM_ACTION_BAR: String = "write_kudo_bottom_action_bar"
     const val CANCEL_BUTTON: String = "write_kudo_cancel_button"

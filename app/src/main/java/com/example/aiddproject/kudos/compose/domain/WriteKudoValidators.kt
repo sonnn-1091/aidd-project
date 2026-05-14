@@ -58,6 +58,18 @@ object WriteKudoValidators {
             else -> null
         }
 
+    /** Anonymous flow — nickname required iff isAnonymous is set. */
+    @StringRes
+    fun validateAnonymousNickname(
+        isAnonymous: Boolean,
+        nickname: String,
+    ): Int? =
+        when {
+            !isAnonymous -> null
+            nickname.isBlank() -> R.string.write_kudo_error_anonymous_nickname_required
+            else -> null
+        }
+
     const val MAX_TITLE_LENGTH: Int = 100
     const val MAX_MESSAGE_LENGTH: Int = 1000
     const val MAX_HASHTAGS: Int = 5

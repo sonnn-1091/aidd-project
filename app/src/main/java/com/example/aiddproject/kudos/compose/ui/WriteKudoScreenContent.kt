@@ -42,9 +42,10 @@ import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
 import com.example.aiddproject.kudos.compose.domain.RichTextValue
 import com.example.aiddproject.kudos.compose.domain.WriteKudoValidators
+import com.example.aiddproject.home.ui.components.HomeBottomBar
+import com.example.aiddproject.home.ui.components.HomeNavTab
 import com.example.aiddproject.kudos.compose.ui.components.AnonymousToggle
 import com.example.aiddproject.kudos.compose.ui.components.BottomActionBar
-import com.example.aiddproject.kudos.compose.ui.components.HashtagPickerOverlay
 import com.example.aiddproject.kudos.compose.ui.components.HashtagSection
 import com.example.aiddproject.kudos.compose.ui.components.ImageSection
 import com.example.aiddproject.kudos.compose.ui.components.LinkInsertDialog
@@ -133,31 +134,27 @@ fun WriteKudoScreenContent(
                 )
             },
             bottomBar = {
-                BottomActionBar(
-                    isSubmitEnabled = state.isSubmitEnabled,
-                    isSending = state.isSending,
-                    onCancel = callbacks.onCancelTap,
-                    onSend = callbacks.onSendTap,
-                )
+                Column {
+                    BottomActionBar(
+                        isSubmitEnabled = state.isSubmitEnabled,
+                        isSending = state.isSending,
+                        onCancel = callbacks.onCancelTap,
+                        onSend = callbacks.onSendTap,
+                    )
+                    HomeBottomBar(
+                        selected = HomeNavTab.Kudos,
+                        onTabSelect = callbacks.onSelectBottomTab,
+                    )
+                }
             },
         ) { padding ->
             FormCard(padding = padding, state = state, callbacks = callbacks)
         }
     }
 
-    // ── Top-level overlays (the recipient picker now anchors INSIDE
-    // the trigger via DropdownMenu, so it's no longer rendered here). ──
-    val hashtagPicker = state.hashtagPicker
-    if (hashtagPicker is HashtagPickerState.Open) {
-        HashtagPickerOverlay(
-            state = hashtagPicker,
-            selected = state.tags.map { it.id },
-            onAdd = callbacks.onHashtagAdd,
-            onRemove = callbacks.onHashtagRemove,
-            onDismiss = callbacks.onHashtagPickerDismiss,
-        )
-    }
-
+    // ── Top-level overlays (both recipient and hashtag pickers now
+    // anchor INSIDE their trigger via DropdownMenu, so neither is
+    // rendered here). ──
     if (state.confirmDialog is ConfirmDialogState.UnsavedChanges) {
         UnsavedChangesDialog(
             onConfirm = callbacks.onConfirmDiscard,
@@ -185,24 +182,24 @@ private fun FormCard(
     state: WriteKudoUiState,
     callbacks: WriteKudoCallbacks,
 ) {
-    Box(
+    Column(
         modifier =
             Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Surface(
             color = FormCardBackground,
             shape = RoundedCornerShape(11.dp),
             tonalElevation = 0.dp,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
                         .padding(horizontal = 12.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -268,8 +265,11 @@ private fun FormCard(
 
                 HashtagSection(
                     tags = state.tags,
+                    pickerState = state.hashtagPicker,
                     onAddTap = callbacks.onHashtagPickerOpen,
-                    onRemoveTag = { callbacks.onHashtagRemove(it.id) },
+                    onPickerDismiss = callbacks.onHashtagPickerDismiss,
+                    onHashtagAdd = callbacks.onHashtagAdd,
+                    onRemoveTag = callbacks.onHashtagRemove,
                     errorRes = state.fieldErrors.hashtags,
                 )
                 ImageSection(
@@ -281,6 +281,9 @@ private fun FormCard(
                 AnonymousToggle(
                     checked = state.isAnonymous,
                     onCheckedChange = callbacks.onAnonymousToggle,
+                    nickname = state.anonymousNickname,
+                    onNicknameChange = callbacks.onAnonymousNicknameChange,
+                    nicknameErrorRes = state.fieldErrors.anonymousNickname,
                 )
             }
         }
@@ -326,6 +329,7 @@ data class WriteKudoCallbacks(
     val onHashtagAdd: (Hashtag) -> Unit,
     val onHashtagRemove: (String) -> Unit,
     val onAnonymousToggle: (Boolean) -> Unit,
+    val onAnonymousNicknameChange: (String) -> Unit,
     val onCommunityStandardsTap: () -> Unit,
     val onCancelTap: () -> Unit,
     val onSendTap: () -> Unit,
@@ -341,6 +345,7 @@ data class WriteKudoCallbacks(
     val onMentionPick: (SunnerNode) -> Unit,
     val onImageAddTap: () -> Unit,
     val onImageRemove: (clientId: String) -> Unit,
+    val onSelectBottomTab: (HomeNavTab) -> Unit,
 )
 
 // ── Figma tokens (queried 2026-05-13 from frame 7fFAb-K35a) ─────────

@@ -259,7 +259,26 @@ class WriteKudoViewModel
         }
 
         fun onAnonymousToggle(checked: Boolean) {
-            _state.update { it.copy(isAnonymous = checked, formDirty = true) }
+            _state.update {
+                it.copy(
+                    isAnonymous = checked,
+                    // Clear nickname + its inline error when toggling off so
+                    // the next on-toggle starts from a blank slate.
+                    anonymousNickname = if (checked) it.anonymousNickname else "",
+                    formDirty = true,
+                    fieldErrors = it.fieldErrors.copy(anonymousNickname = null),
+                )
+            }
+        }
+
+        fun onAnonymousNicknameChange(value: String) {
+            _state.update {
+                it.copy(
+                    anonymousNickname = value,
+                    formDirty = true,
+                    fieldErrors = it.fieldErrors.copy(anonymousNickname = null),
+                )
+            }
         }
 
         // ── Image attachments (Q-W-2 — T092/T093) ────────────────────
@@ -460,6 +479,8 @@ class WriteKudoViewModel
                             tags = current.tags.map { it.id },
                             imageIds = uploaded.mapNotNull { it.storagePath },
                             isAnonymous = current.isAnonymous,
+                            anonymousNickname =
+                                current.anonymousNickname.trim().takeIf { current.isAnonymous && it.isNotEmpty() },
                         )
                     val result = kudosRepository.createKudo(draft)
                     result.fold(
@@ -495,6 +516,8 @@ class WriteKudoViewModel
                     message = WriteKudoValidators.validateMessage(s.message),
                     hashtags = WriteKudoValidators.validateHashtags(s.tags.map { it.id }),
                     images = s.fieldErrors.images,
+                    anonymousNickname =
+                        WriteKudoValidators.validateAnonymousNickname(s.isAnonymous, s.anonymousNickname),
                 )
             _state.update { it.copy(fieldErrors = errors) }
         }

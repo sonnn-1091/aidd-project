@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.content.ContentResolver
 import android.provider.OpenableColumns
 import android.widget.Toast
+import com.example.aiddproject.home.ui.components.HomeNavTab
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -37,6 +38,7 @@ fun WriteKudoScreen(
     onSubmitted: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToCommunityStandards: () -> Unit,
+    onSelectBottomTab: (HomeNavTab) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WriteKudoViewModel = hiltViewModel(),
 ) {
@@ -96,6 +98,7 @@ fun WriteKudoScreen(
                 onHashtagAdd = viewModel::onHashtagAdd,
                 onHashtagRemove = viewModel::onHashtagRemove,
                 onAnonymousToggle = viewModel::onAnonymousToggle,
+                onAnonymousNicknameChange = viewModel::onAnonymousNicknameChange,
                 onCommunityStandardsTap = onNavigateToCommunityStandards,
                 onCancelTap = viewModel::onCancelTap,
                 onSendTap = viewModel::onSendTap,
@@ -115,6 +118,7 @@ fun WriteKudoScreen(
                     )
                 },
                 onImageRemove = viewModel::onImageRemove,
+                onSelectBottomTab = onSelectBottomTab,
             ),
         modifier = modifier,
     )
