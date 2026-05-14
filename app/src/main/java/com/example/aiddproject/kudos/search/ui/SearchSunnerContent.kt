@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -140,13 +140,15 @@ private fun SearchSunnerTopBar(
     onBack: () -> Unit,
     onSearchBarTap: () -> Unit,
 ) {
+    // Figma node 6891:21279 — width 375, height 40, padding 0/20/0/0
+    // (right only), gap 12 between Left Accessory and search bar.
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
+                .padding(end = 20.dp),
     ) {
         IconButton(
             onClick = rememberSingleClickHandler(onClick = onBack),
@@ -160,10 +162,7 @@ private fun SearchSunnerTopBar(
         }
         InactiveSearchBar(
             onTap = onSearchBarTap,
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .padding(end = 16.dp),
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -176,8 +175,10 @@ private fun SearchSunnerTopBar(
  * Visual per Figma `mms_2_Search bar` (`6891:22074`):
  *  - background: SaaCream @ 10% alpha
  *  - border: 1dp #998C5F
- *  - radius: 4dp; padding: 10dp; gap: 8dp
- *  - label: Montserrat 500 14sp, white @ 80%, centered
+ *  - radius: 4dp; padding: 10dp
+ *  - label: Montserrat 500 14sp, white @ 80%, **textAlign: center**
+ *  - **NO leading magnifying-glass icon** — the Figma instance has
+ *    only the Label TEXT child, no icon.
  */
 @Composable
 private fun InactiveSearchBar(
@@ -187,9 +188,7 @@ private fun InactiveSearchBar(
     val click = rememberSingleClickHandler(onClick = onTap)
     val label = stringResource(R.string.search_sunner_placeholder)
     val a11yLabel = stringResource(R.string.a11y_search_sunner_search_bar)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Box(
         modifier =
             modifier
                 .clip(RoundedCornerShape(4.dp))
@@ -199,20 +198,16 @@ private fun InactiveSearchBar(
                 .padding(10.dp)
                 .testTag(SearchSunnerTestTags.SEARCH_BAR)
                 .semantics { contentDescription = a11yLabel },
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = null,
-            tint = Color.White.copy(alpha = 0.8f),
-            modifier = Modifier.size(20.dp),
-        )
         Text(
             text = label,
             color = Color.White.copy(alpha = 0.8f),
             fontSize = 14.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -228,19 +223,23 @@ private fun RecentSectionHeader(
     showViewAllButton: Boolean,
     onToggleViewAll: () -> Unit,
 ) {
+    // Figma node 6891:22086 — height 32dp, space-between layout.
+    // Label + button both WHITE per Figma (NOT SaaCream).
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
                 .fillMaxWidth()
+                .height(32.dp)
                 .testTag(SearchSunnerTestTags.RECENT_LABEL),
     ) {
         Text(
             text = stringResource(R.string.search_sunner_section_recent),
-            color = SaaCream,
-            fontSize = 18.sp,
-            lineHeight = 24.sp,
+            color = Color.White,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
             fontWeight = FontWeight.Bold,
+            letterSpacing = 0.1.sp,
             modifier = Modifier.weight(1f),
         )
         if (showViewAllButton) {
@@ -250,14 +249,15 @@ private fun RecentSectionHeader(
                     stringResource(
                         if (isViewingAll) R.string.search_sunner_collapse else R.string.search_sunner_view_all,
                     ),
-                color = SaaCream,
+                color = Color.White,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
                 modifier =
                     Modifier
                         .clickable(role = Role.Button) { toggleClick() }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(vertical = 6.dp)
                         .testTag(SearchSunnerTestTags.VIEW_ALL_BUTTON),
             )
         }
@@ -271,9 +271,11 @@ private fun RecentSunnerList(
     onRemove: (userId: String) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    // Figma Frame 556 stacks rows end-to-end with no gap (each row is
+    // a self-contained 60dp tall card with internal padding).
     LazyColumn(
         state = listState,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         items(items = visibleSunners, key = { it.userId }) { sunner ->
@@ -351,10 +353,13 @@ private fun RecentSunnerRow(
                     .testTag(SearchSunnerTestTags.removeButtonTag(sunner.userId))
                     .semantics { contentDescription = removeA11y },
         ) {
+            // Figma 6891:22103 — the X icon is 16dp, not the M3 default 24dp.
+            // M3 IconButton keeps a 48dp tap target around it for a11y.
             Icon(
                 imageVector = Icons.Filled.Close,
                 contentDescription = null,
                 tint = Color.White,
+                modifier = Modifier.size(16.dp),
             )
         }
     }
@@ -379,7 +384,9 @@ private fun Avatar(
             modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .border(2.dp, Color.White, CircleShape),
+                // Figma border is 1.869dp; round to 1.5dp for closer fidelity
+                // than 2dp (the half-px difference is visible on xxhdpi).
+                .border(1.5.dp, Color.White, CircleShape),
     )
 }
 
