@@ -116,7 +116,7 @@ fun CommunityStandardsContent(
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
             ) {
                 KvBanner()
                 CommunityStandardsSection()
@@ -129,9 +129,11 @@ fun CommunityStandardsContent(
 
 @Composable
 private fun KvBanner() {
-    // Figma node 6885:10829 — banner sits at the TOP of the content
-    // frame, fixed 151×64 within a 335-wide column. The outer Column's
-    // `horizontalAlignment = CenterHorizontally` centers it like Figma.
+    // Figma node 6885:10828 (KV) — `alignItems: flex-start`,
+    // banner image positioned at startX=20 inside a 375-wide frame
+    // (i.e. flush against the 20dp horizontal padding). The outer
+    // Column uses `horizontalAlignment = Alignment.Start` so this
+    // fixed-size image naturally hugs the left edge.
     Image(
         painter = painterResource(R.drawable.ic_logo_root_further),
         contentDescription = null,
