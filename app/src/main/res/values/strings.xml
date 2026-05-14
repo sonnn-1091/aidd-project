@@ -272,6 +272,9 @@
     <string name="search_sunner_section_recent">Recent</string>
     <string name="search_sunner_view_all">View all</string>
     <string name="search_sunner_collapse">Thu gọn</string>
+    <string name="search_sunner_no_results">Không tìm thấy Sunner phù hợp</string>
+    <string name="search_sunner_loading">Đang tìm kiếm…</string>
+    <string name="search_sunner_error">Không thể tải kết quả. Vui lòng thử lại.</string>
     <string name="a11y_search_sunner_back">Quay lại</string>
     <string name="a11y_search_sunner_search_bar">Tìm kiếm Sunner</string>
     <string name="a11y_search_sunner_row">%1$s, %2$s</string>

@@ -122,7 +122,12 @@ fun SearchSunnerContent(
                         .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (state.recentSunners.isNotEmpty()) {
+                if (state.isSearching) {
+                    SearchResultsSection(
+                        results = state.searchResults,
+                        onRowTap = callbacks.onRowTap,
+                    )
+                } else if (state.recentSunners.isNotEmpty()) {
                     RecentSectionHeader(
                         isViewingAll = state.isViewingAll,
                         showViewAllButton = state.showViewAllButton,
@@ -181,21 +186,21 @@ private fun SearchSunnerTopBar(
 
 /**
  * Editable search field — `BasicTextField` styled as the Figma pill.
- * The user types a Sunner name/email here; the typed text drives the
- * Searching state in a future spec (`hldqjHoSRH`). For MVP, typing
- * just updates state — no live results render yet.
+ * Text and placeholder are LEFT-aligned (override of Figma's
+ * `textAlign: center` per UX feedback: centered text in a typing-in-
+ * progress field jumps as characters are added, which is jarring).
  *
  * Visual per Figma `mms_2_Search bar` (`6891:22074`):
  *  - background: SaaCream @ 10% alpha
  *  - border: 1dp #998C5F
  *  - radius: 4dp; padding: 10dp
- *  - text + placeholder: Montserrat 500 14sp, white @ 80%, centered
+ *  - text + placeholder: Montserrat 500 14sp, white @ 80%
  *  - **NO leading magnifying-glass icon** — Figma's instance has no
  *    icon child (only the Label TEXT).
  *
- * Keyboard: text type with IME action = Search. Pressing the action
- * is a no-op for MVP (no live-search backend); the typed text stays
- * in state for the future Searching state to consume.
+ * Keyboard: single-line, IME action = Search. The action is a no-op
+ * — search happens automatically 500ms after the user stops typing,
+ * driven by the VM's debounce pipeline.
  */
 @Composable
 private fun SearchBarTextField(
@@ -211,7 +216,7 @@ private fun SearchBarTextField(
             fontSize = 14.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
         )
     BasicTextField(
         value = query,
@@ -223,9 +228,8 @@ private fun SearchBarTextField(
             KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions =
             KeyboardActions(
-                // No live-search backend at MVP — the IME "Search"
-                // action just dismisses focus. Replace with a
-                // navigate-to-Searching call when hldqjHoSRH ships.
+                // Search fires automatically on debounce (500ms after
+                // the last keystroke) — see SearchSunnerViewModel.
                 onSearch = { /* no-op */ },
             ),
         modifier =
@@ -237,12 +241,11 @@ private fun SearchBarTextField(
                 .testTag(SearchSunnerTestTags.SEARCH_BAR)
                 .semantics { contentDescription = a11yLabel },
         decorationBox = { innerTextField ->
-            Box(contentAlignment = Alignment.Center) {
+            Box(contentAlignment = Alignment.CenterStart) {
                 if (query.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = textStyle,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 innerTextField()
@@ -303,6 +306,64 @@ private fun RecentSectionHeader(
     }
 }
 
+/**
+ * Active-search results body. Renders one of:
+ *  - Loading spinner (centered) while waiting for the repo call.
+ *  - LazyColumn of result rows (avatar + name + dept, NO X icon).
+ *  - "Không tìm thấy Sunner phù hợp" centered text for an empty result.
+ *  - Generic error text for a failed call.
+ *
+ * Tapping a result row promotes the Sunner to the head of the recent
+ * list and navigates to Profile — same as a recent-row tap.
+ */
+@Composable
+private fun SearchResultsSection(
+    results: SearchResultsState,
+    onRowTap: (userId: String) -> Unit,
+) {
+    when (results) {
+        SearchResultsState.Idle -> Unit
+        SearchResultsState.Loading -> CenteredMessage(stringResource(R.string.search_sunner_loading))
+        SearchResultsState.Empty -> CenteredMessage(stringResource(R.string.search_sunner_no_results))
+        SearchResultsState.Error -> CenteredMessage(stringResource(R.string.search_sunner_error))
+        is SearchResultsState.Loaded ->
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(items = results.matches, key = { it.id }) { node ->
+                    SunnerRow(
+                        userId = node.id,
+                        fullName = node.fullName,
+                        departmentName = node.department?.name,
+                        onRowTap = { onRowTap(node.id) },
+                        onRemove = null, // search results have no X
+                    )
+                }
+            }
+    }
+}
+
+@Composable
+private fun CenteredMessage(text: String) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = Color.White.copy(alpha = 0.6f),
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
 @Composable
 private fun RecentSunnerList(
     visibleSunners: List<RecentSunner>,
@@ -318,8 +379,10 @@ private fun RecentSunnerList(
         modifier = Modifier.fillMaxWidth(),
     ) {
         items(items = visibleSunners, key = { it.userId }) { sunner ->
-            RecentSunnerRow(
-                sunner = sunner,
+            SunnerRow(
+                userId = sunner.userId,
+                fullName = sunner.fullName,
+                departmentName = sunner.departmentName,
                 onRowTap = { onRowTap(sunner.userId) },
                 onRemove = { onRemove(sunner.userId) },
             )
@@ -328,25 +391,30 @@ private fun RecentSunnerList(
 }
 
 /**
- * Single recent-search row (Figma `kết quả search 3` / `mms_B.3_*`).
- * Avatar (40dp circle, white border) + name (Montserrat 500 14sp,
- * white) + department code (Montserrat 500 14sp, #999999) + X icon
- * button on the right.
+ * Shared row composable used by BOTH the Recent list and the live-
+ * search results. Avatar (40dp circle, white border) + name
+ * (Montserrat 500 14sp, white) + department code (Montserrat 500
+ * 14sp, #999999). The trailing X icon is rendered only when
+ * [onRemove] is non-null — search-result rows don't have one.
+ *
+ * Figma `kết quả search 3` / `mms_B.3_*`.
  */
 @Composable
-private fun RecentSunnerRow(
-    sunner: RecentSunner,
+private fun SunnerRow(
+    userId: String,
+    fullName: String,
+    departmentName: String?,
     onRowTap: () -> Unit,
-    onRemove: () -> Unit,
+    onRemove: (() -> Unit)?,
 ) {
     val rowClick = rememberSingleClickHandler(onClick = onRowTap)
     val rowA11y =
         stringResource(
             R.string.a11y_search_sunner_row,
-            sunner.fullName,
-            sunner.departmentName.orEmpty(),
+            fullName,
+            departmentName.orEmpty(),
         )
-    val removeA11y = stringResource(R.string.a11y_search_sunner_remove, sunner.fullName)
+    val removeA11y = stringResource(R.string.a11y_search_sunner_remove, fullName)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
@@ -354,33 +422,31 @@ private fun RecentSunnerRow(
                 .fillMaxWidth()
                 .height(60.dp)
                 .clickable(role = Role.Button) { rowClick() }
-                .testTag(SearchSunnerTestTags.recentRowTag(sunner.userId))
+                .testTag(SearchSunnerTestTags.recentRowTag(userId))
                 .semantics { contentDescription = rowA11y },
     ) {
         Avatar(
-            avatarUrl = sunner.avatarUrl,
+            avatarUrl = null,
             modifier = Modifier.padding(10.dp),
         )
         // Figma `kết quả search 3` has `gap: 2px` between the Avatar
-        // frame (60dp wide incl. 10dp padding) and the Tên frame —
-        // i.e. 2dp between the Avatar frame's right edge and the
-        // Tên frame's left edge.
+        // frame (60dp wide incl. 10dp padding) and the Tên frame.
         Spacer(Modifier.width(2.dp))
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = sunner.fullName,
+                text = fullName,
                 color = Color.White,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
             )
-            if (!sunner.departmentName.isNullOrBlank()) {
+            if (!departmentName.isNullOrBlank()) {
                 Text(
-                    text = sunner.departmentName,
+                    text = departmentName,
                     color = RowDepartmentColor,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
@@ -389,21 +455,23 @@ private fun RecentSunnerRow(
                 )
             }
         }
-        IconButton(
-            onClick = onRemove,
-            modifier =
-                Modifier
-                    .testTag(SearchSunnerTestTags.removeButtonTag(sunner.userId))
-                    .semantics { contentDescription = removeA11y },
-        ) {
-            // Figma 6891:22103 — the X icon is 16dp, not the M3 default 24dp.
-            // M3 IconButton keeps a 48dp tap target around it for a11y.
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp),
-            )
+        if (onRemove != null) {
+            IconButton(
+                onClick = onRemove,
+                modifier =
+                    Modifier
+                        .testTag(SearchSunnerTestTags.removeButtonTag(userId))
+                        .semantics { contentDescription = removeA11y },
+            ) {
+                // Figma 6891:22103 — X is 16dp, not the M3 default 24dp.
+                // M3 IconButton keeps a 48dp tap target around it for a11y.
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
     }
 }
