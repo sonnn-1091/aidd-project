@@ -22,6 +22,7 @@ import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
 import com.example.aiddproject.kudos.compose.ui.WriteKudoScreen
+import com.example.aiddproject.kudos.search.ui.SearchSunnerScreen
 import com.example.aiddproject.kudos.standards.ui.CommunityStandardsScreen
 import com.example.aiddproject.kudos.ui.KudosScreen
 import dagger.hilt.EntryPoint
@@ -190,7 +191,32 @@ fun AppNavigation(
             CommunityStandardsScreen(onNavigateBack = { navController.popBackStack() })
         }
         composable(Routes.SECRET_BOX_OPEN) { PlaceholderScreen(label = "Open Secret Box") }
-        composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
+        composable(Routes.SEARCH) {
+            SearchSunnerScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProfile = { userId ->
+                    // Profile screen is not yet parameterized; pass userId
+                    // via savedStateHandle so the future Profile impl can
+                    // read it. (Plan FR-010 + Profile-spec handshake.)
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("userId", userId)
+                    navController.navigate(Routes.PROFILE)
+                },
+                onSelectBottomTab = { tab ->
+                    when (tab) {
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Saa2025 ->
+                            navController.popBackStack(Routes.HOME, inclusive = false)
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Awards ->
+                            navController.navigate(Routes.AWARDS_OVERVIEW)
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Kudos ->
+                            navController.navigate(Routes.KUDOS_OVERVIEW)
+                        com.example.aiddproject.home.ui.components.HomeNavTab.Profile ->
+                            navController.navigate(Routes.PROFILE)
+                    }
+                },
+            )
+        }
         composable(Routes.PROFILE) { PlaceholderScreen(label = "Profile") }
         composable(
             route = Routes.AWARD_DETAIL_PATTERN,

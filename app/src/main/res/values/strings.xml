@@ -266,4 +266,15 @@
     <string name="community_standards_section_security_scope">Phạm vi Chia sẻ: Toàn bộ thông tin nhân sự và dự án trong hệ thống được bảo mật. Sunner vui lòng chỉ chia sẻ trong nội bộ Sun*.</string>
     <string name="community_standards_section_security_support">Liên hệ Hỗ trợ: Mọi thắc mắc, Sunner vui lòng liên hệ đại diện BTC SAA: Slack duong.thi.thuy.an để được hỗ trợ.</string>
     <string name="a11y_community_standards_back">Quay lại</string>
+
+    <!-- Search Sunner screen (Figma frame 3jgwke3E8O) -->
+    <string name="search_sunner_placeholder">Search Sunner</string>
+    <string name="search_sunner_section_recent">Recent</string>
+    <string name="search_sunner_view_all">View all</string>
+    <string name="search_sunner_collapse">Thu gọn</string>
+    <string name="search_sunner_coming_soon">Tính năng đang được phát triển</string>
+    <string name="a11y_search_sunner_back">Quay lại</string>
+    <string name="a11y_search_sunner_search_bar">Tìm kiếm Sunner</string>
+    <string name="a11y_search_sunner_row">%1$s, %2$s</string>
+    <string name="a11y_search_sunner_remove">Xoá %1$s khỏi danh sách gần đây</string>
 </resources>
