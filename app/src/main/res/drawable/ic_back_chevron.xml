@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Back / nav-up icon — chevron-left matching Figma's Back Icon frame
+    convention (e.g. node 6885:10825 in file 9ypp4enmFmdK3YAFJLIu6C),
+    which renders as an 18×24 chevron on iOS top-nav. Used by every
+    top-app-bar back arrow in the app (Write Kudo, Community Standards,
+    and future screens) so the back affordance stays consistent.
+
+    Stroke-style chevron rendered as a filled path so Compose's
+    `Icon(tint = ...)` parameter can theme the color from the call site.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="24dp"
+    android:viewportWidth="18"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M14.0303,5.0303 L6.0606,13 L14.0303,20.9697 L11.9697,23.0303 L1.9393,13 L11.9697,2.9697 Z" />
+</vector>

@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -118,7 +116,7 @@ fun WriteKudoScreenContent(
                     navigationIcon = {
                         IconButton(onClick = callbacks.onCancelTap) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                painter = painterResource(R.drawable.ic_back_chevron),
                                 contentDescription = stringResource(R.string.a11y_write_kudo_cancel),
                                 tint = Color.White,
                             )

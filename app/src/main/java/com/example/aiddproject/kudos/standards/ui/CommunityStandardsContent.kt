@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -94,7 +92,7 @@ fun CommunityStandardsContent(
                             modifier = Modifier.testTag(CommunityStandardsTestTags.BACK_BUTTON),
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                painter = painterResource(R.drawable.ic_back_chevron),
                                 contentDescription = stringResource(R.string.a11y_community_standards_back),
                                 tint = Color.White,
                             )
@@ -131,14 +129,17 @@ fun CommunityStandardsContent(
 
 @Composable
 private fun KvBanner() {
+    // Figma node 6885:10829 — banner sits at the TOP of the content
+    // frame, fixed 151×64 within a 335-wide column. The outer Column's
+    // `horizontalAlignment = CenterHorizontally` centers it like Figma.
     Image(
         painter = painterResource(R.drawable.ic_logo_root_further),
         contentDescription = null,
         contentScale = ContentScale.Fit,
         modifier =
             Modifier
-                .fillMaxWidth()
-                .height(160.dp)
+                .width(151.dp)
+                .height(64.dp)
                 .testTag(CommunityStandardsTestTags.KV_BANNER),
     )
 }
