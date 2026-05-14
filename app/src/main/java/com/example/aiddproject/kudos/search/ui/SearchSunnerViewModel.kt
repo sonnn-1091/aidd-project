@@ -44,6 +44,14 @@ class SearchSunnerViewModel
             _state.update { it.copy(isViewingAll = !it.isViewingAll) }
         }
 
+        fun onSearchQueryChange(query: String) {
+            // Clip to FR-009's 1..100 char range (the Searching-state spec
+            // owns the live-search ITSELF; this screen owns the field
+            // input lifecycle).
+            val clipped = query.take(MAX_QUERY_LENGTH)
+            _state.update { it.copy(searchQuery = clipped) }
+        }
+
         fun onRemove(userId: String) {
             viewModelScope.launch {
                 recentSunnerRepository.remove(userId)
@@ -66,5 +74,9 @@ class SearchSunnerViewModel
                 }
             }
             onPromoted()
+        }
+
+        private companion object {
+            const val MAX_QUERY_LENGTH: Int = 100
         }
     }

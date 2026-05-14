@@ -6,6 +6,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -42,7 +46,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -92,8 +98,9 @@ fun SearchSunnerContent(
             containerColor = Color.Transparent,
             topBar = {
                 SearchSunnerTopBar(
+                    query = state.searchQuery,
+                    onQueryChange = callbacks.onSearchQueryChange,
                     onBack = callbacks.onNavigateBack,
-                    onSearchBarTap = callbacks.onSearchBarTap,
                 )
             },
             bottomBar = {
@@ -140,8 +147,9 @@ fun SearchSunnerContent(
  */
 @Composable
 private fun SearchSunnerTopBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
     onBack: () -> Unit,
-    onSearchBarTap: () -> Unit,
 ) {
     // Figma node 6891:21279 — width 375, height 40, padding 0/20/0/0
     // (right only), gap 12 between Left Accessory and search bar.
@@ -163,56 +171,84 @@ private fun SearchSunnerTopBar(
                 tint = Color.White,
             )
         }
-        InactiveSearchBar(
-            onTap = onSearchBarTap,
+        SearchBarTextField(
+            query = query,
+            onQueryChange = onQueryChange,
             modifier = Modifier.weight(1f),
         )
     }
 }
 
 /**
- * Default-state search input — visually a pill, behaviorally a
- * clickable Row. Tapping transitions to the active Searching state
- * (sibling spec `hldqjHoSRH`).
+ * Editable search field — `BasicTextField` styled as the Figma pill.
+ * The user types a Sunner name/email here; the typed text drives the
+ * Searching state in a future spec (`hldqjHoSRH`). For MVP, typing
+ * just updates state — no live results render yet.
  *
  * Visual per Figma `mms_2_Search bar` (`6891:22074`):
  *  - background: SaaCream @ 10% alpha
  *  - border: 1dp #998C5F
  *  - radius: 4dp; padding: 10dp
- *  - label: Montserrat 500 14sp, white @ 80%, **textAlign: center**
- *  - **NO leading magnifying-glass icon** — the Figma instance has
- *    only the Label TEXT child, no icon.
+ *  - text + placeholder: Montserrat 500 14sp, white @ 80%, centered
+ *  - **NO leading magnifying-glass icon** — Figma's instance has no
+ *    icon child (only the Label TEXT).
+ *
+ * Keyboard: text type with IME action = Search. Pressing the action
+ * is a no-op for MVP (no live-search backend); the typed text stays
+ * in state for the future Searching state to consume.
  */
 @Composable
-private fun InactiveSearchBar(
-    onTap: () -> Unit,
+private fun SearchBarTextField(
+    query: String,
+    onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val click = rememberSingleClickHandler(onClick = onTap)
-    val label = stringResource(R.string.search_sunner_placeholder)
+    val placeholder = stringResource(R.string.search_sunner_placeholder)
     val a11yLabel = stringResource(R.string.a11y_search_sunner_search_bar)
-    Box(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(SaaCream.copy(alpha = 0.10f))
-                .border(BorderStroke(1.dp, SearchBarBorderColor), RoundedCornerShape(4.dp))
-                .clickable(role = Role.Button) { click() }
-                .padding(10.dp)
-                .testTag(SearchSunnerTestTags.SEARCH_BAR)
-                .semantics { contentDescription = a11yLabel },
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
+    val textStyle =
+        TextStyle(
             color = Color.White.copy(alpha = 0.8f),
             fontSize = 14.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
         )
-    }
+    BasicTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        singleLine = true,
+        textStyle = textStyle,
+        cursorBrush = SolidColor(Color.White),
+        keyboardOptions =
+            KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions =
+            KeyboardActions(
+                // No live-search backend at MVP — the IME "Search"
+                // action just dismisses focus. Replace with a
+                // navigate-to-Searching call when hldqjHoSRH ships.
+                onSearch = { /* no-op */ },
+            ),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(4.dp))
+                .background(SaaCream.copy(alpha = 0.10f))
+                .border(BorderStroke(1.dp, SearchBarBorderColor), RoundedCornerShape(4.dp))
+                .padding(10.dp)
+                .testTag(SearchSunnerTestTags.SEARCH_BAR)
+                .semantics { contentDescription = a11yLabel },
+        decorationBox = { innerTextField ->
+            Box(contentAlignment = Alignment.Center) {
+                if (query.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = textStyle,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                innerTextField()
+            }
+        },
+    )
 }
 
 /**
@@ -405,7 +441,7 @@ private fun Avatar(
  */
 data class SearchSunnerCallbacks(
     val onNavigateBack: () -> Unit,
-    val onSearchBarTap: () -> Unit,
+    val onSearchQueryChange: (String) -> Unit,
     val onToggleViewAll: () -> Unit,
     val onRemove: (userId: String) -> Unit,
     val onRowTap: (userId: String) -> Unit,
@@ -452,7 +488,7 @@ private fun SearchSunnerContentPopulatedPreview() {
 private fun previewCallbacks(): SearchSunnerCallbacks =
     SearchSunnerCallbacks(
         onNavigateBack = {},
-        onSearchBarTap = {},
+        onSearchQueryChange = {},
         onToggleViewAll = {},
         onRemove = {},
         onRowTap = {},

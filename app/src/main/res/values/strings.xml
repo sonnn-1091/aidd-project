@@ -272,7 +272,6 @@
     <string name="search_sunner_section_recent">Recent</string>
     <string name="search_sunner_view_all">View all</string>
     <string name="search_sunner_collapse">Thu gọn</string>
-    <string name="search_sunner_coming_soon">Tính năng đang được phát triển</string>
     <string name="a11y_search_sunner_back">Quay lại</string>
     <string name="a11y_search_sunner_search_bar">Tìm kiếm Sunner</string>
     <string name="a11y_search_sunner_row">%1$s, %2$s</string>

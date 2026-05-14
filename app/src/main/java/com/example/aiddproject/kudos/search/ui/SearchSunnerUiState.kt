@@ -13,6 +13,8 @@ import com.example.aiddproject.kudos.search.domain.RecentSunner
 data class SearchSunnerUiState(
     val recentSunners: List<RecentSunner> = emptyList(),
     val isViewingAll: Boolean = false,
+    /** Live text typed into the search field. Drives the Searching state in a future spec. */
+    val searchQuery: String = "",
 ) {
     val visibleSunners: List<RecentSunner>
         get() = if (isViewingAll) recentSunners else recentSunners.take(COLLAPSED_VISIBLE_COUNT)
