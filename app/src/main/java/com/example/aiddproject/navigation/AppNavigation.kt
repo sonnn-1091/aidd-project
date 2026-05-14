@@ -22,6 +22,7 @@ import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
 import com.example.aiddproject.kudos.compose.ui.WriteKudoScreen
+import com.example.aiddproject.kudos.standards.ui.CommunityStandardsScreen
 import com.example.aiddproject.kudos.ui.KudosScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -186,7 +187,7 @@ fun AppNavigation(
             )
         }
         composable(Routes.COMMUNITY_STANDARDS) {
-            PlaceholderScreen(label = "Community Standards")
+            CommunityStandardsScreen(onNavigateBack = { navController.popBackStack() })
         }
         composable(Routes.SECRET_BOX_OPEN) { PlaceholderScreen(label = "Open Secret Box") }
         composable(Routes.SEARCH) { PlaceholderScreen(label = "Search") }
