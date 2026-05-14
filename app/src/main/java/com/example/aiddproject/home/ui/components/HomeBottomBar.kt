@@ -73,8 +73,13 @@ fun HomeBottomBar(
                 .testTag(TEST_TAG_HOME_BOTTOM_BAR),
         // The container background is provided by `Modifier.background` above so
         // the 20dp top-rounded clip applies to the cream tint. NavigationBar's
-        // own surface stays transparent.
+        // own surface stays transparent AND its tonal elevation is zeroed —
+        // otherwise M3's default 3dp tonal elevation paints a surface-tint
+        // overlay on top of the transparent container, washing out the
+        // SaaCream @ 15% fill (verified against Figma rgba(255,234,158,0.15)
+        // on frame 3jgwke3E8O nav bar node).
         containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
     ) {
         HomeNavTab.entries.forEach { tab ->
             val isActive = tab == selected
