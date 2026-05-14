@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -109,7 +108,11 @@ fun SearchSunnerContent(
                     Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        // Figma: 24dp gap from TopNav bottom (y=87) to Title
+                        // top (y=111). Outer 20dp horizontal matches each
+                        // section's per-frame padding (Title + Frame 556
+                        // both `0 20 0 20` in Figma).
+                        .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (state.recentSunners.isNotEmpty()) {
@@ -322,6 +325,10 @@ private fun RecentSunnerRow(
             avatarUrl = sunner.avatarUrl,
             modifier = Modifier.padding(10.dp),
         )
+        // Figma `kết quả search 3` has `gap: 2px` between the Avatar
+        // frame (60dp wide incl. 10dp padding) and the Tên frame —
+        // i.e. 2dp between the Avatar frame's right edge and the
+        // Tên frame's left edge.
         Spacer(Modifier.width(2.dp))
         Column(
             modifier = Modifier.weight(1f),
