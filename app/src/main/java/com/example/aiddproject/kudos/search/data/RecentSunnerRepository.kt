@@ -62,13 +62,25 @@ class DefaultRecentSunnerRepository
 
         override fun observeAll(): Flow<List<RecentSunner>> =
             dataStore.data.map { prefs ->
-                val raw = prefs[currentUserKey()] ?: return@map emptyList()
-                runCatching {
-                    json.decodeFromString<List<RecentSunner>>(raw)
-                }.onFailure { error ->
-                    Timber.tag(TELEMETRY_TAG).w(error, "recent.decode.failure")
-                }.getOrDefault(emptyList())
-                    .sortedByDescending { it.lastSearchedAtMillis }
+                val raw = prefs[currentUserKey()]
+                val persisted =
+                    if (raw == null) {
+                        emptyList()
+                    } else {
+                        runCatching {
+                            json.decodeFromString<List<RecentSunner>>(raw)
+                        }.onFailure { error ->
+                            Timber.tag(TELEMETRY_TAG).w(error, "recent.decode.failure")
+                        }.getOrDefault(emptyList())
+                    }
+                // When the user has nothing persisted yet (fresh install
+                // OR after clearing every entry), surface a small demo
+                // seed so the empty-box state isn't visually empty in
+                // dev/demo builds. User-triggered adds/removes write
+                // through normally — once the user touches the list,
+                // their persisted entries take over.
+                val list = if (persisted.isEmpty()) DEMO_SEED else persisted
+                list.sortedByDescending { it.lastSearchedAtMillis }
             }
 
         override suspend fun addOrPromote(entry: RecentSunner) {
@@ -121,5 +133,41 @@ class DefaultRecentSunnerRepository
         private companion object {
             const val TELEMETRY_TAG = "SearchSunnerTelemetry"
             const val ANON_USER_ID = "anon"
+
+            /**
+             * Demo seed — 3 colleagues drawn from `DemoKudosRepository.DEMO_SUNNERS`
+             * so the empty-DataStore state has something to render. Their
+             * `userId`s match the demo Sunner directory so tapping any
+             * seed row navigates to the correct Profile (once that screen
+             * ships with parameterization). Timestamps are arbitrary
+             * positive longs — only the relative ordering matters.
+             *
+             * Removed when the live-search state spec (`hldqjHoSRH`) ships
+             * and starts populating the recent list naturally.
+             */
+            val DEMO_SEED: List<RecentSunner> =
+                listOf(
+                    RecentSunner(
+                        userId = "u11",
+                        fullName = "Nguyễn Ngọc Sơn",
+                        departmentName = "CECV1",
+                        avatarUrl = null,
+                        lastSearchedAtMillis = 300L,
+                    ),
+                    RecentSunner(
+                        userId = "u09",
+                        fullName = "Dương Huỳnh Xuân Nhật",
+                        departmentName = "CECU01",
+                        avatarUrl = null,
+                        lastSearchedAtMillis = 200L,
+                    ),
+                    RecentSunner(
+                        userId = "u02",
+                        fullName = "Trần Bình",
+                        departmentName = "CECV1",
+                        avatarUrl = null,
+                        lastSearchedAtMillis = 100L,
+                    ),
+                )
         }
     }
