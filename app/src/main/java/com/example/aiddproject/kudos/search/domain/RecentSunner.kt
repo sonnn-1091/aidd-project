@@ -1,7 +1,5 @@
 package com.example.aiddproject.kudos.search.domain
 
-import kotlinx.serialization.Serializable
-
 /**
  * Local-only projection of a Sunner that has been opened from the
  * Search Sunner screen recently. Intentionally smaller than the full
@@ -9,10 +7,13 @@ import kotlinx.serialization.Serializable
  * needs to render, so the recent list survives any future schema
  * change in the directory model.
  *
- * Persisted as a JSON array under the per-user DataStore key
- * `recent_sunners_$userId` (see [RecentSunnerRepository]).
+ * Persisted as a JSON array (encoded by hand via `org.json.JSONArray`
+ * in `DefaultRecentSunnerRepository`) under the per-user DataStore
+ * key `recent_sunners_$userId`. Hand-rolled because the project does
+ * not apply the `kotlinx-serialization` Gradle plugin yet — adding a
+ * `@Serializable` annotation alone (without the plugin) throws at
+ * runtime.
  */
-@Serializable
 data class RecentSunner(
     val userId: String,
     val fullName: String,

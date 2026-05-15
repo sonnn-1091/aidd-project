@@ -8,7 +8,8 @@ import com.example.aiddproject.auth.login.data.AuthRepository
 import com.example.aiddproject.kudos.search.domain.RecentSunner
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.json.Json
+import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,13 +59,11 @@ class DefaultRecentSunnerRepository
         @RecentSunnersDataStore private val dataStore: DataStore<Preferences>,
         private val authRepository: AuthRepository,
     ) : RecentSunnerRepository {
-        private val json = Json { ignoreUnknownKeys = true }
-
         override fun observeAll(): Flow<List<RecentSunner>> =
             dataStore.data.map { prefs ->
                 val raw = prefs[currentUserKey()] ?: return@map emptyList()
                 runCatching {
-                    json.decodeFromString<List<RecentSunner>>(raw)
+                    decodeRecentList(raw)
                 }.onFailure { error ->
                     Timber.tag(TELEMETRY_TAG).w(error, "recent.decode.failure")
                 }.getOrDefault(emptyList())
@@ -104,11 +103,11 @@ class DefaultRecentSunnerRepository
                         if (raw == null) {
                             emptyList()
                         } else {
-                            runCatching { json.decodeFromString<List<RecentSunner>>(raw) }
+                            runCatching { decodeRecentList(raw) }
                                 .getOrDefault(emptyList())
                         }
                     val next = block(current)
-                    prefs[key] = json.encodeToString(next)
+                    prefs[key] = encodeRecentList(next)
                 }
             }.onFailure { error ->
                 Timber.tag(TELEMETRY_TAG).w(error, "recent.write.failure")
@@ -117,6 +116,42 @@ class DefaultRecentSunnerRepository
 
         private fun currentUserKey() =
             stringPreferencesKey("recent_sunners_${authRepository.currentUserId() ?: ANON_USER_ID}")
+
+        /**
+         * Manual JSON encode. Avoids the `kotlinx-serialization` Gradle
+         * plugin since it isn't applied to the `:app` module — a
+         * `@Serializable` annotation alone would throw at runtime with
+         * "Serializer for class 'RecentSunner' is not found".
+         */
+        private fun encodeRecentList(list: List<RecentSunner>): String {
+            val arr = JSONArray()
+            list.forEach { r ->
+                val obj =
+                    JSONObject().apply {
+                        put("userId", r.userId)
+                        put("fullName", r.fullName)
+                        put("departmentName", r.departmentName ?: JSONObject.NULL)
+                        put("avatarUrl", r.avatarUrl ?: JSONObject.NULL)
+                        put("lastSearchedAtMillis", r.lastSearchedAtMillis)
+                    }
+                arr.put(obj)
+            }
+            return arr.toString()
+        }
+
+        private fun decodeRecentList(raw: String): List<RecentSunner> {
+            val arr = JSONArray(raw)
+            return (0 until arr.length()).map { i ->
+                val obj = arr.getJSONObject(i)
+                RecentSunner(
+                    userId = obj.getString("userId"),
+                    fullName = obj.getString("fullName"),
+                    departmentName = obj.optString("departmentName").takeIf { !obj.isNull("departmentName") },
+                    avatarUrl = obj.optString("avatarUrl").takeIf { !obj.isNull("avatarUrl") },
+                    lastSearchedAtMillis = obj.getLong("lastSearchedAtMillis"),
+                )
+            }
+        }
 
         private companion object {
             const val TELEMETRY_TAG = "SearchSunnerTelemetry"
