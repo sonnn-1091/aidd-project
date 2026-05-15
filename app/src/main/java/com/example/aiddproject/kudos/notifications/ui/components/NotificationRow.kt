@@ -10,23 +10,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.RateReview
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.CardGiftcard
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material.icons.outlined.MarkEmailUnread
+import androidx.compose.material.icons.outlined.NorthEast
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -51,19 +52,22 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 /**
- * A single notification list row.
+ * A single notification row matching Figma `mms_B.1_Noti` /
+ * componentSet `6885:8819`.
  *
- *  - Type-keyed Material icon placeholder on the left (40dp circle).
- *    Phase-0 audit (T036) swaps these for Figma-exported drawables.
- *  - Body text (newest first) + relative-time below.
- *  - Inline "Tiêu chuẩn cộng đồng" link rendered only when
- *    `type == CONTENT_HIDDEN` (US3 / T040).
- *  - Red unread-dot indicator on the right when `!isRead`.
- *
- * Accessibility: the entire row is a single focusable button; the
- * inline link is a *separate* focusable button whose pointer-input
- * consumes the tap before bubbling to the parent. The merged
- * `contentDescription` reads "{body}, {time}, {read|unread}".
+ * Layout (335dp card width, 8dp inner padding, 16dp gap between icon
+ * and content):
+ *  - 24×24 type-keyed outlined icon at the top-left, stroke-colored
+ *    per [iconAndTintFor] — no circle background (Figma renders the
+ *    icon glyph directly on the card surface).
+ *  - Body text 14sp Montserrat / weight 700 for unread, 400 for read,
+ *    white, lineHeight 20.
+ *  - Timestamp 12sp Montserrat 400, color #999999, lineHeight 16.
+ *  - For `CONTENT_HIDDEN` rows: inline "Tiêu chuẩn cộng đồng" link
+ *    with NE-arrow icon rendered between body + timestamp. Its own
+ *    `clickable` consumes the gesture before bubbling to the row.
+ *  - For unread rows: an 8×8 red dot (#D4271D) anchored at top-right
+ *    of the row content area (Figma `mms_B.1.3_Group 425`).
  */
 @Composable
 fun NotificationRow(
@@ -87,108 +91,132 @@ fun NotificationRow(
             statusLabel,
         )
     val rowClick = rememberSingleClickHandler(onClick = onRowTap)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+
+    Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clickable(role = Role.Button) { rowClick() }
-                .padding(horizontal = 20.dp, vertical = 14.dp)
                 .testTag(NotificationsTestTags.rowTag(item.id))
                 .semantics { contentDescription = rowA11y },
     ) {
-        TypeIcon(item.type)
-        Spacer(Modifier.width(12.dp))
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(8.dp),
         ) {
-            Text(
-                text = item.displayBody,
-                color = Color.White,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                fontWeight = if (item.isRead) FontWeight.Normal else FontWeight.Medium,
-            )
-            Text(
-                text = timeLabel,
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Normal,
-            )
-            if (item.type == NotificationType.CONTENT_HIDDEN) {
-                TextButton(
-                    onClick = onInlineCommunityStandardsTap,
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
-                    modifier =
-                        Modifier
-                            .height(28.dp)
-                            .testTag(NotificationsTestTags.inlineCommunityStandardsTag(item.id)),
-                ) {
-                    Text(
-                        text = stringResource(R.string.notifications_inline_community_standards),
-                        color = InlineLinkColor,
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp,
-                        fontWeight = FontWeight.Medium,
+            TypeIcon(item.type)
+            Spacer(Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = bodyText(item),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                )
+                if (item.type == NotificationType.CONTENT_HIDDEN) {
+                    InlineCommunityStandardsLink(
+                        notificationId = item.id,
+                        onClick = onInlineCommunityStandardsTap,
                     )
                 }
+                Text(
+                    text = timeLabel,
+                    color = TimestampColor,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                )
             }
         }
-        Spacer(Modifier.width(8.dp))
         if (!item.isRead) {
-            UnreadDot(notificationId = item.id)
-        } else {
-            // Reserve the dot space so rows align consistently.
-            Spacer(Modifier.size(8.dp))
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 8.dp, end = 8.dp)
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(UnreadDotColor)
+                        .testTag(NotificationsTestTags.unreadDotTag(item.id)),
+            )
         }
     }
 }
+
+/** Bold body for unread rows; regular weight for read rows. */
+private fun bodyText(item: NotificationItem) =
+    buildAnnotatedString {
+        withStyle(
+            SpanStyle(
+                fontWeight = if (item.isRead) FontWeight.Normal else FontWeight.Bold,
+            ),
+        ) {
+            append(item.displayBody)
+        }
+    }
 
 @Composable
 private fun TypeIcon(type: NotificationType) {
     val (icon, tint) = iconAndTintFor(type)
-    Box(
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = tint,
+        modifier = Modifier.size(24.dp),
+    )
+}
+
+/**
+ * Material outlined approximations of the 7 Figma icon nodes
+ * (`6885:8273`…`6885:8313`). Stroke colors are sampled from the
+ * Figma frame.
+ */
+@Composable
+private fun iconAndTintFor(type: NotificationType): Pair<ImageVector, Color> =
+    when (type) {
+        NotificationType.KUDOS_RECEIVED -> Icons.Outlined.MarkEmailUnread to Color(0xFF33CDDC)
+        NotificationType.HEART_RECEIVED -> Icons.Outlined.FavoriteBorder to Color(0xFFE6705A)
+        NotificationType.SECRET_BOX_UNLOCK -> Icons.Outlined.CardGiftcard to Color(0xFF5BC178)
+        NotificationType.LEVEL_UP -> Icons.Outlined.AutoAwesome to Color(0xFF34D0DC)
+        NotificationType.CONTENT_HIDDEN -> Icons.Outlined.WarningAmber to Color(0xFFE5C03A)
+        NotificationType.BADGE_COLLECTED -> Icons.AutoMirrored.Outlined.Assignment to Color(0xFF5BC178)
+        NotificationType.REVIEW_REQUEST -> Icons.Outlined.Flag to Color(0xFFD74877)
+    }
+
+@Composable
+private fun InlineCommunityStandardsLink(
+    notificationId: String,
+    onClick: () -> Unit,
+) {
+    val click = rememberSingleClickHandler(onClick = onClick)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
             Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(tint.copy(alpha = 0.18f)),
-        contentAlignment = Alignment.Center,
+                .clickable(role = Role.Button) { click() }
+                .padding(end = 16.dp, top = 8.dp, bottom = 8.dp)
+                .testTag(NotificationsTestTags.inlineCommunityStandardsTag(notificationId)),
     ) {
+        Text(
+            text = stringResource(R.string.notifications_inline_community_standards),
+            color = Color.White,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+        )
         Icon(
-            imageVector = icon,
+            imageVector = Icons.Outlined.NorthEast,
             contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(20.dp),
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
         )
     }
 }
 
-@Composable
-private fun iconAndTintFor(type: NotificationType): Pair<ImageVector, Color> =
-    when (type) {
-        NotificationType.KUDOS_RECEIVED -> Icons.Filled.CardGiftcard to MaterialTheme.colorScheme.primary
-        NotificationType.HEART_RECEIVED -> Icons.Filled.Favorite to Color(0xFFE6705A)
-        NotificationType.SECRET_BOX_UNLOCK -> Icons.Filled.Inventory2 to Color(0xFFE0BE5C)
-        NotificationType.LEVEL_UP -> Icons.Filled.TrendingUp to Color(0xFF6CB07B)
-        NotificationType.CONTENT_HIDDEN -> Icons.Filled.WarningAmber to Color(0xFFD17A4E)
-        NotificationType.BADGE_COLLECTED -> Icons.Filled.EmojiEvents to Color(0xFFE6B23A)
-        NotificationType.REVIEW_REQUEST -> Icons.Filled.RateReview to Color(0xFF7CA5D1)
-    }
-
-@Composable
-private fun UnreadDot(notificationId: String) {
-    Box(
-        modifier =
-            Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(UnreadDotColor)
-                .testTag(NotificationsTestTags.unreadDotTag(notificationId)),
-    )
-}
-
-private val InlineLinkColor: Color = Color(0xFFFFD27A)
-private val UnreadDotColor: Color = Color(0xFFE6705A)
+private val TimestampColor: Color = Color(0xFF999999)
+private val UnreadDotColor: Color = Color(0xFFD4271D)
