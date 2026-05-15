@@ -2,19 +2,14 @@ package com.example.aiddproject.awarddetail.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.aiddproject.core.locale.LocaleViewModel
 import com.example.aiddproject.home.ui.components.HomeNavTab
-import com.example.aiddproject.home.ui.components.NotificationsSheet
 
 /**
  * Stateful entry point for the Award Detail route. Owns the
- * [AwardDetailViewModel] + the shared [LocaleViewModel] + the
- * Notifications sheet `mutableStateOf` flag.
+ * [AwardDetailViewModel] + the shared [LocaleViewModel].
  *
  * Header / bottom-nav / Sun*Kudos / dropdown callbacks were stubbed
  * in Phase 3 and progressively wired through Phase 4 (dropdown) and
@@ -23,9 +18,9 @@ import com.example.aiddproject.home.ui.components.NotificationsSheet
  * [onNavigateToKudosOverview] lambda so both surfaces funnel into the
  * Kudos hub.
  *
- * The bell opens a `NotificationsSheet` mirroring Home's pattern —
- * the sheet is mounted at the screen root so a 401-driven NavHost
- * tear-down implicitly removes it.
+ * The bell tap routes to the dedicated `Routes.NOTIFICATIONS` screen
+ * (spec `_b68CBWKl5` Q-N-11) — replaces the previous bottom-sheet
+ * pattern. Migration shared with Home and Kudos hub.
  */
 @Composable
 fun AwardDetailScreen(
@@ -33,18 +28,18 @@ fun AwardDetailScreen(
     onNavigateToKudosOverview: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToSearch: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
     viewModel: AwardDetailViewModel = hiltViewModel(),
     localeViewModel: LocaleViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var notificationsSheetVisible by rememberSaveable { mutableStateOf(false) }
 
     AwardDetailScreenContent(
         state = state,
         onRetry = viewModel::onRetry,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
-        onBellClick = { notificationsSheetVisible = true },
+        onBellClick = onNavigateToNotifications,
         onTabSelect = { tab ->
             when (tab) {
                 // Awards re-tap scrolls to top — handled in
@@ -58,12 +53,4 @@ fun AwardDetailScreen(
         onCategorySelected = { award -> viewModel.onCategorySelected(award.id) },
         onKudosChiTietClick = onNavigateToKudosOverview,
     )
-
-    // Sheet mounted at the screen root so a 401-driven popUpTo(GATE)
-    // tear-down implicitly removes it (mirrors HomeScreen's pattern).
-    if (notificationsSheetVisible) {
-        NotificationsSheet(
-            onDismissRequest = { notificationsSheetVisible = false },
-        )
-    }
 }

@@ -8,11 +8,10 @@ import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LanguagePreferenceRepository
 import com.example.aiddproject.home.data.AwardsRepository
 import com.example.aiddproject.home.data.KudosSummaryRepository
-import com.example.aiddproject.home.data.NotificationsSummaryRepository
 import com.example.aiddproject.home.domain.CountdownEngine
 import com.example.aiddproject.home.domain.states.AwardsState
 import com.example.aiddproject.home.domain.states.KudosState
-import com.example.aiddproject.home.domain.states.NotificationsState
+import com.example.aiddproject.kudos.notifications.data.NotificationsCountFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,18 +24,23 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Hilt-injected ViewModel for `HomeScreen`. Drives four independent section flows
- * (`awards`, `kudos`, `notifications`, `countdown`) plus the shared `language`
- * preference, exposed as a single [HomeUiState] aggregate via [uiState].
+ * Hilt-injected ViewModel for `HomeScreen`. Drives three independent section flows
+ * (`awards`, `kudos`, `countdown`) plus the shared `language` preference and the
+ * process-singleton `NotificationsCountFlow`, exposed as a single [HomeUiState]
+ * aggregate via [uiState].
  *
- * The three data fetches are fired in parallel on construction and on [refreshAll]
- * (Q-Home-7); each section keeps its own state machine so a failure in one section
- * never blocks the others. The countdown ticker is started/stopped explicitly by the
- * screen via [startCountdown]/[stopCountdown] so it pauses on `STOPPED` (TR-004).
+ * The two repository fetches are fired in parallel on construction and on
+ * [refreshAll] (Q-Home-7); each section keeps its own state machine so a failure
+ * in one section never blocks the others. The countdown ticker is started/stopped
+ * explicitly by the screen via [startCountdown]/[stopCountdown] so it pauses on
+ * `STOPPED` (TR-004).
  *
- * The initial value of every section StateFlow is the `Loading` variant — that way
- * the very first paint of the screen renders the loading skeleton synchronously
- * (TR-003), with no `Idle`/`Initial` predecessor.
+ * The notifications unread count is no longer a per-host fetch: the
+ * Notifications screen migration (spec `_b68CBWKl5`) replaced the bell-tap sheet
+ * with a dedicated route, and the unread count is owned by a process-singleton
+ * `NotificationsCountFlow` shared across Home/Kudos/AwardDetail. HomeViewModel
+ * only triggers a one-shot `refreshFromServer()` on construction so a cold-start
+ * lands on the canonical server value.
  */
 @HiltViewModel
 class HomeViewModel
@@ -44,13 +48,12 @@ class HomeViewModel
     constructor(
         private val awardsRepository: AwardsRepository,
         private val kudosRepository: KudosSummaryRepository,
-        private val notificationsRepository: NotificationsSummaryRepository,
         private val countdownEngine: CountdownEngine,
+        private val notificationsCountFlow: NotificationsCountFlow,
         languageRepository: LanguagePreferenceRepository,
     ) : ViewModel() {
         private val awardsState = MutableStateFlow<AwardsState>(AwardsState.Loading)
         private val kudosState = MutableStateFlow<KudosState>(KudosState.Loading)
-        private val notificationsState = MutableStateFlow<NotificationsState>(NotificationsState.Loading)
         private val countdownState = MutableStateFlow(countdownEngine.snapshot())
         private val languageState: StateFlow<Language> =
             languageRepository.language.stateIn(
@@ -64,10 +67,10 @@ class HomeViewModel
                 countdownState,
                 awardsState,
                 kudosState,
-                notificationsState,
                 languageState,
-            ) { countdown, awards, kudos, notifications, language ->
-                HomeUiState(countdown, awards, kudos, notifications, language)
+                notificationsCountFlow.count,
+            ) { countdown, awards, kudos, language, unread ->
+                HomeUiState(countdown, awards, kudos, language, unread)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
@@ -76,8 +79,8 @@ class HomeViewModel
                         countdown = countdownState.value,
                         awards = AwardsState.Loading,
                         kudos = KudosState.Loading,
-                        notifications = NotificationsState.Loading,
                         language = Language.Default,
+                        unreadCount = notificationsCountFlow.count.value,
                     ),
             )
 
@@ -88,36 +91,23 @@ class HomeViewModel
         }
 
         /**
-         * Re-fires all three section fetches in parallel. Called on construction, on
-         * Home `STARTED` re-entry, and (in later phases) on Retry / sheet dismissal.
+         * Re-fires section fetches in parallel + refreshes the bell counter
+         * from the server. Called on construction and on Home `STARTED` re-entry.
          */
         fun refreshAll() {
             viewModelScope.launch { loadAwards() }
             viewModelScope.launch { loadKudos() }
-            viewModelScope.launch { loadNotifications() }
+            viewModelScope.launch { notificationsCountFlow.refreshFromServer() }
         }
 
         /**
          * US2 Retry intent — re-fires only the awards fetch. Each section's state
          * machine is independent (Q-Home-7), so a transient awards failure recovers
-         * without re-triggering kudos / notifications calls.
+         * without re-triggering kudos calls.
          */
         fun onRetryAwards() {
-            // Telemetry breadcrumb (T099). Real telemetry SDK choice carries over
-            // from Login Phase 7; until that lands, Timber is the conduit and the
-            // SecureTimberTree scrubber covers PII keys (TR-007).
             Timber.tag(TELEMETRY_TAG).i("home.awards.retry")
             viewModelScope.launch { loadAwards() }
-        }
-
-        /**
-         * US6 — re-fires only the notifications-summary fetch when the
-         * Notifications sheet is dismissed, so the badge reflects newly-read
-         * notifications without forcing a full Home refresh (Q-Home-6).
-         */
-        fun onNotificationsSheetDismissed() {
-            Timber.tag(TELEMETRY_TAG).i("home.notifications.sheet_dismissed")
-            viewModelScope.launch { loadNotifications() }
         }
 
         /**
@@ -145,8 +135,6 @@ class HomeViewModel
                 onSuccess = { items ->
                     awardsState.value =
                         if (items.isEmpty()) AwardsState.Empty else AwardsState.Populated(items)
-                    // SecureTimberTree scrubs `award.name` / `award.description` keys
-                    // before they hit Logcat — we only emit the count for telemetry.
                     Timber.tag(TELEMETRY_TAG).i("home.awards.success count=%d", items.size)
                 },
                 onFailure = { error ->
@@ -178,33 +166,12 @@ class HomeViewModel
             )
         }
 
-        private suspend fun loadNotifications() {
-            Timber.tag(TELEMETRY_TAG).i("home.notifications.loading")
-            notificationsRepository.get().fold(
-                onSuccess = { summary ->
-                    notificationsState.value = NotificationsState.Loaded(summary.unreadCount)
-                    Timber.tag(TELEMETRY_TAG).i(
-                        "home.notifications.success unreadCount=%d",
-                        summary.unreadCount,
-                    )
-                },
-                onFailure = { error ->
-                    notificationsState.value = NotificationsState.Error
-                    Timber.tag(TELEMETRY_TAG).w(error, "home.notifications.error")
-                },
-            )
-        }
-
         override fun onCleared() {
             super.onCleared()
             countdownJob = null
         }
 
         private companion object {
-            // Tag for the four-state-transitions-per-section breadcrumbs (T099).
-            // The real telemetry SDK choice is still pending Login Phase 7
-            // carry-over; until that lands, Timber is the conduit and the
-            // SecureTimberTree scrubber covers any PII keys we accidentally pass.
             const val TELEMETRY_TAG = "HomeTelemetry"
         }
     }

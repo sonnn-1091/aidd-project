@@ -13,7 +13,6 @@ import com.example.aiddproject.home.domain.KudosSummary
 import com.example.aiddproject.home.domain.states.AwardsState
 import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.home.domain.states.KudosState
-import com.example.aiddproject.home.domain.states.NotificationsState
 import com.example.aiddproject.home.ui.HomeScreenContent
 import com.example.aiddproject.home.ui.HomeUiState
 import com.example.aiddproject.home.ui.components.HomeNavTab
@@ -59,7 +58,7 @@ class HomeFocusOrderTest {
                         ),
                 ),
             kudos = KudosState.Loaded(KudosSummary(isKudosAvailable = true, descriptionText = "")),
-            notifications = NotificationsState.Loaded(unreadCount = 2),
+            unreadCount = 2,
             language = Language.VN,
         )
 

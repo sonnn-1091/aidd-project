@@ -111,6 +111,7 @@ fun AppNavigation(
                 },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+                onNavigateToNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
             )
         }
         composable(Routes.ACCESS_DENIED) { AccessDeniedPlaceholder() }
@@ -130,6 +131,7 @@ fun AppNavigation(
                 onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+                onNavigateToNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
             )
         }
         composable(Routes.KUDOS_OVERVIEW) { entry ->
@@ -233,6 +235,7 @@ fun AppNavigation(
                 onNavigateToKudosOverview = { navController.navigate(Routes.KUDOS_OVERVIEW) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
+                onNavigateToNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
             )
         }
         composable(Routes.NOTIFICATIONS) {

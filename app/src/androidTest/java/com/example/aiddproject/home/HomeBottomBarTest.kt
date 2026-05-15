@@ -22,7 +22,6 @@ import com.example.aiddproject.home.domain.KudosSummary
 import com.example.aiddproject.home.domain.states.AwardsState
 import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.home.domain.states.KudosState
-import com.example.aiddproject.home.domain.states.NotificationsState
 import com.example.aiddproject.home.ui.HomeScreenContent
 import com.example.aiddproject.home.ui.HomeUiState
 import com.example.aiddproject.home.ui.components.HomeBottomBar
@@ -44,8 +43,6 @@ import org.junit.Test
  *  - Tap on each tab fires the callback with the correct [HomeNavTab] enum.
  *  - Re-tap of the active SAA 2025 tab scrolls the Home `LazyColumn` to top
  *    (Q-Home-3) when driven through [HomeScreenContent].
- *  - Scroll-to-top is suppressed when `notificationsSheetVisible == true`
- *    (risk register).
  */
 class HomeBottomBarTest {
     @get:Rule
@@ -135,12 +132,12 @@ class HomeBottomBarTest {
     }
 
     // -----------------------------------------------------------------------
-    // 2. HomeScreenContent integration — scroll-to-top + sheet suppression
+    // 2. HomeScreenContent integration — scroll-to-top
     // -----------------------------------------------------------------------
 
     @Test
     fun retap_of_saa_scrolls_lazy_column_to_top() {
-        val capturedState = setHomeContent(notificationsSheetVisible = false)
+        val capturedState = setHomeContent()
 
         // Programmatically advance the scroll past the top so the re-tap can return.
         runBlocking { capturedState.scrollToItem(5) }
@@ -157,30 +154,6 @@ class HomeBottomBarTest {
 
         assertEquals(0, capturedState.firstVisibleItemIndex)
         assertEquals(0, capturedState.firstVisibleItemScrollOffset)
-    }
-
-    @Test
-    fun retap_of_saa_does_not_scroll_when_notifications_sheet_visible() {
-        val capturedState = setHomeContent(notificationsSheetVisible = true)
-
-        runBlocking { capturedState.scrollToItem(5) }
-        composeRule.waitForIdle()
-        val frozenIndex = capturedState.firstVisibleItemIndex
-        assertTrue(
-            "Expected pre-scroll to advance firstVisibleItemIndex away from 0",
-            frozenIndex > 0,
-        )
-
-        composeRule.onNodeWithTag(testTagForTab(HomeNavTab.Saa2025)).performClick()
-        composeRule.waitForIdle()
-        // Give the (suppressed) animation a chance — but it should never run.
-        composeRule.mainClock.advanceTimeBy(500)
-
-        assertEquals(
-            "Scroll-to-top must be suppressed while the Notifications sheet is open",
-            frozenIndex,
-            capturedState.firstVisibleItemIndex,
-        )
     }
 
     // -----------------------------------------------------------------------
@@ -206,7 +179,6 @@ class HomeBottomBarTest {
      * deterministically.
      */
     private fun setHomeContent(
-        notificationsSheetVisible: Boolean,
         onTabSelect: (HomeNavTab) -> Unit = {},
     ): LazyListState {
         lateinit var captured: LazyListState
@@ -230,7 +202,6 @@ class HomeBottomBarTest {
                         onSKudosClick = {},
                         onTabSelect = onTabSelect,
                         lazyListState = lazyListState,
-                        notificationsSheetVisible = notificationsSheetVisible,
                     )
                 }
             }
@@ -250,7 +221,7 @@ class HomeBottomBarTest {
                         },
                 ),
             kudos = KudosState.Loaded(KudosSummary(isKudosAvailable = true, descriptionText = "")),
-            notifications = NotificationsState.Loaded(unreadCount = 2),
+            unreadCount = 2,
             language = Language.VN,
         )
 }

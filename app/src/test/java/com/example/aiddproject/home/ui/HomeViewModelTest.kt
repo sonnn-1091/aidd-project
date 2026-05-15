@@ -15,7 +15,7 @@ import com.example.aiddproject.home.domain.SaaCountdownTarget
 import com.example.aiddproject.home.domain.states.AwardsState
 import com.example.aiddproject.home.domain.states.CountdownState
 import com.example.aiddproject.home.domain.states.KudosState
-import com.example.aiddproject.home.domain.states.NotificationsState
+import com.example.aiddproject.kudos.notifications.data.NotificationsCountFlow
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -44,8 +44,18 @@ import kotlin.time.Instant
 class HomeViewModelTest {
     private val awardsRepository: AwardsRepository = mockk()
     private val kudosRepository: KudosSummaryRepository = mockk()
-    private val notificationsRepository: NotificationsSummaryRepository = mockk()
     private val languageRepository: LanguagePreferenceRepository = mockk()
+
+    /**
+     * The summary repository is the upstream source for the shared
+     * `NotificationsCountFlow` — it's no longer injected directly into
+     * HomeViewModel after the Notifications screen migration (spec
+     * `_b68CBWKl5`). HomeViewModel only triggers a refresh through the
+     * singleton; this mock lets us verify the refresh count + drive
+     * different unread-count seeds.
+     */
+    private val summaryRepository: NotificationsSummaryRepository = mockk()
+    private val notificationsCountFlow get() = NotificationsCountFlow(summaryRepository)
 
     /** Pre-event clock so the countdown snapshot is non-zero in every test. */
     private val fixedClock =
@@ -63,14 +73,13 @@ class HomeViewModelTest {
             badgeText = "FUN",
             descriptionText = "Recognise teammates who carried you.",
         )
-    private val sampleNotifications = NotificationsSummary(unreadCount = 2)
 
     @Before
     fun setUp() {
         coEvery { languageRepository.language } returns flowOf(Language.VN)
         coEvery { awardsRepository.list() } returns Result.success(listOf(sampleAward))
         coEvery { kudosRepository.get() } returns Result.success(sampleKudos)
-        coEvery { notificationsRepository.get() } returns Result.success(sampleNotifications)
+        coEvery { summaryRepository.get() } returns Result.success(NotificationsSummary(unreadCount = 2))
         Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
@@ -79,12 +88,12 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun newViewModel() =
+    private fun newViewModel(countFlow: NotificationsCountFlow = notificationsCountFlow) =
         HomeViewModel(
             awardsRepository = awardsRepository,
             kudosRepository = kudosRepository,
-            notificationsRepository = notificationsRepository,
             countdownEngine = countdownEngine,
+            notificationsCountFlow = countFlow,
             languageRepository = languageRepository,
         )
 
@@ -99,7 +108,7 @@ class HomeViewModelTest {
             val state = vm.uiState.value
             assertEquals(AwardsState.Loading, state.awards)
             assertEquals(KudosState.Loading, state.kudos)
-            assertEquals(NotificationsState.Loading, state.notifications)
+            assertEquals(0, state.unreadCount)
             assertTrue(state.countdown.isPreEvent)
         }
 
@@ -115,7 +124,7 @@ class HomeViewModelTest {
             val state = vm.uiState.value
             assertEquals(AwardsState.Populated(listOf(sampleAward)), state.awards)
             assertEquals(KudosState.Loaded(sampleKudos), state.kudos)
-            assertEquals(NotificationsState.Loaded(2), state.notifications)
+            assertEquals(2, state.unreadCount)
         }
 
     @Test
@@ -160,7 +169,7 @@ class HomeViewModelTest {
 
             coVerify(exactly = 2) { awardsRepository.list() } // initial + retry
             coVerify(exactly = 1) { kudosRepository.get() } // unchanged
-            coVerify(exactly = 1) { notificationsRepository.get() } // unchanged
+            coVerify(exactly = 1) { summaryRepository.get() } // unchanged
         }
 
     @Test
@@ -181,45 +190,40 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `notifications failure maps to NotificationsState_Error - bell still tappable`() =
+    fun `notifications failure leaves unread count at zero - bell still tappable`() =
         runTest {
-            coEvery { notificationsRepository.get() } returns Result.failure(RuntimeException("offline"))
+            coEvery { summaryRepository.get() } returns Result.failure(RuntimeException("offline"))
             val vm = newViewModel()
-            assertEquals(NotificationsState.Error, vm.uiState.value.notifications)
+            // refreshFromServer's failure path is silent (offline tolerance) —
+            // the count stays at its prior value, which is the initial 0.
             assertEquals(0, vm.uiState.value.unreadCount)
         }
 
     @Test
-    fun `notifications zero unread maps to Loaded(0) - badge hidden`() =
+    fun `notifications zero unread propagates to unreadCount`() =
         runTest {
-            coEvery { notificationsRepository.get() } returns
+            coEvery { summaryRepository.get() } returns
                 Result.success(NotificationsSummary(unreadCount = 0))
             val vm = newViewModel()
-            assertEquals(NotificationsState.Loaded(0), vm.uiState.value.notifications)
             assertEquals(0, vm.uiState.value.unreadCount)
         }
 
     @Test
-    fun `onNotificationsSheetDismissed re-fires only the notifications fetch (US6)`() =
+    fun `unreadCount mirrors NotificationsCountFlow mutations after the Notifications screen acts`() =
         runTest {
-            // Initial fetch returns 2 unread; sheet-dismiss fetch returns 1 (e.g.
-            // user read one notification while the sheet was open).
-            coEvery { notificationsRepository.get() } returnsMany
-                listOf(
-                    Result.success(NotificationsSummary(unreadCount = 2)),
-                    Result.success(NotificationsSummary(unreadCount = 1)),
-                )
-            val vm = newViewModel()
-            assertEquals(NotificationsState.Loaded(2), vm.uiState.value.notifications)
+            // Simulates: user opens Notifications → marks rows read → returns
+            // to Home, where the bell badge must reflect the new count without
+            // a server refresh. The singleton mutations propagate via the
+            // combine pipeline.
+            val countFlow = notificationsCountFlow
+            val vm = newViewModel(countFlow = countFlow)
+            assertEquals(2, vm.uiState.value.unreadCount)
 
-            vm.onNotificationsSheetDismissed()
+            countFlow.decrement()
+            assertEquals(1, vm.uiState.value.unreadCount)
 
-            assertEquals(NotificationsState.Loaded(1), vm.uiState.value.notifications)
-            // Awards / kudos must NOT be re-fetched on sheet dismissal — only the
-            // notifications endpoint (Q-Home-6).
-            coVerify(exactly = 2) { notificationsRepository.get() }
-            coVerify(exactly = 1) { awardsRepository.list() }
-            coVerify(exactly = 1) { kudosRepository.get() }
+            countFlow.setTo(0)
+            assertEquals(0, vm.uiState.value.unreadCount)
         }
 
     @Test
@@ -245,8 +249,8 @@ class HomeViewModelTest {
                 HomeViewModel(
                     awardsRepository = awardsRepository,
                     kudosRepository = kudosRepository,
-                    notificationsRepository = notificationsRepository,
                     countdownEngine = engine,
+                    notificationsCountFlow = notificationsCountFlow,
                     languageRepository = languageRepository,
                 )
 
@@ -258,24 +262,13 @@ class HomeViewModelTest {
             )
 
             vm.startCountdown()
-            // Move the clock and tick once. advanceTimeBy(1s) resumes the collector's
-            // delay exactly once; collecting the new emission updates countdownState
-            // which propagates through the combine pipeline.
             mutableClock.now = SaaCountdownTarget - 5.days - 1.minutes
             advanceTimeBy(1.seconds)
             testScheduler.runCurrent()
             assertEquals(1, vm.uiState.value.countdown.minutes)
 
-            // Cancel and verify the ticker no longer mutates state on subsequent virtual
-            // time advances. We MUST cancel before runTest's auto-cleanup or the
-            // `while (true) { delay(1.s) }` collector would advance the test scheduler
-            // forever.
             vm.stopCountdown()
             mutableClock.now = SaaCountdownTarget + 1.seconds
-            // Don't advanceTimeBy here: the cancelled job wouldn't advance the clock-derived
-            // state, but advancing virtual time on a still-active runTest would also tick
-            // the language StateFlow's `Eagerly` upstream forever in pathological setups.
-            // A direct value read after cancellation is sufficient evidence.
             assertEquals(1, vm.uiState.value.countdown.minutes)
         }
 
@@ -291,33 +284,15 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `unreadCount derives from NotificationsState_Loaded`() =
-        runTest {
-            // sanity check on HomeUiState helper used by HomeHeader's BellWithBadge.
-            val ui =
-                HomeUiState(
-                    countdown = countdownEngine.snapshot(),
-                    awards = AwardsState.Loading,
-                    kudos = KudosState.Loading,
-                    notifications = NotificationsState.Loaded(unreadCount = 7),
-                    language = Language.VN,
-                )
-            assertEquals(7, ui.unreadCount)
-        }
-
-    @Test
     fun `language StateFlow is collected eagerly so first paint matches stored preference`() =
         runTest {
             // Use a hot StateFlow upstream so we can verify that `stateIn(Eagerly)` propagates.
-            // VN → EN transition stands in for the previous VN → EN → JA chain
-            // since JA is removed (Language Dropdown spec uUvW6Qm1ve).
             val upstream = MutableStateFlow(Language.VN)
             coEvery { languageRepository.language } returns upstream
             val vm = newViewModel()
             assertEquals(Language.VN, vm.uiState.value.language)
 
             upstream.value = Language.EN
-            // Eagerly collected — propagation is one dispatcher step away.
             assertEquals(Language.EN, vm.uiState.value.language)
         }
 }
