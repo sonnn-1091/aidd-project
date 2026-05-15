@@ -52,6 +52,18 @@ object Routes {
      */
     const val AWARD_DETAIL_PATTERN: String = "route_award_detail/{awardId}"
 
+    /**
+     * Notifications list (Figma `_b68CBWKl5`). Replaces the legacy
+     * `NotificationsSheet` bottom-sheet across Home / Kudos / AwardDetail.
+     */
+    const val NOTIFICATIONS: String = "route_notifications"
+
+    /**
+     * Admin Review destination for REVIEW_REQUEST notification rows.
+     * Currently a placeholder — the real screen ships in a separate spec.
+     */
+    const val ADMIN_REVIEW: String = "route_admin_review"
+
     fun awardDetail(awardId: String): String = "route_award_detail/$awardId"
 
     /**

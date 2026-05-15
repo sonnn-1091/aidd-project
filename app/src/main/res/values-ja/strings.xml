@@ -66,4 +66,31 @@
     <string name="a11y_award_detail_screen">アワード詳細画面</string>
     <string name="a11y_award_category_dropdown">アワードカテゴリを選択、%1$s、ドロップダウン</string>
     <string name="a11y_award_badge_image">%1$s のバッジ</string>
+
+    <!-- Notifications (Figma _b68CBWKl5) -->
+    <string name="notifications_title">通知</string>
+    <string name="notifications_empty">通知はまだありません</string>
+    <string name="notifications_loading">通知を読み込み中…</string>
+    <string name="notifications_error">通知を読み込めませんでした。再試行してください。</string>
+    <string name="notifications_retry">再試行</string>
+    <string name="notifications_mark_all_read">すべて既読にする</string>
+    <string name="notifications_inline_community_standards">コミュニティ基準</string>
+    <string name="a11y_notifications_back">戻る</string>
+    <string name="a11y_notifications_row">%1$s、%2$s、%3$s</string>
+    <string name="a11y_notifications_mark_all_read">すべての通知を既読にする</string>
+    <plurals name="relative_time_minutes_ago">
+        <item quantity="other">%1$d 分前</item>
+    </plurals>
+    <plurals name="relative_time_hours_ago">
+        <item quantity="other">%1$d 時間前</item>
+    </plurals>
+    <plurals name="relative_time_days_ago">
+        <item quantity="other">%1$d 日前</item>
+    </plurals>
+    <plurals name="relative_time_months_ago">
+        <item quantity="other">%1$d か月前</item>
+    </plurals>
+    <plurals name="relative_time_years_ago">
+        <item quantity="other">%1$d 年前</item>
+    </plurals>
 </resources>
