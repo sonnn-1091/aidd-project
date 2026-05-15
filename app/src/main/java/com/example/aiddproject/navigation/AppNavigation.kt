@@ -22,6 +22,7 @@ import com.example.aiddproject.core.auth.rememberAuthRedirectController
 import com.example.aiddproject.core.session.SessionGate
 import com.example.aiddproject.home.ui.HomeScreen
 import com.example.aiddproject.kudos.compose.ui.WriteKudoScreen
+import com.example.aiddproject.kudos.notifications.ui.NotificationsScreen
 import com.example.aiddproject.kudos.search.ui.SearchSunnerScreen
 import com.example.aiddproject.kudos.standards.ui.CommunityStandardsScreen
 import com.example.aiddproject.kudos.ui.KudosScreen
@@ -234,6 +235,17 @@ fun AppNavigation(
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },
             )
         }
+        composable(Routes.NOTIFICATIONS) {
+            NotificationsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToKudoDetail = { _, _ -> navController.navigate(Routes.KUDOS_DETAIL) },
+                onNavigateToSecretBoxOpen = { navController.navigate(Routes.SECRET_BOX_OPEN) },
+                onNavigateToProfile = { navController.navigate(Routes.PROFILE) },
+                onNavigateToCommunityStandards = { navController.navigate(Routes.COMMUNITY_STANDARDS) },
+                onNavigateToAdminReview = { navController.navigate(Routes.ADMIN_REVIEW) },
+            )
+        }
+        composable(Routes.ADMIN_REVIEW) { PlaceholderScreen(label = "Admin Review Content") }
     }
 }
 

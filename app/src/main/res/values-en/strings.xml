@@ -187,6 +187,8 @@
     <string name="a11y_notifications_back">Back</string>
     <string name="a11y_notifications_row">%1$s, %2$s, %3$s</string>
     <string name="a11y_notifications_mark_all_read">Mark all notifications as read</string>
+    <string name="a11y_notifications_read">Read</string>
+    <string name="a11y_notifications_unread">Unread</string>
     <plurals name="relative_time_minutes_ago">
         <item quantity="one">%1$d minute ago</item>
         <item quantity="other">%1$d minutes ago</item>
