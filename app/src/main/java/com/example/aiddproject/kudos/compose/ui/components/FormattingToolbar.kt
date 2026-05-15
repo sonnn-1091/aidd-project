@@ -11,13 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatBold
-import androidx.compose.material.icons.filled.FormatItalic
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.FormatStrikethrough
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,12 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aiddproject.R
@@ -71,7 +66,7 @@ fun FormattingToolbar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ToolbarCell(
-            icon = Icons.Filled.FormatBold,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_bold),
             descRes = R.string.a11y_write_kudo_toolbar_bold,
             tag = WriteKudoTestTags.BOLD_BUTTON,
             shape = ShapeLeftEdge,
@@ -79,7 +74,7 @@ fun FormattingToolbar(
             onClick = { onAction(ToolbarAction.Bold) },
         )
         ToolbarCell(
-            icon = Icons.Filled.FormatItalic,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_italic),
             descRes = R.string.a11y_write_kudo_toolbar_italic,
             tag = WriteKudoTestTags.ITALIC_BUTTON,
             shape = ShapeMiddle,
@@ -87,7 +82,7 @@ fun FormattingToolbar(
             onClick = { onAction(ToolbarAction.Italic) },
         )
         ToolbarCell(
-            icon = Icons.Filled.FormatStrikethrough,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_strike),
             descRes = R.string.a11y_write_kudo_toolbar_strike,
             tag = WriteKudoTestTags.STRIKE_BUTTON,
             shape = ShapeMiddle,
@@ -95,7 +90,7 @@ fun FormattingToolbar(
             onClick = { onAction(ToolbarAction.Strikethrough) },
         )
         ToolbarCell(
-            icon = Icons.Filled.FormatListNumbered,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_numbered_list),
             descRes = R.string.a11y_write_kudo_toolbar_numbered_list,
             tag = WriteKudoTestTags.NUMBERED_LIST_BUTTON,
             shape = ShapeMiddle,
@@ -103,7 +98,7 @@ fun FormattingToolbar(
             onClick = { onAction(ToolbarAction.NumberedList) },
         )
         ToolbarCell(
-            icon = Icons.Filled.Link,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_link),
             descRes = R.string.a11y_write_kudo_toolbar_link,
             tag = WriteKudoTestTags.LINK_BUTTON,
             shape = ShapeMiddle,
@@ -111,7 +106,7 @@ fun FormattingToolbar(
             onClick = onLinkTap,
         )
         ToolbarCell(
-            icon = Icons.Filled.FormatQuote,
+            painter = painterResource(R.drawable.ic_write_kudo_toolbar_quote),
             descRes = R.string.a11y_write_kudo_toolbar_quote,
             tag = WriteKudoTestTags.QUOTE_BUTTON,
             shape = ShapeMiddle,
@@ -128,7 +123,7 @@ fun FormattingToolbar(
 
 @Composable
 private fun ToolbarCell(
-    icon: ImageVector,
+    painter: Painter,
     descRes: Int,
     tag: String,
     shape: Shape,
@@ -151,7 +146,7 @@ private fun ToolbarCell(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = icon,
+            painter = painter,
             contentDescription = null,
             tint = FormFieldTokens.LabelColor,
             modifier = Modifier.size(16.dp),
@@ -184,6 +179,7 @@ private fun StandardsCell(
             fontSize = 10.sp,
             lineHeight = 16.sp,
             fontWeight = FontWeight.Normal,
+            textDecoration = TextDecoration.Underline,
         )
     }
 }
