@@ -32,6 +32,7 @@ fun KudosScreen(
     onNavigateToKudosDetail: () -> Unit,
     onNavigateToAllKudos: () -> Unit,
     onNavigateToSecretBoxOpen: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
     submitSignalSavedStateHandle: SavedStateHandle? = null,
     viewModel: KudosViewModel = hiltViewModel(),
     localeViewModel: LocaleViewModel = hiltViewModel(),
@@ -65,7 +66,7 @@ fun KudosScreen(
         onPullToRefresh = viewModel::onPullToRefresh,
         onLanguageSelected = { localeViewModel.setLanguage(it) },
         onSearchClick = onNavigateToSearch,
-        onBellClick = { /* Notifications sheet wires in Phase 13 polish. */ },
+        onBellClick = onNavigateToNotifications,
         onTabSelect = { tab ->
             when (tab) {
                 HomeNavTab.Saa2025 -> onNavigateToHome()

@@ -255,6 +255,15 @@ class KudosViewModelTest {
         KudosViewModel(
             savedStateHandle = SavedStateHandle(),
             repository = repo,
+            notificationsCountFlow =
+                com.example.aiddproject.kudos.notifications.data.NotificationsCountFlow(
+                    object : com.example.aiddproject.home.data.NotificationsSummaryRepository {
+                        override suspend fun get() =
+                            Result.success(
+                                com.example.aiddproject.home.domain.NotificationsSummary(unreadCount = 0),
+                            )
+                    },
+                ),
             languagePreferenceRepository = languageRepository,
         )
 

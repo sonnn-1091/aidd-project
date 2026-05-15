@@ -146,6 +146,7 @@ fun AppNavigation(
                 onNavigateToKudosDetail = { navController.navigate(Routes.KUDOS_DETAIL) },
                 onNavigateToAllKudos = { navController.navigate(Routes.KUDOS_FEED) },
                 onNavigateToSecretBoxOpen = { navController.navigate(Routes.SECRET_BOX_OPEN) },
+                onNavigateToNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
                 submitSignalSavedStateHandle = entry.savedStateHandle,
             )
         }

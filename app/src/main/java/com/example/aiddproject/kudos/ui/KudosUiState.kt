@@ -42,6 +42,7 @@ data class KudosUiState(
     val specialDayActive: Boolean = false,
     val x2BonusActive: Boolean = false,
     val language: Language = Language.Default,
+    val unreadNotificationsCount: Int = 0,
 ) {
     companion object {
         val Empty: KudosUiState =

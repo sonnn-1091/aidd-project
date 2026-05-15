@@ -7,6 +7,7 @@ import com.example.aiddproject.R
 import com.example.aiddproject.core.locale.Language
 import com.example.aiddproject.core.locale.LanguagePreferenceRepository
 import com.example.aiddproject.kudos.data.KudosRepository
+import com.example.aiddproject.kudos.notifications.data.NotificationsCountFlow
 import com.example.aiddproject.kudos.domain.KudosFilter
 import com.example.aiddproject.kudos.domain.SpotlightSearchResult
 import com.example.aiddproject.kudos.domain.SystemFlags
@@ -59,6 +60,7 @@ class KudosViewModel
     constructor(
         private val savedStateHandle: SavedStateHandle,
         private val repository: KudosRepository,
+        private val notificationsCountFlow: NotificationsCountFlow,
         languagePreferenceRepository: LanguagePreferenceRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(KudosUiState.Empty)
@@ -95,6 +97,12 @@ class KudosViewModel
             viewModelScope.launch { refreshAll() }
             viewModelScope.launch { loadFilters() }
             viewModelScope.launch { collectSpotlightSearch() }
+            viewModelScope.launch { notificationsCountFlow.refreshFromServer() }
+            viewModelScope.launch {
+                notificationsCountFlow.count.collect { count ->
+                    _uiState.update { it.copy(unreadNotificationsCount = count) }
+                }
+            }
         }
 
         /** Update the spotlight search query — fed into the debounce stream. */

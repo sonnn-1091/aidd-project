@@ -143,7 +143,7 @@ fun KudosScreenContent(
                     onLanguageSelected = onLanguageSelected,
                     onSearchClick = onSearchClick,
                     onBellClick = onBellClick,
-                    unreadCount = 0,
+                    unreadCount = state.unreadNotificationsCount,
                     modifier = Modifier.statusBarsPadding(),
                 )
             },
